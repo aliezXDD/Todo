@@ -94,7 +94,10 @@ fun SettingsScreen(
                 }
             }
 
-            GlassCard(modifier = Modifier.fillMaxWidth()) {
+            GlassCard(
+                modifier = Modifier.fillMaxWidth(),
+                drawShadow = false
+            ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -103,12 +106,12 @@ fun SettingsScreen(
                     Text(text = "关于", style = MaterialTheme.typography.bodyLarge)
                     Column(horizontalAlignment = Alignment.End) {
                         Text(
-                            text = "Todo v1.2",
+                            text = "Todo v1.3",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.secondary
                         )
                         Text(
-                            text = "创作者：小肥霙",
+                            text = "小肥霙",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

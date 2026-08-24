@@ -19,6 +19,7 @@ import com.todo.ui.theme.LightGlassSurface
 fun GlassCard(
     modifier: Modifier = Modifier,
     highlightScale: Float = 1f,
+    drawShadow: Boolean = true,
     content: @Composable () -> Unit
 ) {
     val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
@@ -33,7 +34,8 @@ fun GlassCard(
             topAlphaLight = 0.18f * highlightScale,
             topAlphaDark = 0.11f * highlightScale,
             bottomAlphaLight = 0.06f * highlightScale,
-            bottomAlphaDark = 0.14f * highlightScale
+            bottomAlphaDark = 0.14f * highlightScale,
+            drawOuterShadow = drawShadow
         ),
         shape = shape,
         color = containerColor,
