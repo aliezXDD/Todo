@@ -2,6 +2,7 @@ package com.todo.ui.screen.preset
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -12,9 +13,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -24,6 +33,8 @@ import com.todo.ui.component.GlassDialog
 import com.todo.ui.screen.preset.component.PresetEditDialog
 import com.todo.ui.screen.preset.component.PresetItemRow
 import com.todo.ui.screen.preset.component.PresetTopBar
+import com.todo.ui.theme.GradientDarkBottom
+import com.todo.ui.theme.GradientLightBottom
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -61,9 +72,13 @@ fun PresetScreen(
             )
         } else {
             Box(modifier = Modifier.fillMaxSize()) {
+                val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
+                val listState = rememberLazyListState()
+                val showFade by remember { derivedStateOf { listState.canScrollForward } }
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(bottom = 32.dp),
+                    state = listState,
+                    contentPadding = PaddingValues(bottom = 8.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     items(uiState.presets, key = { it.id }) { preset ->
@@ -78,7 +93,23 @@ fun PresetScreen(
                     }
                 }
 
+                if (showFade) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .fillMaxWidth()
+                            .height(56.dp)
+                            .background(
+                                Brush.verticalGradient(
+                                    colors = listOf(
+                                        Color.Transparent,
+                                        if (isDark) GradientDarkBottom else GradientLightBottom
+                                    )
+                                )
+                            )
+                    )
                 }
+            }
             }
 
     PresetEditDialog(
