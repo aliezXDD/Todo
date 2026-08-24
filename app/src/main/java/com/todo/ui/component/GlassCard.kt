@@ -9,6 +9,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.todo.ui.theme.DarkGlassBorder
 import com.todo.ui.theme.DarkGlassSurface
@@ -20,6 +21,7 @@ fun GlassCard(
     modifier: Modifier = Modifier,
     highlightScale: Float = 1f,
     drawShadow: Boolean = true,
+    shadowElevation: Dp = 0.dp,
     content: @Composable () -> Unit
 ) {
     val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
@@ -41,7 +43,7 @@ fun GlassCard(
         color = containerColor,
         border = BorderStroke(1.dp, borderColor),
         tonalElevation = 0.dp,
-        shadowElevation = 0.dp
+        shadowElevation = shadowElevation
     ) {
         Box(modifier = Modifier.padding(16.dp)) {
             content()
