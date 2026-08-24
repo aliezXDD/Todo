@@ -77,7 +77,7 @@ fun Modifier.glassOverlay(
             else -> Path().apply { addRect(outline.bounds) }
         }
 
-        val shadowAlpha = if (isDark) 0.18f else 0.12f
+        val shadowAlpha = if (isDark) 0.18f else 0.22f
         val shadowBlur = if (isDark) 18.dp.toPx() else 22.dp.toPx()
         val shadowOffsetY = if (isDark) 2.dp.toPx() else 3.dp.toPx()
         val shadowPaint = android.graphics.Paint().apply {
