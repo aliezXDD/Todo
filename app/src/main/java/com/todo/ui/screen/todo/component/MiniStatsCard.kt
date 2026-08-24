@@ -1,5 +1,8 @@
 package com.todo.ui.screen.todo.component
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -11,6 +14,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -26,6 +30,11 @@ fun MiniStatsCard(
     modifier: Modifier = Modifier
 ) {
     val progress = if (totalCount == 0) 0f else completedCount.toFloat() / totalCount.toFloat()
+    val animatedProgress by animateFloatAsState(
+        targetValue = progress,
+        animationSpec = tween(durationMillis = 400, easing = FastOutSlowInEasing),
+        label = "todayProgress"
+    )
     val isDarkTheme = MaterialTheme.colorScheme.onSurface.luminance() > 0.5f
     val progressTrackColor = if (isDarkTheme) {
         MaterialTheme.colorScheme.onSurface.copy(alpha = 0.20f)
@@ -45,7 +54,7 @@ fun MiniStatsCard(
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             CircularProgressIndicator(
-                progress = { progress },
+                progress = { animatedProgress },
                 modifier = Modifier.padding(4.dp),
                 trackColor = progressTrackColor
             )
