@@ -1,4 +1,4 @@
-﻿package com.todo.ui.component
+package com.todo.ui.component
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -46,7 +46,7 @@ fun GlassButton(
         onClick = onClick,
         modifier = modifier,
         enabled = enabled,
-        shape = RoundedCornerShape(18.dp),
+        shape = RoundedCornerShape(14.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = containerColor.copy(alpha = if (enabled) 0.95f else 0.82f),
             contentColor = contentColor,

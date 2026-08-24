@@ -1,4 +1,4 @@
-﻿package com.todo.ui.component
+package com.todo.ui.component
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
@@ -21,18 +21,18 @@ fun GlassCard(
     content: @Composable () -> Unit
 ) {
     val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
-    val containerColor = if (isDark) DarkGlassSurface.copy(alpha = 0.78f) else LightGlassSurface.copy(alpha = 0.84f)
+    val containerColor = if (isDark) DarkGlassSurface.copy(alpha = 0.82f) else LightGlassSurface.copy(alpha = 0.92f)
     val borderColor = if (isDark) DarkGlassBorder else LightGlassBorder
-    val shape = RoundedCornerShape(20.dp)
+    val shape = RoundedCornerShape(16.dp)
 
     Surface(
         modifier = modifier.glassOverlay(
             shape = shape,
             isDark = isDark,
-            topAlphaLight = 0.18f,
-            topAlphaDark = 0.11f,
-            bottomAlphaLight = 0.06f,
-            bottomAlphaDark = 0.14f
+            topAlphaLight = 0.12f,
+            topAlphaDark = 0.07f,
+            bottomAlphaLight = 0.04f,
+            bottomAlphaDark = 0.09f
         ),
         shape = shape,
         color = containerColor,

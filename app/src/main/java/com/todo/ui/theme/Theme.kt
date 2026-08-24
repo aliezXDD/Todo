@@ -23,23 +23,37 @@ import com.todo.ui.theme.MotionTokens
 private val LightColorScheme = lightColorScheme(
     primary = LightAccent,
     onPrimary = Color.White,
+    primaryContainer = LightPrimaryContainer,
+    onPrimaryContainer = LightPrimaryText,
     background = Color.Transparent,
     onBackground = LightPrimaryText,
     surface = Color.Transparent,
     onSurface = LightPrimaryText,
+    surfaceVariant = LightSurfaceVariant,
+    onSurfaceVariant = LightSecondaryText,
+    outline = LightOutline,
     secondary = LightSecondaryText,
-    error = LightDanger
+    onSecondary = Color.White,
+    error = LightDanger,
+    onError = Color.White
 )
 
 private val DarkColorScheme = darkColorScheme(
     primary = DarkAccent,
-    onPrimary = Color.Black,
+    onPrimary = Color(0xFF12141A),
+    primaryContainer = DarkPrimaryContainer,
+    onPrimaryContainer = DarkPrimaryText,
     background = Color.Transparent,
     onBackground = DarkPrimaryText,
     surface = Color.Transparent,
     onSurface = DarkPrimaryText,
+    surfaceVariant = DarkSurfaceVariant,
+    onSurfaceVariant = DarkSecondaryText,
+    outline = DarkOutline,
     secondary = DarkSecondaryText,
-    error = DarkDanger
+    onSecondary = Color(0xFF12141A),
+    error = DarkDanger,
+    onError = Color(0xFF12141A)
 )
 
 @Composable

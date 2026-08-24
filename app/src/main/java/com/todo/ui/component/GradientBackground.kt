@@ -34,27 +34,18 @@ fun GradientBackground(
         if (isDark) {
             Brush.verticalGradient(
                 colors = listOf(
-                    Color.White.copy(alpha = 0.05f),
+                    Color.White.copy(alpha = 0.04f),
                     Color.Transparent
                 )
             )
         } else {
             Brush.verticalGradient(
                 colors = listOf(
-                    Color.White.copy(alpha = 0.16f),
+                    Color.White.copy(alpha = 0.08f),
                     Color.Transparent
                 )
             )
         }
-    }
-
-    val vignetteOverlay = remember(isDark) {
-        Brush.verticalGradient(
-            colors = listOf(
-                Color.Transparent,
-                Color.Black.copy(alpha = if (isDark) 0.16f else 0.08f)
-            )
-        )
     }
 
     Box(
@@ -66,11 +57,6 @@ fun GradientBackground(
             modifier = Modifier
                 .fillMaxSize()
                 .background(highlightOverlay)
-        )
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(vignetteOverlay)
         )
         content()
     }
