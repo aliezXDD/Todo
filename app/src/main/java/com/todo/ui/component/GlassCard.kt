@@ -30,10 +30,10 @@ fun GlassCard(
         modifier = modifier.glassOverlay(
             shape = shape,
             isDark = isDark,
-            topAlphaLight = 0.12f * highlightScale,
-            topAlphaDark = 0.07f * highlightScale,
-            bottomAlphaLight = 0.04f * highlightScale,
-            bottomAlphaDark = 0.09f * highlightScale
+            topAlphaLight = 0.18f * highlightScale,
+            topAlphaDark = 0.11f * highlightScale,
+            bottomAlphaLight = 0.06f * highlightScale,
+            bottomAlphaDark = 0.14f * highlightScale
         ),
         shape = shape,
         color = containerColor,

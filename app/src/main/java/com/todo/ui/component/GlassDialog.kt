@@ -1,4 +1,4 @@
-﻿package com.todo.ui.component
+package com.todo.ui.component
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.MutableTransitionState
@@ -137,7 +137,7 @@ fun GlassDialog(
                         shape = RoundedCornerShape(20.dp),
                         isDark = isDark,
                         topAlphaLight = 0.18f,
-                        topAlphaDark = 0.10f,
+                        topAlphaDark = 0.11f,
                         bottomAlphaLight = 0.06f,
                         bottomAlphaDark = 0.14f
                     )
