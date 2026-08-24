@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.todo.domain.model.Preset
 import com.todo.ui.component.GlassBottomSheet
 import com.todo.ui.component.GlassButton
@@ -260,6 +261,7 @@ fun AddTodoSheet(
                                                         Text(
                                                             text = if (preset.id in selectedPresetIds) "✓" else "○",
                                                             color = secondaryTextColor,
+                                                            fontSize = 14.sp,
                                                             fontFamily = FontFamily.SansSerif
                                                         )
                                                     }

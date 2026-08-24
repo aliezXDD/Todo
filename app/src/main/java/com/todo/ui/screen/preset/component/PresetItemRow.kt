@@ -1,4 +1,4 @@
-﻿package com.todo.ui.screen.preset.component
+package com.todo.ui.screen.preset.component
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -24,6 +24,7 @@ import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.foundation.layout.offset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.todo.domain.model.Preset
 import com.todo.ui.component.GlassListItem
 import com.todo.ui.component.glassOverlay
@@ -97,6 +98,7 @@ fun PresetItemRow(
                         modifier = Modifier.offset(y = (-1).dp),
                         color = androidx.compose.ui.graphics.Color.White,
                         style = MaterialTheme.typography.labelSmall,
+                        fontSize = 14.sp,
                         fontFamily = FontFamily.SansSerif
                     )
                 }

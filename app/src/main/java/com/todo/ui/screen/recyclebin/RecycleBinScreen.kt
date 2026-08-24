@@ -39,6 +39,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.todo.ui.component.DialogButtonRole
@@ -282,6 +283,7 @@ private fun RecycleBinRow(
                         modifier = Modifier.offset(y = (-1).dp),
                         color = androidx.compose.ui.graphics.Color.White,
                         style = MaterialTheme.typography.labelSmall,
+                        fontSize = 14.sp,
                         fontFamily = FontFamily.SansSerif
                     )
                 }
