@@ -13,7 +13,7 @@ object MotionTokens {
     const val Slow = 320
 
     const val ThemeCrossfade = 320
-    const val ScreenSlide = 240
+    const val ScreenSlide = 280
     const val ItemReveal = 180
     const val DialogEnter = 220
     const val DialogExit = 180
