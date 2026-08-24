@@ -19,6 +19,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,10 +33,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.todo.domain.model.Todo
 import com.todo.ui.component.GlassListItem
 import com.todo.ui.theme.MotionTokens
@@ -122,17 +123,14 @@ fun TodoItemRow(
                         .clickable { onCheckedChange(!todo.isCompleted) },
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = if (todo.isCompleted) "✓" else "",
-                        modifier = Modifier.scale(checkMarkScale.value),
-                        color = if (todo.isCompleted && isDark) {
-                            Color.White
-                        } else {
-                            MaterialTheme.colorScheme.onPrimary
-                        },
-                        fontSize = 16.sp,
-                        fontFamily = FontFamily.SansSerif
-                    )
+                    if (todo.isCompleted) {
+                        Icon(
+                            imageVector = Icons.Filled.Check,
+                            contentDescription = null,
+                            modifier = Modifier.scale(checkMarkScale.value),
+                            tint = if (isDark) Color.White else MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
                 }
 
                 Text(

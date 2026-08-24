@@ -23,7 +23,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -37,9 +39,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.todo.ui.component.DialogButtonRole
@@ -278,14 +278,14 @@ private fun RecycleBinRow(
                         .background(indicatorColor, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = if (isSelected) "✓" else "",
-                        modifier = Modifier.offset(y = (-1).dp),
-                        color = androidx.compose.ui.graphics.Color.White,
-                        style = MaterialTheme.typography.labelSmall,
-                        fontSize = 14.sp,
-                        fontFamily = FontFamily.SansSerif
-                    )
+                    if (isSelected) {
+                        Icon(
+                            imageVector = Icons.Filled.Check,
+                            contentDescription = null,
+                            modifier = Modifier.offset(y = (-1).dp).size(16.dp),
+                            tint = androidx.compose.ui.graphics.Color.White
+                        )
+                    }
                 }
             }
         }

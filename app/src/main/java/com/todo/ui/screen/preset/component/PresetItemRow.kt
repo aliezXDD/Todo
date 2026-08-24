@@ -14,6 +14,9 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,10 +24,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.luminance
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.foundation.layout.offset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.todo.domain.model.Preset
 import com.todo.ui.component.GlassListItem
 import com.todo.ui.component.glassOverlay
@@ -93,14 +94,14 @@ fun PresetItemRow(
                         .background(indicatorColor.value, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = if (isSelected) "✓" else "",
-                        modifier = Modifier.offset(y = (-1).dp),
-                        color = androidx.compose.ui.graphics.Color.White,
-                        style = MaterialTheme.typography.labelSmall,
-                        fontSize = 14.sp,
-                        fontFamily = FontFamily.SansSerif
-                    )
+                    if (isSelected) {
+                        Icon(
+                            imageVector = Icons.Filled.Check,
+                            contentDescription = null,
+                            modifier = Modifier.offset(y = (-1).dp).size(16.dp),
+                            tint = androidx.compose.ui.graphics.Color.White
+                        )
+                    }
                 }
             }
         }
