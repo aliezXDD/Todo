@@ -92,7 +92,7 @@ fun Modifier.glassOverlay(
                 Color.Transparent
             ),
             start = Offset(0f, 0f),
-            end = Offset(size.width * 0.75f, size.height * 0.32f)
+            end = Offset(size.width * 0.60f, size.height * 0.26f)
         )
         val rim = Brush.horizontalGradient(
             colors = listOf(
@@ -108,14 +108,14 @@ fun Modifier.glassOverlay(
                 Color.Transparent
             ),
             startY = 0f,
-            endY = size.height * 0.07f
+            endY = size.height * 0.056f
         )
         val bottomSweep = Brush.verticalGradient(
             colors = listOf(
                 Color.Transparent,
                 Color.White.copy(alpha = if (isDark) bottomAlphaDark * 0.324f else bottomAlphaLight * 0.43f)
             ),
-            startY = size.height * 0.73f,
+            startY = size.height * 0.78f,
             endY = size.height
         )
 

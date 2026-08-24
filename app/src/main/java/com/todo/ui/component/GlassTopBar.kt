@@ -155,7 +155,7 @@ private fun Modifier.glassTopBarOverlay(
                     Color.Transparent
                 ),
                 start = Offset.Zero,
-                end = Offset(size.width * 0.75f, size.height * 0.28f)
+                end = Offset(size.width * 0.60f, size.height * 0.22f)
             )
         )
         drawRect(
