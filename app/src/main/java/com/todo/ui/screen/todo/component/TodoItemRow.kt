@@ -1,4 +1,4 @@
-﻿package com.todo.ui.screen.todo.component
+package com.todo.ui.screen.todo.component
 
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
@@ -92,7 +92,7 @@ fun TodoItemRow(
                 onClick = {},
                 onLongClick = onLongPress
             ),
-        minHeight = 60
+        minHeight = 44
     ) {
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
             val handleSpace = 32.dp
@@ -159,7 +159,7 @@ fun TodoItemRow(
                 text = "≡",
                 modifier = dragHandleModifier
                     .align(Alignment.CenterEnd)
-                    .height(36.dp)
+                    .height(24.dp)
                     .padding(horizontal = 2.dp),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.secondary.copy(alpha = if (isDragging) 0.95f else 0.8f)
