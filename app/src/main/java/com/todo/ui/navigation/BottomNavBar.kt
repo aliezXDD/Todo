@@ -1,7 +1,6 @@
 package com.todo.ui.navigation
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -21,7 +20,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
@@ -70,11 +68,10 @@ fun BottomNavBar(
             tonalElevation = 0.dp,
             shadowElevation = 4.dp
         ) {
-            Box(modifier = Modifier.fillMaxWidth()) {
-                NavigationBar(
-                    containerColor = Color.Transparent,
-                    tonalElevation = 0.dp
-                ) {
+            NavigationBar(
+                containerColor = Color.Transparent,
+                tonalElevation = 0.dp
+            ) {
                 items.forEach { (screen, label, icon) ->
                     val selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true
                     val iconScale by animateFloatAsState(
@@ -136,16 +133,6 @@ fun BottomNavBar(
                         indicatorColor = if (isDark) Color.White.copy(alpha = 0.24f) else Color.White
                     ),
                         modifier = Modifier.padding(horizontal = 2.dp)
-                    )
-                }
-                }
-                if (isDark) {
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.TopCenter)
-                            .fillMaxWidth()
-                            .height(1.dp)
-                            .background(Color.White.copy(alpha = 0.14f))
                     )
                 }
             }
