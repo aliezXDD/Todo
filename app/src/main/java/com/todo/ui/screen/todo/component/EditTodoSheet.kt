@@ -21,6 +21,8 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.todo.domain.model.Todo
 import com.todo.ui.component.GlassBottomSheet
@@ -44,7 +46,7 @@ fun EditTodoSheet(
     if (!visible || todo == null) return
 
     val focusRequester = remember { FocusRequester() }
-    var input by remember(todo.id) { mutableStateOf(todo.content) }
+    var input by remember(todo.id) { mutableStateOf(TextFieldValue(todo.content, TextRange(todo.content.length))) }
     val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
 
     LaunchedEffect(todo.id) {
@@ -77,7 +79,7 @@ fun EditTodoSheet(
                 ) {
                     GlassButton(
                         text = "保存",
-                        onClick = { if (input.isNotBlank()) onSave(input) },
+                        onClick = { if (input.text.isNotBlank()) onSave(input.text) },
                         modifier = Modifier.weight(1f)
                     )
                     GlassButton(
