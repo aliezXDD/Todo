@@ -88,34 +88,34 @@ fun Modifier.glassOverlay(
         }
         val topSweep = Brush.linearGradient(
             colors = listOf(
-                Color.White.copy(alpha = if (isDark) topAlphaDark * 0.6f else topAlphaLight * 0.78f),
+                Color.White.copy(alpha = if (isDark) topAlphaDark * 0.54f else topAlphaLight * 0.70f),
                 Color.Transparent
             ),
             start = Offset(0f, 0f),
-            end = Offset(size.width * 0.68f, size.height * 0.29f)
+            end = Offset(size.width * 0.75f, size.height * 0.32f)
         )
         val rim = Brush.horizontalGradient(
             colors = listOf(
-                Color.White.copy(alpha = if (isDark) 0.028f else 0.055f),
+                Color.White.copy(alpha = if (isDark) 0.025f else 0.050f),
                 Color.Transparent,
                 Color.Transparent,
-                Color.White.copy(alpha = if (isDark) 0.016f else 0.035f)
+                Color.White.copy(alpha = if (isDark) 0.014f else 0.032f)
             )
         )
         val topLine = Brush.verticalGradient(
             colors = listOf(
-                Color.White.copy(alpha = if (isDark) 0.064f else 0.14f),
+                Color.White.copy(alpha = if (isDark) 0.058f else 0.126f),
                 Color.Transparent
             ),
             startY = 0f,
-            endY = size.height * 0.06f
+            endY = size.height * 0.07f
         )
         val bottomSweep = Brush.verticalGradient(
             colors = listOf(
                 Color.Transparent,
-                Color.White.copy(alpha = if (isDark) bottomAlphaDark * 0.36f else bottomAlphaLight * 0.48f)
+                Color.White.copy(alpha = if (isDark) bottomAlphaDark * 0.324f else bottomAlphaLight * 0.43f)
             ),
-            startY = size.height * 0.75f,
+            startY = size.height * 0.73f,
             endY = size.height
         )
 
