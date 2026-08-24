@@ -61,7 +61,6 @@ import com.todo.ui.theme.MotionTokens
 import com.todo.ui.theme.GradientDarkBottom
 import com.todo.ui.theme.GradientLightBottom
 import java.time.Instant
-import java.time.LocalDate
 import java.time.ZoneId
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -80,7 +79,7 @@ fun RecycleBinScreen(
         uiState.items.filter { it.id in uiState.selectedIds }
     }
     val canRestore = remember(selectedItems) {
-        selectedItems.isNotEmpty() && selectedItems.all { isDeletedToday(it.deletedAt) }
+        selectedItems.isNotEmpty()
     }
     val listBottomInset = 24.dp
 
@@ -308,7 +307,3 @@ private fun formatOriginalDate(date: String): String {
     return "${parts[0]}年${parts[1].toInt()}月${parts[2].toInt()}日"
 }
 
-private fun isDeletedToday(timestamp: Long): Boolean {
-    val deletedDate = Instant.ofEpochMilli(timestamp).atZone(ZoneId.systemDefault()).toLocalDate()
-    return deletedDate == LocalDate.now()
-}
