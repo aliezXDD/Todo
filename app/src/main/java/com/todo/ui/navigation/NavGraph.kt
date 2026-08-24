@@ -37,7 +37,15 @@ fun NavGraph(
         composable(
             route = Screen.Todo.route,
             enterTransition = { tabEnter(isTabForward(initialState, targetState)) },
-            exitTransition = { tabExit(isTabForward(initialState, targetState)) },
+            exitTransition = {
+                if (targetState.destination.route == Screen.Chart.route ||
+                    targetState.destination.route == Screen.History.route
+                ) {
+                    detailExit()
+                } else {
+                    tabExit(isTabForward(initialState, targetState))
+                }
+            },
             popEnterTransition = {
                 if (initialState.destination.route == Screen.Chart.route ||
                     initialState.destination.route == Screen.History.route
