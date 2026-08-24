@@ -138,6 +138,7 @@ fun BottomNavBar(
                         modifier = Modifier.padding(horizontal = 2.dp)
                     )
                 }
+                }
                 if (isDark) {
                     Box(
                         modifier = Modifier
