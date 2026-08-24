@@ -1,4 +1,4 @@
-﻿package com.todo.domain.usecase
+package com.todo.domain.usecase
 
 import com.todo.data.local.entity.TodoEntity
 import com.todo.data.repository.TodoRepository
@@ -14,7 +14,11 @@ class GetHistoryRecordsUseCase @Inject constructor(
     private val todoRepository: TodoRepository
 ) {
     suspend operator fun invoke(limit: Int = 7): Flow<List<DailyRecord>> {
-        val dates = todoRepository.getHistoryDates(DateUtils.today()).take(limit)
+        val today = DateUtils.today()
+        val cutoff = DateUtils.daysAgo(7)
+        val dates = todoRepository.getHistoryDates(today)
+            .filter { it >= cutoff }
+            .take(limit)
         if (dates.isEmpty()) {
             return flowOf(emptyList())
         }

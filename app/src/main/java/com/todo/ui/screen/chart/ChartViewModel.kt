@@ -50,12 +50,13 @@ class ChartViewModel @Inject constructor(
                     statByDate[date] ?: DailyStats(date = date, totalCount = 0, completedCount = 0)
                 }
 
-                val averageRate = if (filledStats.isEmpty()) {
+                val validStats = filledStats.filter { it.totalCount > 0 }
+                val averageRate = if (validStats.isEmpty()) {
                     0
                 } else {
-                    (filledStats.map { it.completionRate }.average() * 100).toInt()
+                    (validStats.map { it.completionRate }.average() * 100).toInt()
                 }
-                val maxRate = ((filledStats.maxOfOrNull { it.completionRate } ?: 0f) * 100).toInt()
+                val maxRate = ((validStats.maxOfOrNull { it.completionRate } ?: 0f) * 100).toInt()
                 val totalCompleted = filledStats.sumOf { it.completedCount }
                 val consecutiveDays = calculateConsecutiveFullCompletionDays(filledStats)
 
