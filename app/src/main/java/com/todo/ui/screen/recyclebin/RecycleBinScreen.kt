@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
@@ -33,10 +34,13 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -54,6 +58,8 @@ import com.todo.ui.theme.DarkGlassSurface
 import com.todo.ui.theme.LightGlassBorder
 import com.todo.ui.theme.LightGlassSurface
 import com.todo.ui.theme.MotionTokens
+import com.todo.ui.theme.GradientDarkBottom
+import com.todo.ui.theme.GradientLightBottom
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -131,10 +137,13 @@ fun RecycleBinScreen(
             )
         } else {
             Box(modifier = Modifier.fillMaxSize()) {
+                val listState = rememberLazyListState()
+                val showFade by remember { derivedStateOf { listState.canScrollForward } }
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = listBottomInset),
+                    state = listState,
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     groupedItems.forEach { (dateLabel, groupItems) ->
@@ -163,6 +172,23 @@ fun RecycleBinScreen(
                             )
                         }
                     }
+                }
+
+                if (showFade) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .fillMaxWidth()
+                            .height(56.dp)
+                            .background(
+                                Brush.verticalGradient(
+                                    colors = listOf(
+                                        Color.Transparent,
+                                        if (isDark) GradientDarkBottom else GradientLightBottom
+                                    )
+                                )
+                            )
+                    )
                 }
             }
         }
