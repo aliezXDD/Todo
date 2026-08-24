@@ -80,8 +80,6 @@ fun PresetScreen(
 
                 }
             }
-        }
-    }
 
     PresetEditDialog(
         visible = showEditDialog,
@@ -102,4 +100,5 @@ fun PresetScreen(
         onConfirm = viewModel::confirmDeleteSelected,
         onCancel = viewModel::dismissDeleteConfirm
     )
+    }
 }
