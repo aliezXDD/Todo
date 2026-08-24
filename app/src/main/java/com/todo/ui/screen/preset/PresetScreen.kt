@@ -53,7 +53,7 @@ fun PresetScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 84.dp),
+            .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 0.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
         PresetTopBar(
