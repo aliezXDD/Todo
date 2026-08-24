@@ -36,7 +36,7 @@ fun TodoScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
-    val historyButtonShape = RoundedCornerShape(18.dp)
+    val historyButtonShape = RoundedCornerShape(16.dp)
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
