@@ -1,4 +1,4 @@
-﻿package com.todo.ui.screen.preset
+package com.todo.ui.screen.preset
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -87,7 +87,7 @@ fun PresetScreen(
                 }
 
                 if (showBottomShadow) {
-                    val shadowBottomColor = if (isDark) Color(0xFF171819) else Color(0xFFDEDBE4)
+                    val shadowBottomColor = if (isDark) Color(0xFF17191F) else Color(0xFFE7EAF3)
                     Box(
                         modifier = Modifier
                             .align(Alignment.BottomCenter)

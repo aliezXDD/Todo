@@ -1,7 +1,6 @@
-﻿package com.todo.ui.navigation
+package com.todo.ui.navigation
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -22,7 +21,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
@@ -34,11 +32,8 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.todo.ui.component.glassOverlay
-import com.todo.ui.theme.DarkGlassBorder
 import com.todo.ui.theme.DarkGlassSurface
 import com.todo.ui.theme.LightGlassBorder
-import com.todo.ui.theme.LightGlassSurface
 import com.todo.ui.theme.MotionTokens
 
 @Composable
@@ -49,8 +44,8 @@ fun BottomNavBar(
     val navBackStackEntry = navController.currentBackStackEntryAsState().value
     val currentDestination = navBackStackEntry?.destination
     val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
-    val container = if (isDark) DarkGlassSurface.copy(alpha = 0.82f) else Color.White
-    val border = if (isDark) Color.White.copy(alpha = 0.48f) else Color.White
+    val container = if (isDark) DarkGlassSurface.copy(alpha = 0.90f) else Color.White.copy(alpha = 0.95f)
+    val border = if (isDark) Color.White.copy(alpha = 0.12f) else LightGlassBorder
     val shape = RoundedCornerShape(24.dp)
 
     val items = listOf(
@@ -64,23 +59,14 @@ fun BottomNavBar(
             .fillMaxWidth()
             .navigationBarsPadding()
             .padding(horizontal = 12.dp, vertical = 8.dp)
-            .clip(shape)
-            .background(container)
     ) {
         Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .glassOverlay(
-                    shape = shape,
-                    isDark = isDark,
-                    topAlphaLight = 0.34f,
-                    topAlphaDark = 0.14f,
-                    bottomAlphaLight = 0.18f,
-                    bottomAlphaDark = 0.18f
-                ),
-            color = Color.Transparent,
+            modifier = Modifier.fillMaxWidth(),
+            color = container,
             shape = shape,
-            border = BorderStroke(1.dp, border)
+            border = BorderStroke(1.dp, border),
+            tonalElevation = 0.dp,
+            shadowElevation = if (isDark) 0.dp else 3.dp
         ) {
             NavigationBar(
                 containerColor = Color.Transparent,
