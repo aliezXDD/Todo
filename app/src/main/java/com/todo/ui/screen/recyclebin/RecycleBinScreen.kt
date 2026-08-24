@@ -36,8 +36,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -77,8 +75,7 @@ fun RecycleBinScreen(
     val canRestore = remember(selectedItems) {
         selectedItems.isNotEmpty() && selectedItems.all { isDeletedToday(it.deletedAt) }
     }
-    val showBottomShadow = uiState.items.size > 8
-    val listBottomInset = 84.dp
+    val listBottomInset = 24.dp
 
     BackHandler(enabled = uiState.isMultiSelectMode) {
         viewModel.clearMultiSelect()
@@ -165,25 +162,6 @@ fun RecycleBinScreen(
                             )
                         }
                     }
-                }
-
-                if (showBottomShadow) {
-                    val shadowBottomColor = if (isDark) Color(0xFF0F0F11) else Color(0xFFDEDBE4)
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .padding(bottom = listBottomInset)
-                            .fillMaxWidth()
-                            .height(40.dp)
-                            .background(
-                                Brush.verticalGradient(
-                                    colors = listOf(
-                                        Color.Transparent,
-                                        shadowBottomColor
-                                    )
-                                )
-                            )
-                    )
                 }
             }
         }

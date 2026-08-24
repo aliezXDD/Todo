@@ -2,7 +2,6 @@ package com.todo.ui.screen.preset
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -13,14 +12,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -40,8 +34,6 @@ fun PresetScreen(
     val showEditDialog by viewModel.showEditDialog.collectAsStateWithLifecycle()
     val editingPreset by viewModel.editingPreset.collectAsStateWithLifecycle()
     val showDeleteConfirm by viewModel.showDeleteConfirm.collectAsStateWithLifecycle()
-    val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
-    val showBottomShadow = uiState.presets.size > 8
 
     BackHandler(enabled = uiState.isMultiSelectMode) {
         viewModel.clearMultiSelect()
@@ -71,7 +63,7 @@ fun PresetScreen(
             Box(modifier = Modifier.fillMaxSize()) {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(bottom = if (showBottomShadow) 44.dp else 0.dp),
+                    contentPadding = PaddingValues(bottom = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     items(uiState.presets, key = { it.id }) { preset ->
@@ -86,22 +78,6 @@ fun PresetScreen(
                     }
                 }
 
-                if (showBottomShadow) {
-                    val shadowBottomColor = if (isDark) Color(0xFF17191F) else Color(0xFFE7EAF3)
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .fillMaxWidth()
-                            .height(40.dp)
-                            .background(
-                                Brush.verticalGradient(
-                                    colors = listOf(
-                                        Color.Transparent,
-                                        shadowBottomColor
-                                    )
-                                )
-                            )
-                    )
                 }
             }
         }
