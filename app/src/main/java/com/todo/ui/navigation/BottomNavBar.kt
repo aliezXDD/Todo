@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.animation.animateColorAsState
@@ -47,6 +48,7 @@ fun BottomNavBar(
     val container = if (isDark) DarkGlassSurface.copy(alpha = 0.90f) else Color.White.copy(alpha = 0.95f)
     val border = if (isDark) Color.White.copy(alpha = 0.12f) else LightGlassBorder
     val shape = RoundedCornerShape(24.dp)
+    val shadowColor = if (isDark) Color.White.copy(alpha = 0.10f) else Color.Black.copy(alpha = 0.14f)
 
     val items = listOf(
         Triple(Screen.Preset, "预设", Icons.AutoMirrored.Filled.List),
@@ -61,12 +63,19 @@ fun BottomNavBar(
             .padding(horizontal = 12.dp, vertical = 8.dp)
     ) {
         Surface(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .shadow(
+                    elevation = 6.dp,
+                    shape = shape,
+                    ambientColor = shadowColor,
+                    spotColor = shadowColor
+                ),
             color = container,
             shape = shape,
             border = BorderStroke(1.dp, border),
             tonalElevation = 0.dp,
-            shadowElevation = 4.dp
+            shadowElevation = 0.dp
         ) {
             NavigationBar(
                 containerColor = Color.Transparent,
