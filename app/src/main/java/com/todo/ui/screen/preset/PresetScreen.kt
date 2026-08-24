@@ -50,6 +50,7 @@ fun PresetScreen(
         viewModel.clearMultiSelect()
     }
 
+    Box(modifier = Modifier.fillMaxSize()) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -111,6 +112,7 @@ fun PresetScreen(
                 }
             }
             }
+    }
 
     PresetEditDialog(
         visible = showEditDialog,
