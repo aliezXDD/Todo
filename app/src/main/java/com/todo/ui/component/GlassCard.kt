@@ -33,13 +33,14 @@ fun GlassCard(
             topAlphaLight = 0.18f * highlightScale,
             topAlphaDark = 0.11f * highlightScale,
             bottomAlphaLight = 0.06f * highlightScale,
-            bottomAlphaDark = 0.14f * highlightScale
+            bottomAlphaDark = 0.14f * highlightScale,
+            drawOuterShadow = false
         ),
         shape = shape,
         color = containerColor,
         border = BorderStroke(1.dp, borderColor),
         tonalElevation = 0.dp,
-        shadowElevation = 0.dp
+        shadowElevation = 4.dp
     ) {
         Box(modifier = Modifier.padding(16.dp)) {
             content()

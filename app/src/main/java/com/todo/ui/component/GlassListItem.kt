@@ -1,4 +1,4 @@
-﻿package com.todo.ui.component
+package com.todo.ui.component
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
@@ -41,7 +41,7 @@ fun GlassListItem(
         color = bgColor,
         border = BorderStroke(1.dp, borderColor),
         tonalElevation = 0.dp,
-        shadowElevation = 0.dp
+        shadowElevation = 3.dp
     ) {
         Row(
             modifier = Modifier

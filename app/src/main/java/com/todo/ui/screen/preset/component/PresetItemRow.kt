@@ -71,7 +71,8 @@ fun PresetItemRow(
                 topAlphaLight = 0.18f,
                 topAlphaDark = 0.11f,
                 bottomAlphaLight = 0.06f,
-                bottomAlphaDark = 0.14f
+                bottomAlphaDark = 0.14f,
+                drawOuterShadow = false
             )
             .clip(shape)
             .combinedClickable(
