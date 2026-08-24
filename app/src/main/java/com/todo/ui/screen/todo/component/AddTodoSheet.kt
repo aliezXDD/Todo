@@ -92,7 +92,8 @@ fun AddTodoSheet(
         opaqueBackground = true
     ) {
         GlassCard(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            highlightScale = 0.5f
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 TabRow(
