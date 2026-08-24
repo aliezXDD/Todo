@@ -127,7 +127,7 @@ fun TodoItemRow(
                         Icon(
                             imageVector = Icons.Filled.Check,
                             contentDescription = null,
-                            modifier = Modifier.scale(checkMarkScale.value),
+                            modifier = Modifier.size(16.dp).scale(checkMarkScale.value),
                             tint = if (isDark) Color.White else MaterialTheme.colorScheme.onPrimary
                         )
                     }

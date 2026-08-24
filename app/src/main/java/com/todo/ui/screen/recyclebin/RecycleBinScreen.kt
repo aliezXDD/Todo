@@ -282,7 +282,7 @@ private fun RecycleBinRow(
                         Icon(
                             imageVector = Icons.Filled.Check,
                             contentDescription = null,
-                            modifier = Modifier.offset(y = (-1).dp).size(16.dp),
+                            modifier = Modifier.offset(y = 1.dp).size(16.dp),
                             tint = androidx.compose.ui.graphics.Color.White
                         )
                     }
