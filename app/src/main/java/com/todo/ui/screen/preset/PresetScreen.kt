@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -48,6 +49,10 @@ fun PresetScreen(
 
     BackHandler(enabled = uiState.isMultiSelectMode) {
         viewModel.clearMultiSelect()
+    }
+
+    DisposableEffect(Unit) {
+        onDispose { viewModel.clearMultiSelect() }
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
