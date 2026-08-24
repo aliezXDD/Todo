@@ -79,9 +79,7 @@ fun SettingsScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(16.dp))
-                    .clickable(onClick = onNavigateToRecycleBin),
-                drawShadow = false,
-                shadowElevation = 4.dp
+                    .clickable(onClick = onNavigateToRecycleBin)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
