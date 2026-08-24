@@ -1,4 +1,4 @@
-﻿package com.todo.ui.component
+package com.todo.ui.component
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -151,7 +151,7 @@ private fun Modifier.glassTopBarOverlay(
         drawRect(
             brush = androidx.compose.ui.graphics.Brush.linearGradient(
                 colors = listOf(
-                    Color.White.copy(alpha = if (isDark) 0.10f else 0.16f),
+                    Color.White.copy(alpha = if (isDark) 0.08f else 0.16f),
                     Color.Transparent
                 ),
                 start = Offset.Zero,
@@ -161,10 +161,10 @@ private fun Modifier.glassTopBarOverlay(
         drawRect(
             brush = androidx.compose.ui.graphics.Brush.horizontalGradient(
                 colors = listOf(
-                    Color.White.copy(alpha = if (isDark) 0.03f else 0.05f),
+                    Color.White.copy(alpha = if (isDark) 0.024f else 0.05f),
                     Color.Transparent,
                     Color.Transparent,
-                    Color.White.copy(alpha = if (isDark) 0.02f else 0.03f)
+                    Color.White.copy(alpha = if (isDark) 0.016f else 0.03f)
                 )
             )
         )
