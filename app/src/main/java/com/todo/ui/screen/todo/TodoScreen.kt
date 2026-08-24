@@ -1,4 +1,4 @@
-﻿package com.todo.ui.screen.todo
+package com.todo.ui.screen.todo
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -15,7 +14,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.luminance
 import com.todo.ui.component.DialogButtonRole
 import com.todo.ui.component.GlassDialog
@@ -83,9 +81,7 @@ fun TodoScreen(
             onClick = { viewModel.setAddSheetVisible(true) },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .navigationBarsPadding()
-                .padding(end = 20.dp, bottom = 0.dp)
-                .graphicsLayer { translationY = 100f }
+                .padding(end = 20.dp, bottom = 16.dp)
         )
 
     }
