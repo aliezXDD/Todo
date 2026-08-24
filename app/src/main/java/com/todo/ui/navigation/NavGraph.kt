@@ -1,6 +1,12 @@
 package com.todo.ui.navigation
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
@@ -30,72 +36,22 @@ fun NavGraph(
     ) {
         composable(
             route = Screen.Todo.route,
-            enterTransition = {
-                val forward = isTabForward(initialState, targetState)
-                slideInHorizontally(
-                    initialOffsetX = { width -> if (forward) width else -width },
-                    animationSpec = tween(
-                        durationMillis = MotionTokens.ScreenSlide,
-                        easing = MotionTokens.StandardEasing
-                    )
-                )
-            },
-            exitTransition = {
-                val forward = isTabForward(initialState, targetState)
-                slideOutHorizontally(
-                    targetOffsetX = { width -> if (forward) -width else width },
-                    animationSpec = tween(
-                        durationMillis = MotionTokens.ScreenSlide,
-                        easing = MotionTokens.StandardEasing
-                    )
-                )
-            },
+            enterTransition = { tabEnter(isTabForward(initialState, targetState)) },
+            exitTransition = { tabExit(isTabForward(initialState, targetState)) },
             popEnterTransition = {
-                if (initialState.destination.route == Screen.Chart.route) {
-                    slideInHorizontally(
-                        initialOffsetX = { width -> -width },
-                        animationSpec = tween(
-                            durationMillis = MotionTokens.ScreenSlide,
-                            easing = MotionTokens.StandardEasing
-                        )
-                    )
-                } else if (initialState.destination.route == Screen.History.route) {
-                    slideInHorizontally(
-                        initialOffsetX = { width -> -width },
-                        animationSpec = tween(
-                            durationMillis = MotionTokens.ScreenSlide,
-                            easing = MotionTokens.StandardEasing
-                        )
-                    )
+                if (initialState.destination.route == Screen.Chart.route ||
+                    initialState.destination.route == Screen.History.route
+                ) {
+                    detailPopEnter()
                 } else {
-                    val forward = isTabForward(initialState, targetState)
-                    slideInHorizontally(
-                        initialOffsetX = { width -> if (forward) width else -width },
-                        animationSpec = tween(
-                            durationMillis = MotionTokens.ScreenSlide,
-                            easing = MotionTokens.StandardEasing
-                        )
-                    )
+                    tabEnter(isTabForward(initialState, targetState))
                 }
             },
             popExitTransition = {
                 if (targetState.destination.route == Screen.Chart.route) {
-                    slideOutHorizontally(
-                        targetOffsetX = { width -> width },
-                        animationSpec = tween(
-                            durationMillis = MotionTokens.ScreenSlide,
-                            easing = MotionTokens.StandardEasing
-                        )
-                    )
+                    detailPopExit()
                 } else {
-                    val forward = isTabForward(initialState, targetState)
-                    slideOutHorizontally(
-                        targetOffsetX = { width -> if (forward) -width else width },
-                        animationSpec = tween(
-                            durationMillis = MotionTokens.ScreenSlide,
-                            easing = MotionTokens.StandardEasing
-                        )
-                    )
+                    tabExit(isTabForward(initialState, targetState))
                 }
             }
         ) {
@@ -107,154 +63,42 @@ fun NavGraph(
 
         composable(
             route = Screen.History.route,
-            enterTransition = {
-                slideInHorizontally(
-                    initialOffsetX = { width -> width },
-                    animationSpec = tween(
-                        durationMillis = MotionTokens.ScreenSlide,
-                        easing = MotionTokens.StandardEasing
-                    )
-                )
-            },
-            exitTransition = {
-                slideOutHorizontally(
-                    targetOffsetX = { width -> -width },
-                    animationSpec = tween(
-                        durationMillis = MotionTokens.ScreenSlide,
-                        easing = MotionTokens.StandardEasing
-                    )
-                )
-            },
-            popEnterTransition = {
-                slideInHorizontally(
-                    initialOffsetX = { width -> -width },
-                    animationSpec = tween(
-                        durationMillis = MotionTokens.ScreenSlide,
-                        easing = MotionTokens.StandardEasing
-                    )
-                )
-            },
-            popExitTransition = {
-                slideOutHorizontally(
-                    targetOffsetX = { width -> width },
-                    animationSpec = tween(
-                        durationMillis = MotionTokens.ScreenSlide,
-                        easing = MotionTokens.StandardEasing
-                    )
-                )
-            }
+            enterTransition = { detailEnter() },
+            exitTransition = { detailExit() },
+            popEnterTransition = { detailPopEnter() },
+            popExitTransition = { detailPopExit() }
         ) {
             HistoryScreen(onBack = { navController.popBackStack() })
         }
 
         composable(
             route = Screen.Preset.route,
-            enterTransition = {
-                val forward = isTabForward(initialState, targetState)
-                slideInHorizontally(
-                    initialOffsetX = { width -> if (forward) width else -width },
-                    animationSpec = tween(
-                        durationMillis = MotionTokens.ScreenSlide,
-                        easing = MotionTokens.StandardEasing
-                    )
-                )
-            },
-            exitTransition = {
-                val forward = isTabForward(initialState, targetState)
-                slideOutHorizontally(
-                    targetOffsetX = { width -> if (forward) -width else width },
-                    animationSpec = tween(
-                        durationMillis = MotionTokens.ScreenSlide,
-                        easing = MotionTokens.StandardEasing
-                    )
-                )
-            },
-            popEnterTransition = {
-                val forward = isTabForward(initialState, targetState)
-                slideInHorizontally(
-                    initialOffsetX = { width -> if (forward) width else -width },
-                    animationSpec = tween(
-                        durationMillis = MotionTokens.ScreenSlide,
-                        easing = MotionTokens.StandardEasing
-                    )
-                )
-            },
-            popExitTransition = {
-                val forward = isTabForward(initialState, targetState)
-                slideOutHorizontally(
-                    targetOffsetX = { width -> if (forward) -width else width },
-                    animationSpec = tween(
-                        durationMillis = MotionTokens.ScreenSlide,
-                        easing = MotionTokens.StandardEasing
-                    )
-                )
-            }
+            enterTransition = { tabEnter(isTabForward(initialState, targetState)) },
+            exitTransition = { tabExit(isTabForward(initialState, targetState)) },
+            popEnterTransition = { tabEnter(isTabForward(initialState, targetState)) },
+            popExitTransition = { tabExit(isTabForward(initialState, targetState)) }
         ) {
             PresetScreen()
         }
 
         composable(
             route = Screen.Settings.route,
-            enterTransition = {
-                val forward = isTabForward(initialState, targetState)
-                slideInHorizontally(
-                    initialOffsetX = { width -> if (forward) width else -width },
-                    animationSpec = tween(
-                        durationMillis = MotionTokens.ScreenSlide,
-                        easing = MotionTokens.StandardEasing
-                    )
-                )
-            },
+            enterTransition = { tabEnter(isTabForward(initialState, targetState)) },
             exitTransition = {
                 if (targetState.destination.route == Screen.RecycleBin.route) {
-                    slideOutHorizontally(
-                        targetOffsetX = { width -> -width },
-                        animationSpec = tween(
-                            durationMillis = MotionTokens.ScreenSlide,
-                            easing = MotionTokens.StandardEasing
-                        )
-                    )
+                    detailExit()
                 } else {
-                    val forward = isTabForward(initialState, targetState)
-                    slideOutHorizontally(
-                        targetOffsetX = { width -> if (forward) -width else width },
-                        animationSpec = tween(
-                            durationMillis = MotionTokens.ScreenSlide,
-                            easing = MotionTokens.StandardEasing
-                        )
-                    )
+                    tabExit(isTabForward(initialState, targetState))
                 }
             },
             popEnterTransition = {
                 if (initialState.destination.route == Screen.RecycleBin.route) {
-                    slideInHorizontally(
-                        initialOffsetX = { width -> -width },
-                        animationSpec = tween(
-                            durationMillis = MotionTokens.ScreenSlide,
-                            easing = MotionTokens.StandardEasing
-                        )
-                    )
+                    detailPopEnter()
                 } else {
-                    val forward = isTabForward(initialState, targetState)
-                    slideInHorizontally(
-                        initialOffsetX = { width -> if (forward) width else -width },
-                        animationSpec = tween(
-                            durationMillis = MotionTokens.ScreenSlide,
-                            easing = MotionTokens.StandardEasing
-                        )
-                    )
+                    tabEnter(isTabForward(initialState, targetState))
                 }
             },
-            popExitTransition = {
-                val forward = isTabForward(initialState, targetState)
-                slideOutHorizontally(
-                    targetOffsetX = { width -> if (forward) -width else width },
-                    animationSpec = tween(
-                        durationMillis = MotionTokens.ScreenSlide,
-                        easing = MotionTokens.StandardEasing
-                    )
-                )
-            }
+            popExitTransition = { tabExit(isTabForward(initialState, targetState)) }
         ) {
             SettingsScreen(
                 onNavigateToRecycleBin = { navController.navigate(Screen.RecycleBin.route) }
@@ -263,89 +107,93 @@ fun NavGraph(
 
         composable(
             route = Screen.RecycleBin.route,
-            enterTransition = {
-                slideInHorizontally(
-                    initialOffsetX = { width -> width },
-                    animationSpec = tween(
-                        durationMillis = MotionTokens.ScreenSlide,
-                        easing = MotionTokens.StandardEasing
-                    )
-                )
-            },
-            exitTransition = {
-                slideOutHorizontally(
-                    targetOffsetX = { width -> -width },
-                    animationSpec = tween(
-                        durationMillis = MotionTokens.ScreenSlide,
-                        easing = MotionTokens.StandardEasing
-                    )
-                )
-            },
-            popEnterTransition = {
-                slideInHorizontally(
-                    initialOffsetX = { width -> width },
-                    animationSpec = tween(
-                        durationMillis = MotionTokens.ScreenSlide,
-                        easing = MotionTokens.StandardEasing
-                    )
-                )
-            },
-            popExitTransition = {
-                slideOutHorizontally(
-                    targetOffsetX = { width -> width },
-                    animationSpec = tween(
-                        durationMillis = MotionTokens.ScreenSlide,
-                        easing = MotionTokens.StandardEasing
-                    )
-                )
-            }
+            enterTransition = { detailEnter() },
+            exitTransition = { detailExit() },
+            popEnterTransition = { detailPopEnter() },
+            popExitTransition = { detailPopExit() }
         ) {
             RecycleBinScreen(onBack = { navController.popBackStack() })
         }
 
         composable(
             route = Screen.Chart.route,
-            enterTransition = {
-                slideInHorizontally(
-                    initialOffsetX = { width -> width },
-                    animationSpec = tween(
-                        durationMillis = MotionTokens.ScreenSlide,
-                        easing = MotionTokens.StandardEasing
-                    )
-                )
-            },
-            exitTransition = {
-                slideOutHorizontally(
-                    targetOffsetX = { width -> -width },
-                    animationSpec = tween(
-                        durationMillis = MotionTokens.ScreenSlide,
-                        easing = MotionTokens.StandardEasing
-                    )
-                )
-            },
-            popEnterTransition = {
-                slideInHorizontally(
-                    initialOffsetX = { width -> -width },
-                    animationSpec = tween(
-                        durationMillis = MotionTokens.ScreenSlide,
-                        easing = MotionTokens.StandardEasing
-                    )
-                )
-            },
-            popExitTransition = {
-                slideOutHorizontally(
-                    targetOffsetX = { width -> width },
-                    animationSpec = tween(
-                        durationMillis = MotionTokens.ScreenSlide,
-                        easing = MotionTokens.StandardEasing
-                    )
-                )
-            }
+            enterTransition = { detailEnter() },
+            exitTransition = { detailExit() },
+            popEnterTransition = { detailPopEnter() },
+            popExitTransition = { detailPopExit() }
         ) {
             ChartScreen(onBack = { navController.popBackStack() })
         }
     }
 }
+
+// --- Tab 切换：含蓄的淡入 + 微滑 + 微缩 —— 更"高级"、不生硬 ---
+private fun tabEnter(forward: Boolean): EnterTransition =
+    fadeIn(tween(MotionTokens.ScreenSlide, easing = MotionTokens.StandardEasing)) +
+        slideInHorizontally(
+            initialOffsetX = { if (forward) it / 8 else -it / 8 },
+            animationSpec = tween(MotionTokens.ScreenSlide, easing = MotionTokens.StandardEasing)
+        ) +
+        scaleIn(
+            initialScale = 0.99f,
+            animationSpec = tween(MotionTokens.ScreenSlide, easing = MotionTokens.StandardEasing)
+        )
+
+private fun tabExit(forward: Boolean): ExitTransition =
+    fadeOut(tween(MotionTokens.ScreenSlide, easing = MotionTokens.StandardEasing)) +
+        slideOutHorizontally(
+            targetOffsetX = { if (forward) -it / 10 else it / 10 },
+            animationSpec = tween(MotionTokens.ScreenSlide, easing = MotionTokens.StandardEasing)
+        ) +
+        scaleOut(
+            targetScale = 0.99f,
+            animationSpec = tween(MotionTokens.ScreenSlide, easing = MotionTokens.StandardEasing)
+        )
+
+// --- Push 详情页：滑入 + 淡入 + 轻微放缩（纵深/视差）---
+private fun detailEnter(): EnterTransition =
+    slideInHorizontally(
+        initialOffsetX = { it / 4 },
+        animationSpec = tween(MotionTokens.ScreenSlide, easing = MotionTokens.StandardEasing)
+    ) +
+        fadeIn(tween(MotionTokens.ScreenSlide, easing = MotionTokens.StandardEasing)) +
+        scaleIn(
+            initialScale = 0.96f,
+            animationSpec = tween(MotionTokens.ScreenSlide, easing = MotionTokens.StandardEasing)
+        )
+
+private fun detailExit(): ExitTransition =
+    fadeOut(tween(MotionTokens.ScreenSlide, easing = MotionTokens.StandardEasing)) +
+        slideOutHorizontally(
+            targetOffsetX = { -it / 6 },
+            animationSpec = tween(MotionTokens.ScreenSlide, easing = MotionTokens.StandardEasing)
+        ) +
+        scaleOut(
+            targetScale = 0.98f,
+            animationSpec = tween(MotionTokens.ScreenSlide, easing = MotionTokens.StandardEasing)
+        )
+
+private fun detailPopEnter(): EnterTransition =
+    slideInHorizontally(
+        initialOffsetX = { -it / 4 },
+        animationSpec = tween(MotionTokens.ScreenSlide, easing = MotionTokens.StandardEasing)
+    ) +
+        fadeIn(tween(MotionTokens.ScreenSlide, easing = MotionTokens.StandardEasing)) +
+        scaleIn(
+            initialScale = 0.96f,
+            animationSpec = tween(MotionTokens.ScreenSlide, easing = MotionTokens.StandardEasing)
+        )
+
+private fun detailPopExit(): ExitTransition =
+    fadeOut(tween(MotionTokens.ScreenSlide, easing = MotionTokens.StandardEasing)) +
+        slideOutHorizontally(
+            targetOffsetX = { it / 6 },
+            animationSpec = tween(MotionTokens.ScreenSlide, easing = MotionTokens.StandardEasing)
+        ) +
+        scaleOut(
+            targetScale = 0.98f,
+            animationSpec = tween(MotionTokens.ScreenSlide, easing = MotionTokens.StandardEasing)
+        )
 
 private fun routeTabIndex(route: String?): Int = when (route) {
     Screen.Preset.route -> 0
