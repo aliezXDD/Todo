@@ -155,16 +155,14 @@ private fun Modifier.glassTopBarOverlay(
                     Color.Transparent
                 ),
                 start = Offset.Zero,
-                end = Offset(size.width * 0.68f, size.height * 0.25f)
+                end = Offset(size.width, 0f)
             )
         )
         drawRect(
             brush = androidx.compose.ui.graphics.Brush.horizontalGradient(
                 colors = listOf(
                     Color.White.copy(alpha = if (isDark) 0.024f else 0.05f),
-                    Color.Transparent,
-                    Color.Transparent,
-                    Color.White.copy(alpha = if (isDark) 0.016f else 0.03f)
+                    Color.Transparent
                 )
             )
         )
