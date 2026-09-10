@@ -31,10 +31,9 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
-import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -98,17 +97,18 @@ fun AddTodoSheet(
             highlightScale = 0.45f
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                TabRow(
+                SecondaryTabRow(
                     selectedTabIndex = selectedTabIndex,
                     modifier = Modifier
                         .clip(RoundedCornerShape(14.dp))
                         .border(1.dp, tabBorderColor, RoundedCornerShape(14.dp)),
                     containerColor = tabContainerColor,
-                    indicator = { tabPositions ->
-                        // 当前选中项下方的白色下滑条：圆角矩形（上下四角圆润），并上移露出下方圆角、避免被 TabRow 底边/描边挡住
+                    indicator = {
+                        // 当前选中项下方的白色下滑条：圆角矩形（上下四角圆润），并上移露出下方圆角、避免被底边/描边挡住
+                        // 指示条偏移由 TabIndicatorScope 按下标提供（旧的 TabPosition 版本已废弃）
                         Box(
                             modifier = Modifier
-                                .tabIndicatorOffset(tabPositions[selectedTabIndex])
+                                .tabIndicatorOffset(selectedTabIndex)
                                 .offset(y = (-1).dp)
                                 .padding(horizontal = 7.dp)
                                 .fillMaxWidth()

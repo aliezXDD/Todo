@@ -4,9 +4,9 @@ import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.graphics.Color as AndroidColor
-import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.compose.setContent
 import androidx.compose.animation.AnimatedVisibility
@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
@@ -28,9 +29,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.graphics.luminance
-import androidx.core.view.WindowInsetsControllerCompat
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -56,24 +55,25 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+// 底部导航栏底色：与整体深色底保持一致
+private val NavigationBarScrim: Int = AndroidColor.parseColor("#0F0F11")
+
 @Composable
 private fun ConfigureSystemBars() {
-    val view = LocalView.current
     val context = LocalContext.current
-    val activity = context.findActivity()
-    val isDark = androidx.compose.material3.MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
+    val activity = context.findActivity() as? ComponentActivity ?: return
+    val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
 
     SideEffect {
-        val window = activity?.window ?: return@SideEffect
-        window.statusBarColor = AndroidColor.TRANSPARENT
-        window.navigationBarColor = AndroidColor.parseColor("#0F0F11")
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            window.isNavigationBarContrastEnforced = false
-        }
-        WindowInsetsControllerCompat(window, view).apply {
-            isAppearanceLightStatusBars = !isDark
-            isAppearanceLightNavigationBars = false
-        }
+        // 统一走 enableEdgeToEdge：它同时处理系统栏底色与图标明暗，且随主题切换可重复调用。
+        // 不直接写 window.statusBarColor / navigationBarColor —— 自 API 35 起系统会忽略这两个值。
+        activity.enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.auto(
+                AndroidColor.TRANSPARENT,
+                AndroidColor.TRANSPARENT
+            ) { isDark },
+            navigationBarStyle = SystemBarStyle.dark(NavigationBarScrim)
+        )
     }
 }
 
