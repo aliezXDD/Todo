@@ -2,6 +2,7 @@ package com.todo.ui.component
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -22,6 +23,7 @@ fun GlassCard(
     highlightScale: Float = 1f,
     drawShadow: Boolean = true,
     shadowElevation: Dp = 0.dp,
+    fillMaxHeight: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
@@ -33,8 +35,6 @@ fun GlassCard(
         modifier = modifier.glassOverlay(
             shape = shape,
             isDark = isDark,
-            topAlphaLight = 0.18f * highlightScale,
-            topAlphaDark = 0.11f * highlightScale,
             bottomAlphaLight = 0.06f * highlightScale,
             bottomAlphaDark = 0.14f * highlightScale,
             drawOuterShadow = drawShadow
@@ -45,7 +45,14 @@ fun GlassCard(
         tonalElevation = 0.dp,
         shadowElevation = shadowElevation
     ) {
-        Box(modifier = Modifier.padding(16.dp)) {
+        // fillMaxHeight=true 时让内容撑满卡片高度（配合外部 weight 固定卡片高度）；默认仍按内容高度
+        Box(
+            modifier = if (fillMaxHeight) {
+                Modifier.fillMaxHeight().padding(16.dp)
+            } else {
+                Modifier.padding(16.dp)
+            }
+        ) {
             content()
         }
     }

@@ -19,23 +19,32 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.todo.ui.component.DialogButtonRole
 import com.todo.ui.component.EmptyState
 import com.todo.ui.component.GlassDialog
+import com.todo.ui.component.GlassToast
 import com.todo.ui.screen.preset.component.PresetEditDialog
 import com.todo.ui.screen.preset.component.PresetItemRow
 import com.todo.ui.screen.preset.component.PresetTopBar
 import com.todo.ui.theme.GradientDarkBottom
+import com.todo.ui.theme.GradientDarkTop
 import com.todo.ui.theme.GradientLightBottom
+import com.todo.ui.theme.GradientLightTop
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -77,12 +86,26 @@ fun PresetScreen(
                 modifier = Modifier.fillMaxWidth()
             )
         } else {
-            Box(modifier = Modifier.fillMaxSize()) {
+            Box(modifier = Modifier.fillMaxSize().padding(bottom = 140.dp)) {
                 val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
                 val listState = rememberLazyListState()
                 val showFade by remember { derivedStateOf { listState.canScrollForward } }
+
+                // 采样列表容器在屏幕中的位置对应的背景渐变色，使底部渐隐与背景精确贴合（而非用固定端色）。
+                val density = LocalDensity.current
+                val screenHeightPx = with(density) { LocalConfiguration.current.screenHeightDp.dp.toPx() }
+                var listBottomPx by remember { mutableFloatStateOf(0f) }
+                val bgTop = if (isDark) GradientDarkTop else GradientLightTop
+                val bgBottom = if (isDark) GradientDarkBottom else GradientLightBottom
+                val bottomFadeColor = if (screenHeightPx > 0f)
+                    lerp(bgTop, bgBottom, (listBottomPx / screenHeightPx).coerceIn(0f, 1f)) else bgBottom
+
                 LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .onGloballyPositioned { coords ->
+                            listBottomPx = coords.positionInRoot().y + coords.size.height
+                        },
                     state = listState,
                     contentPadding = PaddingValues(bottom = 8.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -94,13 +117,16 @@ fun PresetScreen(
                             isSelected = preset.id in uiState.selectedIds,
                             modifier = Modifier.animateItem(),
                             onClick = { viewModel.onPresetClick(preset) },
-                            onLongClick = { viewModel.onPresetLongClick(preset) }
+                            onLongClick = { viewModel.onPresetLongClick(preset) },
+                            onDoubleClick = { viewModel.onPresetDoubleClick(preset) }
                         )
                     }
                 }
 
                 if (showFade) {
                     Box(
+                        // 列表容器已整体上收 140dp（止于底栏上沿），渐隐条落在列表底缘即可，
+                        // 无需位移；这样滚动途中经过底栏的条目会被列表裁剪，不会透出底栏。
                         modifier = Modifier
                             .align(Alignment.BottomCenter)
                             .fillMaxWidth()
@@ -108,8 +134,8 @@ fun PresetScreen(
                             .background(
                                 Brush.verticalGradient(
                                     colors = listOf(
-                                        Color.Transparent,
-                                        if (isDark) GradientDarkBottom else GradientLightBottom
+                                        bottomFadeColor.copy(alpha = 0f),
+                                        bottomFadeColor
                                     )
                                 )
                             )
@@ -137,6 +163,14 @@ fun PresetScreen(
         surfaceAlphaDelta = 0.04f,
         onConfirm = viewModel::confirmDeleteSelected,
         onCancel = viewModel::dismissDeleteConfirm
+    )
+
+    GlassToast(
+        messageFlow = viewModel.addedToTodayMessage,
+        modifier = Modifier
+            .align(Alignment.BottomCenter)
+            .padding(horizontal = 20.dp)
+            .padding(bottom = 140.dp)
     )
     }
 }

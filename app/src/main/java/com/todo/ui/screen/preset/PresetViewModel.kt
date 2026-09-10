@@ -1,12 +1,15 @@
-﻿package com.todo.ui.screen.preset
+package com.todo.ui.screen.preset
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.todo.domain.model.Preset
+import com.todo.domain.usecase.AddTodoUseCase
 import com.todo.domain.usecase.PresetUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -14,7 +17,8 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel
 class PresetViewModel @Inject constructor(
-    private val presetUseCases: PresetUseCases
+    private val presetUseCases: PresetUseCases,
+    private val addTodoUseCase: AddTodoUseCase
 ) : ViewModel() {
 
     data class PresetUiState(
@@ -35,6 +39,10 @@ class PresetViewModel @Inject constructor(
 
     private val _showDeleteConfirm = MutableStateFlow(false)
     val showDeleteConfirm: StateFlow<Boolean> = _showDeleteConfirm.asStateFlow()
+
+    // 双击预设条目成功加入「今日待办」后的一次性提示消息。
+    private val _addedToTodayMessage = MutableSharedFlow<String>(extraBufferCapacity = 1)
+    val addedToTodayMessage: SharedFlow<String> = _addedToTodayMessage
 
     init {
         observePresets()
@@ -78,6 +86,24 @@ class PresetViewModel @Inject constructor(
                 isMultiSelectMode = true,
                 selectedIds = it.selectedIds + preset.id
             )
+        }
+    }
+
+    /** 双击预设条目：多选模式下当作一次选中切换；否则将预设内容加入今日待办。 */
+    fun onPresetDoubleClick(preset: Preset) {
+        if (_uiState.value.isMultiSelectMode) {
+            toggleSelected(preset.id)
+        } else {
+            addPresetToToday(preset)
+        }
+    }
+
+    /** 将预设内容作为一条「今日待办」写入，并触发一次性提示。 */
+    fun addPresetToToday(preset: Preset) {
+        if (preset.content.isBlank()) return
+        viewModelScope.launch {
+            addTodoUseCase(preset.content)
+            _addedToTodayMessage.tryEmit("已添加到今日待办")
         }
     }
 

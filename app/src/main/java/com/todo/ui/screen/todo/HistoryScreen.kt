@@ -28,7 +28,10 @@ fun HistoryScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
         GlassTopBar(
             title = "往日记录",
             navigationIcon = Icons.AutoMirrored.Filled.ArrowBack,

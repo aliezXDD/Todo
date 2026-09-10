@@ -8,6 +8,7 @@ import com.todo.domain.usecase.ArchiveUseCase
 import com.todo.domain.usecase.CleanupUseCase
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.CancellationException
 
 @HiltWorker
 class DailyArchiveWorker @AssistedInject constructor(
@@ -22,7 +23,8 @@ class DailyArchiveWorker @AssistedInject constructor(
             archiveUseCase()
             cleanupUseCase()
             Result.success()
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            if (e is CancellationException) throw e
             Result.retry()
         }
     }

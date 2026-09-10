@@ -3,6 +3,8 @@ package com.todo.ui.screen.todo.component
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
@@ -15,7 +17,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -30,7 +34,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
-import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.Composable
@@ -93,7 +96,7 @@ fun AddTodoSheet(
     ) {
         GlassCard(
             modifier = Modifier.fillMaxWidth(),
-            highlightScale = 0.5f
+            highlightScale = 0.45f
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 TabRow(
@@ -103,9 +106,16 @@ fun AddTodoSheet(
                         .border(1.dp, tabBorderColor, RoundedCornerShape(14.dp)),
                     containerColor = tabContainerColor,
                     indicator = { tabPositions ->
-                        TabRowDefaults.SecondaryIndicator(
-                            modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
-                            color = tabIndicatorColor
+                        // 当前选中项下方的白色下滑条：圆角矩形（上下四角圆润），并上移露出下方圆角、避免被 TabRow 底边/描边挡住
+                        Box(
+                            modifier = Modifier
+                                .tabIndicatorOffset(tabPositions[selectedTabIndex])
+                                .offset(y = (-1).dp)
+                                .padding(horizontal = 7.dp)
+                                .fillMaxWidth()
+                                .height(3.dp)
+                                .clip(RoundedCornerShape(2.dp))
+                                .background(tabIndicatorColor)
                         )
                     }
                 ) {
@@ -129,33 +139,33 @@ fun AddTodoSheet(
                     targetState = selectedTabIndex,
                     transitionSpec = {
                         if (targetState > initialState) {
-                            slideInVertically(
-                                animationSpec = tween(
-                                    durationMillis = MotionTokens.SheetTabSwitch,
-                                    easing = MotionTokens.StandardEasing
-                                ),
-                                initialOffsetY = { it / 3 }
-                            ) togetherWith slideOutVertically(
-                                animationSpec = tween(
-                                    durationMillis = MotionTokens.SheetTabSwitch,
-                                    easing = MotionTokens.StandardEasing
-                                ),
-                                targetOffsetY = { -it / 3 }
-                            )
+                            (
+                                fadeIn(tween(MotionTokens.SheetTabSwitch, easing = MotionTokens.StandardEasing)) +
+                                    slideInVertically(
+                                        animationSpec = tween(MotionTokens.SheetTabSwitch, easing = MotionTokens.StandardEasing),
+                                        initialOffsetY = { it / 3 }
+                                    )
+                                ) togetherWith (
+                                fadeOut(tween(MotionTokens.SheetTabSwitch, easing = MotionTokens.StandardEasing)) +
+                                    slideOutVertically(
+                                        animationSpec = tween(MotionTokens.SheetTabSwitch, easing = MotionTokens.StandardEasing),
+                                        targetOffsetY = { -it / 3 }
+                                    )
+                                )
                         } else {
-                            slideInVertically(
-                                animationSpec = tween(
-                                    durationMillis = MotionTokens.SheetTabSwitch,
-                                    easing = MotionTokens.StandardEasing
-                                ),
-                                initialOffsetY = { -it / 3 }
-                            ) togetherWith slideOutVertically(
-                                animationSpec = tween(
-                                    durationMillis = MotionTokens.SheetTabSwitch,
-                                    easing = MotionTokens.StandardEasing
-                                ),
-                                targetOffsetY = { it / 3 }
-                            )
+                            (
+                                fadeIn(tween(MotionTokens.SheetTabSwitch, easing = MotionTokens.StandardEasing)) +
+                                    slideInVertically(
+                                        animationSpec = tween(MotionTokens.SheetTabSwitch, easing = MotionTokens.StandardEasing),
+                                        initialOffsetY = { -it / 3 }
+                                    )
+                                ) togetherWith (
+                                fadeOut(tween(MotionTokens.SheetTabSwitch, easing = MotionTokens.StandardEasing)) +
+                                    slideOutVertically(
+                                        animationSpec = tween(MotionTokens.SheetTabSwitch, easing = MotionTokens.StandardEasing),
+                                        targetOffsetY = { it / 3 }
+                                    )
+                                )
                         }
                     },
                     label = "addSheetTabSlide"
@@ -193,6 +203,7 @@ fun AddTodoSheet(
                                         GlassButton(
                                             text = "完成",
                                             onClick = onDismiss,
+                                            glassSurface = true,
                                             modifier = Modifier.weight(1f)
                                         )
                                         GlassButton(
@@ -203,7 +214,8 @@ fun AddTodoSheet(
                                                     manualInput = ""
                                                 }
                                             },
-                                            enabled = manualInput.isNotBlank(),
+                                            // 输入框有内容 → 主题浅紫色（主操作）；无内容 → 与“完成”相同的玻璃色（次要）
+                                            glassSurface = !manualInput.isNotBlank(),
                                             modifier = Modifier.weight(1f)
                                         )
                                     }

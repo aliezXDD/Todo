@@ -44,6 +44,7 @@ import com.todo.ui.theme.LightGlassBorder
 import com.todo.ui.theme.LightGlassScrim
 import com.todo.ui.theme.LightGlassSurface
 import com.todo.ui.theme.MotionTokens
+import com.todo.ui.component.glassOverlay
 import com.todo.ui.component.glassTextFieldColors
 import com.todo.ui.component.glassTextFieldShape
 
@@ -66,7 +67,8 @@ fun PresetEditDialog(
 
     val titleColor = if (isDark) Color.White else MaterialTheme.colorScheme.onSurface
     val contentColor = if (isDark) Color.White.copy(alpha = 0.92f) else MaterialTheme.colorScheme.onSurface
-    val containerColor = if (isDark) DarkGlassSurface.copy(alpha = 0.90f) else LightGlassSurface.copy(alpha = 0.94f)
+    // 底层卡片不透明度 100%（不再半透明）
+    val containerColor = if (isDark) DarkGlassSurface else LightGlassSurface
     val borderColor = if (isDark) DarkGlassBorder else LightGlassBorder
     val scrimColor = if (isDark) DarkGlassScrim else LightGlassScrim
     val noRipple = remember { MutableInteractionSource() }
@@ -110,7 +112,15 @@ fun PresetEditDialog(
             contentAlignment = Alignment.Center
         ) {
             Surface(
-                modifier = Modifier.fillMaxWidth(0.9f),
+                modifier = Modifier
+                    .fillMaxWidth(0.9f)
+                    // 与「编辑待办」玻璃卡片类似的高光层（底部/顶部高光 + 外阴影），颜色仍保持不透明度 100%
+                    .glassOverlay(
+                        shape = RoundedCornerShape(20.dp),
+                        isDark = isDark,
+                        bottomAlphaLight = 0.06f,
+                        bottomAlphaDark = 0.14f
+                    ),
                 shape = RoundedCornerShape(20.dp),
                 color = containerColor,
                 border = BorderStroke(1.dp, borderColor)

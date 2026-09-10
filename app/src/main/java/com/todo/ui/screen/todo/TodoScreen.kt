@@ -15,13 +15,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.luminance
-import com.todo.ui.component.DialogButtonRole
-import com.todo.ui.component.GlassDialog
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.todo.ui.component.GlassFAB
 import com.todo.ui.component.GlassButton
+import com.todo.ui.component.GlassFAB
 import com.todo.ui.component.glassOverlay
 import com.todo.ui.screen.todo.component.AddTodoSheet
 import com.todo.ui.screen.todo.component.EditTodoSheet
@@ -36,13 +34,15 @@ fun TodoScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
-    val historyButtonShape = RoundedCornerShape(16.dp)
+    // 「往日记录」按钮：表面圆角 14dp、描边圆角 16dp（描边比按钮略松，仅对该按钮生效）
+    val historyButtonShape = RoundedCornerShape(14.dp)
+    val historyBorderShape = RoundedCornerShape(16.dp)
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 84.dp),
+                .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 150.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             MiniStatsCard(
@@ -55,6 +55,8 @@ fun TodoScreen(
                 text = "往日记录",
                 onClick = onNavigateToHistory,
                 glassSurface = true,
+                shape = historyButtonShape,
+                borderShape = historyBorderShape,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp)
@@ -62,8 +64,6 @@ fun TodoScreen(
                     .glassOverlay(
                         shape = historyButtonShape,
                         isDark = isDark,
-                        topAlphaLight = 0.18f,
-                        topAlphaDark = 0.11f,
                         bottomAlphaLight = 0.06f,
                         bottomAlphaDark = 0.14f
                     )
@@ -73,7 +73,8 @@ fun TodoScreen(
                 todos = uiState.todayTodos,
                 onToggleTodo = viewModel::toggleTodo,
                 onLongPressTodo = viewModel::startEdit,
-                onReorderFinished = viewModel::commitReorder
+                onReorderFinished = viewModel::commitReorder,
+                modifier = Modifier.weight(1f)
             )
         }
 
@@ -81,7 +82,8 @@ fun TodoScreen(
             onClick = { viewModel.setAddSheetVisible(true) },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(end = 20.dp, bottom = 16.dp)
+                // 使 + 按钮底边到今日卡片底边缘的距离，与右边到今日卡片右边缘的距离相等，并稍微远离右下角
+                .padding(end = 26.dp, bottom = 160.dp)
         )
 
     }
@@ -107,18 +109,6 @@ fun TodoScreen(
         todo = uiState.editingTodo,
         onDismiss = { viewModel.setEditSheetVisible(false) },
         onSave = viewModel::saveEditedTodo,
-        onDelete = viewModel::confirmDelete
-    )
-
-    GlassDialog(
-        visible = uiState.showDeleteDialog,
-        title = "删除待办",
-        message = "确定删除这条待办吗？",
-        confirmText = "确定",
-        cancelText = "取消",
-        confirmButtonRole = DialogButtonRole.DANGER,
-        cancelButtonRole = DialogButtonRole.SECONDARY,
-        onConfirm = viewModel::deleteConfirmed,
-        onCancel = viewModel::dismissDeleteDialog
+        onDelete = viewModel::deleteTodoNow
     )
 }

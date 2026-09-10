@@ -17,6 +17,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import kotlinx.coroutines.delay
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
@@ -50,6 +51,8 @@ fun EditTodoSheet(
     val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
 
     LaunchedEffect(todo.id) {
+        // Delay to let the bottom-sheet popup attach its node before requesting focus.
+        delay(80)
         focusRequester.requestFocus()
     }
 
@@ -78,13 +81,14 @@ fun EditTodoSheet(
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     GlassButton(
-                        text = "保存",
-                        onClick = { if (input.text.isNotBlank()) onSave(input.text) },
+                        text = "删除",
+                        onClick = { onDelete(todo) },
+                        glassSurface = true, // 与添加待办页面中的“完成”按钮同色（玻璃/次要）
                         modifier = Modifier.weight(1f)
                     )
                     GlassButton(
-                        text = "删除",
-                        onClick = { onDelete(todo) },
+                        text = "保存",
+                        onClick = { if (input.text.isNotBlank()) onSave(input.text) },
                         modifier = Modifier.weight(1f)
                     )
                 }

@@ -48,7 +48,10 @@ fun ChartScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
         GlassTopBar(
             title = "完成统计",
             navigationIcon = Icons.AutoMirrored.Filled.ArrowBack,

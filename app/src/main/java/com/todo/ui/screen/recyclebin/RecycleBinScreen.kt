@@ -88,9 +88,12 @@ fun RecycleBinScreen(
         viewModel.clearMultiSelect()
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
         GlassTopBar(
-            title = if (uiState.isMultiSelectMode) "已选\n${uiState.selectedIds.size}项" else "回收站",
+            title = if (uiState.isMultiSelectMode) "" else "回收站",
             navigationIcon = Icons.AutoMirrored.Filled.ArrowBack,
             onNavigationClick = {
                 if (uiState.isMultiSelectMode) {
@@ -114,16 +117,19 @@ fun RecycleBinScreen(
                     ) {
                         Text("全选", color = topActionColor)
                     }
-                    TextButton(
-                        onClick = viewModel::requestDeleteSelected
-                    ) {
-                        Text("永久删除", color = topActionColor)
-                    }
-                    if (canRestore) {
+                    // 选中 0 项时只显示「取消」「全选」；有选中才显示 永久删除/还原
+                    if (uiState.selectedIds.size > 0) {
                         TextButton(
-                            onClick = viewModel::restoreSelected
+                            onClick = viewModel::requestDeleteSelected
                         ) {
-                            Text("还原", color = topActionColor)
+                            Text("永久删除", color = topActionColor)
+                        }
+                        if (canRestore) {
+                            TextButton(
+                                onClick = viewModel::restoreSelected
+                            ) {
+                                Text("还原", color = topActionColor)
+                            }
                         }
                     }
                 }
@@ -224,8 +230,6 @@ private fun RecycleBinRow(
             .glassOverlay(
                 shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
                 isDark = isDark,
-                topAlphaLight = 0.18f,
-                topAlphaDark = 0.11f,
                 bottomAlphaLight = 0.06f,
                 bottomAlphaDark = 0.14f
             )

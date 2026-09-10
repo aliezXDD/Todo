@@ -5,7 +5,6 @@ import androidx.compose.runtime.Stable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.graphics.Brush
@@ -25,8 +24,6 @@ import androidx.compose.ui.unit.dp
 fun Modifier.glassOverlay(
     shape: Shape,
     isDark: Boolean,
-    topAlphaLight: Float,
-    topAlphaDark: Float,
     bottomAlphaLight: Float,
     bottomAlphaDark: Float,
     drawOuterShadow: Boolean = true,
@@ -86,34 +83,31 @@ fun Modifier.glassOverlay(
             color = Color.Black.copy(alpha = shadowAlpha).toArgb()
             maskFilter = BlurMaskFilter(shadowBlur, BlurMaskFilter.Blur.NORMAL)
         }
-        val topSweep = Brush.linearGradient(
-            colors = listOf(
-                Color.White.copy(alpha = if (isDark) topAlphaDark * 0.54f else topAlphaLight * 0.70f),
-                Color.Transparent
-            ),
-            start = Offset(0f, 0f),
-            end = Offset(size.width * 0.60f, size.height * 0.26f)
-        )
+        // 高斯模糊半径：把整层高光（rim/topLine/bottomSweep）统一模糊成柔和光晕，消除各处高光导致的色差
+        val highlightBlurPx = if (isDark) 28.dp.toPx() else 32.dp.toPx()
         val rim = Brush.horizontalGradient(
             colors = listOf(
-                Color.White.copy(alpha = if (isDark) 0.025f else 0.050f),
+                Color.White.copy(alpha = if (isDark) 0.020f else 0.050f),
                 Color.Transparent,
                 Color.Transparent,
-                Color.White.copy(alpha = if (isDark) 0.014f else 0.032f)
+                Color.White.copy(alpha = if (isDark) 0.012f else 0.032f)
             )
         )
         val topLine = Brush.verticalGradient(
             colors = listOf(
-                Color.White.copy(alpha = if (isDark) 0.058f else 0.126f),
+                Color.White.copy(alpha = if (isDark) 0.048f else 0.126f),
                 Color.Transparent
             ),
             startY = 0f,
             endY = size.height * 0.056f
         )
+        val bottomSweepPeak = if (isDark) bottomAlphaDark * 0.270f else bottomAlphaLight * 0.43f
         val bottomSweep = Brush.verticalGradient(
-            colors = listOf(
-                Color.Transparent,
-                Color.White.copy(alpha = if (isDark) bottomAlphaDark * 0.324f else bottomAlphaLight * 0.43f)
+            colorStops = arrayOf(
+                0.00f to Color.Transparent,
+                0.25f to Color.White.copy(alpha = bottomSweepPeak * 0.18f),
+                0.55f to Color.White.copy(alpha = bottomSweepPeak * 0.50f),
+                1.00f to Color.White.copy(alpha = bottomSweepPeak)
             ),
             startY = size.height * 0.78f,
             endY = size.height
@@ -132,10 +126,20 @@ fun Modifier.glassOverlay(
             drawContent()
 
             clipPath(mask) {
-                drawRect(brush = topSweep)
+                // 高光（rim/topLine/bottomSweep）统一画进一个高强高斯模糊图层，柔化边界、消除色差
+                drawIntoCanvas { canvas ->
+                    val blurPaint = android.graphics.Paint().apply {
+                        isAntiAlias = true
+                        maskFilter = BlurMaskFilter(highlightBlurPx, BlurMaskFilter.Blur.NORMAL)
+                    }
+                    canvas.nativeCanvas.saveLayer(null, blurPaint)
+                }
                 drawRect(brush = rim)
                 drawRect(brush = topLine)
                 drawRect(brush = bottomSweep)
+                drawIntoCanvas { canvas ->
+                    canvas.nativeCanvas.restore()
+                }
             }
         }
     }

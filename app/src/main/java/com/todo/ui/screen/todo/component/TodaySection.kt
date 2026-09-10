@@ -6,6 +6,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.HorizontalDivider
@@ -55,9 +56,13 @@ fun TodaySection(
 
     GlassCard(
         modifier = modifier
-            .fillMaxWidth()
+            .fillMaxWidth(),
+        fillMaxHeight = true
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
                     text = "今日",
@@ -79,6 +84,7 @@ fun TodaySection(
                 EmptyState(
                     text = "点击右下角 + 添加第一条待办",
                     modifier = Modifier
+                        .weight(1f)
                         .fillMaxWidth()
                         .padding(vertical = 24.dp)
                 )
@@ -86,6 +92,7 @@ fun TodaySection(
                 ReorderableColumn(
                     list = localTodos,
                     modifier = Modifier
+                        .weight(1f)
                         .fillMaxWidth()
                         .verticalScroll(scrollState),
                     verticalArrangement = Arrangement.spacedBy(8.dp),

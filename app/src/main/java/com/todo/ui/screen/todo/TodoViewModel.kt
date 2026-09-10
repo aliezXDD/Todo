@@ -1,4 +1,4 @@
-﻿package com.todo.ui.screen.todo
+package com.todo.ui.screen.todo
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -46,8 +46,6 @@ class TodoViewModel @Inject constructor(
         val addSheetVisible: Boolean = false,
         val editSheetVisible: Boolean = false,
         val editingTodo: Todo? = null,
-        val pendingDeleteTodo: Todo? = null,
-        val showDeleteDialog: Boolean = false,
         val presetSearchQuery: String = "",
         val presetMultiSelectMode: Boolean = false,
         val selectedPresetIds: Set<Long> = emptySet()
@@ -179,7 +177,7 @@ class TodoViewModel @Inject constructor(
 
     fun toggleTodo(todo: Todo, checked: Boolean) {
         viewModelScope.launch {
-            toggleTodoUseCase(todo.id, checked)
+            toggleTodoUseCase(todo, checked)
         }
     }
 
@@ -201,29 +199,12 @@ class TodoViewModel @Inject constructor(
         }
     }
 
-    fun confirmDelete(todo: Todo) {
-        _uiState.update {
-            it.copy(
-                pendingDeleteTodo = todo,
-                showDeleteDialog = true,
-                editSheetVisible = false,
-                editingTodo = null
-            )
-        }
-    }
-
-    fun dismissDeleteDialog() {
-        _uiState.update { it.copy(showDeleteDialog = false, pendingDeleteTodo = null) }
-    }
-
-    fun deleteConfirmed() {
-        val target = _uiState.value.pendingDeleteTodo ?: return
+    /** 编辑待办界面点击「删除」：直接删除，不再弹二次确认框。 */
+    fun deleteTodoNow(todo: Todo) {
         viewModelScope.launch {
-            deleteTodoUseCase(target)
+            deleteTodoUseCase(todo)
             _uiState.update {
                 it.copy(
-                    showDeleteDialog = false,
-                    pendingDeleteTodo = null,
                     editSheetVisible = false,
                     editingTodo = null
                 )

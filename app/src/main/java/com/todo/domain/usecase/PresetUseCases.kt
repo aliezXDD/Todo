@@ -1,4 +1,4 @@
-﻿package com.todo.domain.usecase
+package com.todo.domain.usecase
 
 import com.todo.data.local.entity.PresetEntity
 import com.todo.data.repository.PresetRepository
@@ -60,6 +60,7 @@ class DeletePresetsByIdsUseCase @Inject constructor(
     private val presetRepository: PresetRepository
 ) {
     suspend operator fun invoke(ids: List<Long>) {
+        if (ids.isEmpty()) return
         presetRepository.deleteByIds(ids)
     }
 }

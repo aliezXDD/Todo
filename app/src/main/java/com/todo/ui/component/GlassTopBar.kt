@@ -4,7 +4,6 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -28,6 +27,7 @@ import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.todo.ui.theme.DarkGlassBorder
 import com.todo.ui.theme.DarkGlassSurface
@@ -55,7 +55,7 @@ fun GlassTopBar(
         if (titleAlignStart) {
             TopAppBar(
                 modifier = Modifier,
-                title = { Text(text = title) },
+                title = { Text(text = title, maxLines = 1, overflow = TextOverflow.Ellipsis) },
                 navigationIcon = {
                     if (navigationIcon != null && onNavigationClick != null) {
                         IconButton(onClick = onNavigationClick) {
@@ -72,7 +72,7 @@ fun GlassTopBar(
         } else {
             CenterAlignedTopAppBar(
                 modifier = Modifier,
-                title = { Text(text = title) },
+                title = { Text(text = title, maxLines = 1, overflow = TextOverflow.Ellipsis) },
                 navigationIcon = {
                     if (navigationIcon != null && onNavigationClick != null) {
                         IconButton(onClick = onNavigationClick) {
@@ -93,7 +93,6 @@ fun GlassTopBar(
         Surface(
             modifier = modifier
                 .fillMaxWidth()
-                .statusBarsPadding()
                 .padding(horizontal = 16.dp, vertical = 12.dp),
             shape = shape,
             color = bg,
@@ -122,8 +121,6 @@ fun GlassTopBar(
                 .glassOverlay(
                     shape = shape,
                     isDark = isDark,
-                    topAlphaLight = 0.16f,
-                    topAlphaDark = 0.08f,
                     bottomAlphaLight = 0.04f,
                     bottomAlphaDark = 0.10f
                 )

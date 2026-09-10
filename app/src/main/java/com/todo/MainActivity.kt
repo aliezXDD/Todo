@@ -9,6 +9,12 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.compose.setContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
@@ -19,6 +25,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
@@ -31,6 +38,7 @@ import com.todo.ui.component.GradientBackground
 import com.todo.ui.navigation.BottomNavBar
 import com.todo.ui.navigation.NavGraph
 import com.todo.ui.navigation.Screen
+import com.todo.ui.theme.MotionTokens
 import com.todo.ui.theme.TodoTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -78,17 +86,34 @@ private fun TodoRoot() {
         .any { route -> currentDestination?.hierarchy?.any { it.route == route } == true }
 
     GradientBackground {
-        Scaffold(
-            modifier = Modifier.fillMaxSize(),
-            containerColor = androidx.compose.ui.graphics.Color.Transparent,
-            contentWindowInsets = WindowInsets(0, 0, 0, 0),
-            bottomBar = {
-                if (showBottomBar) {
-                    BottomNavBar(navController = navController)
-                }
+        Box(modifier = Modifier.fillMaxSize()) {
+            Scaffold(
+                modifier = Modifier.fillMaxSize(),
+                containerColor = androidx.compose.ui.graphics.Color.Transparent,
+                contentWindowInsets = WindowInsets(0, 0, 0, 0)
+            ) { innerPadding ->
+                AppNavContent(innerPadding = innerPadding, navController = navController)
             }
-        ) { innerPadding ->
-            AppNavContent(innerPadding = innerPadding, navController = navController)
+
+            // 底部导航以“覆盖层”形式叠加在内容之上并做淡入/滑入、淡出/滑出动画。
+            // 关键：不占用 Scaffold 的 bottomBar 布局空间，因此它出现/消失不会改变内容区尺寸，
+            // 避免进出详情页时 NavHost 内容因内边距突变而上下跳变/错乱。
+            AnimatedVisibility(
+                visible = showBottomBar,
+                enter = fadeIn(tween(MotionTokens.ScreenSlide)) +
+                    slideInVertically(
+                        initialOffsetY = { it },
+                        animationSpec = tween(MotionTokens.ScreenSlide)
+                    ),
+                exit = fadeOut(tween(MotionTokens.ScreenSlide)) +
+                    slideOutVertically(
+                        targetOffsetY = { it },
+                        animationSpec = tween(MotionTokens.ScreenSlide)
+                    ),
+                modifier = Modifier.align(Alignment.BottomCenter)
+            ) {
+                BottomNavBar(navController = navController)
+            }
         }
     }
 }

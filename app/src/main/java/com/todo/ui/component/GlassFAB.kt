@@ -1,7 +1,7 @@
 package com.todo.ui.component
 
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.FloatingActionButton
@@ -40,13 +40,15 @@ fun GlassFAB(
     FloatingActionButton(
         onClick = onClick,
         modifier = modifier
-            .size(56.dp)
+            .size(52.dp)
             .scale(fabScale.value),
-        shape = CircleShape,
+        // 大圆角矩形：边长 52dp，圆角用大半径；+ 图标保持默认尺寸不变
+        shape = RoundedCornerShape(18.dp),
         containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.94f),
         contentColor = Color.White,
         interactionSource = interactionSource,
-        elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 8.dp)
+        // 阴影再淡一点（5.6dp → 4dp）
+        elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 4.dp)
     ) {
         Icon(
             imageVector = Icons.Filled.Add,

@@ -1,8 +1,11 @@
 package com.todo.ui.screen.preset.component
 
-import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
-import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.indication
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,6 +23,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -27,13 +31,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.foundation.layout.offset
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import com.todo.domain.model.Preset
 import com.todo.ui.component.GlassListItem
 import com.todo.ui.component.glassOverlay
 import com.todo.ui.theme.MotionTokens
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun PresetItemRow(
     preset: Preset,
@@ -41,8 +45,10 @@ fun PresetItemRow(
     isSelected: Boolean,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
+    onDoubleClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
     val indicatorScale = animateFloatAsState(
         targetValue = if (isSelected) 1f else 0.86f,
         animationSpec = spring(
@@ -68,16 +74,27 @@ fun PresetItemRow(
             .glassOverlay(
                 shape = shape,
                 isDark = isDark,
-                topAlphaLight = 0.18f,
-                topAlphaDark = 0.11f,
                 bottomAlphaLight = 0.06f,
                 bottomAlphaDark = 0.14f
             )
             .clip(shape)
-            .combinedClickable(
-                onClick = onClick,
-                onLongClick = onLongClick
-            )
+            .pointerInput(preset.id) {
+                detectTapGestures(
+                    onDoubleTap = { onDoubleClick() },
+                    onLongPress = { onLongClick() },
+                    onPress = { pressPosition ->
+                        val press = PressInteraction.Press(pressPosition)
+                        interactionSource.tryEmit(press)
+                        try {
+                            tryAwaitRelease()
+                        } finally {
+                            interactionSource.tryEmit(PressInteraction.Release(press))
+                        }
+                    },
+                    onTap = { onClick() }
+                )
+            }
+            .indication(interactionSource, LocalIndication.current)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),

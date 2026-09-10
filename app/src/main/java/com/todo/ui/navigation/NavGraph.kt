@@ -158,50 +158,20 @@ private fun tabExit(forward: Boolean): ExitTransition =
             animationSpec = tween(MotionTokens.ScreenSlide, easing = MotionTokens.StandardEasing)
         )
 
-// --- Push 详情页：滑入 + 淡入 + 轻微放缩（纵深/视差）---
+// --- Push 详情页：纯交叉淡入淡出（无位移、无缩放、无纵深）---
+// 新页面永远在最上层，与旧页面同位置、同贴屏幕边缘完全重叠。
+// 因无 slide / scale，旧页面边缘永远不会从新页面之下露出——彻底杜绝露底硬边。
 private fun detailEnter(): EnterTransition =
-    slideInHorizontally(
-        initialOffsetX = { it / 4 },
-        animationSpec = tween(MotionTokens.ScreenSlide, easing = MotionTokens.StandardEasing)
-    ) +
-        fadeIn(tween(MotionTokens.ScreenSlide, easing = MotionTokens.StandardEasing)) +
-        scaleIn(
-            initialScale = 0.96f,
-            animationSpec = tween(MotionTokens.ScreenSlide, easing = MotionTokens.StandardEasing)
-        )
+    fadeIn(tween(MotionTokens.ScreenSlide, easing = MotionTokens.StandardEasing))
 
 private fun detailExit(): ExitTransition =
-    fadeOut(tween(MotionTokens.ScreenSlide, easing = MotionTokens.StandardEasing)) +
-        slideOutHorizontally(
-            targetOffsetX = { -it / 6 },
-            animationSpec = tween(MotionTokens.ScreenSlide, easing = MotionTokens.StandardEasing)
-        ) +
-        scaleOut(
-            targetScale = 0.98f,
-            animationSpec = tween(MotionTokens.ScreenSlide, easing = MotionTokens.StandardEasing)
-        )
+    fadeOut(tween(MotionTokens.ScreenSlide, easing = MotionTokens.StandardEasing))
 
 private fun detailPopEnter(): EnterTransition =
-    slideInHorizontally(
-        initialOffsetX = { -it / 4 },
-        animationSpec = tween(MotionTokens.ScreenSlide, easing = MotionTokens.StandardEasing)
-    ) +
-        fadeIn(tween(MotionTokens.ScreenSlide, easing = MotionTokens.StandardEasing)) +
-        scaleIn(
-            initialScale = 0.96f,
-            animationSpec = tween(MotionTokens.ScreenSlide, easing = MotionTokens.StandardEasing)
-        )
+    fadeIn(tween(MotionTokens.ScreenSlide, easing = MotionTokens.StandardEasing))
 
 private fun detailPopExit(): ExitTransition =
-    fadeOut(tween(MotionTokens.ScreenSlide, easing = MotionTokens.StandardEasing)) +
-        slideOutHorizontally(
-            targetOffsetX = { it / 6 },
-            animationSpec = tween(MotionTokens.ScreenSlide, easing = MotionTokens.StandardEasing)
-        ) +
-        scaleOut(
-            targetScale = 0.98f,
-            animationSpec = tween(MotionTokens.ScreenSlide, easing = MotionTokens.StandardEasing)
-        )
+    fadeOut(tween(MotionTokens.ScreenSlide, easing = MotionTokens.StandardEasing))
 
 private fun routeTabIndex(route: String?): Int = when (route) {
     Screen.Preset.route -> 0

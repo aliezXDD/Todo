@@ -1,5 +1,7 @@
 package com.todo.domain.usecase
 
+import androidx.room.withTransaction
+import com.todo.data.local.AppDatabase
 import com.todo.data.local.entity.DailyStatsEntity
 import com.todo.data.local.entity.TodoEntity
 import com.todo.data.repository.RecycleBinRepository
@@ -12,7 +14,8 @@ import javax.inject.Inject
 class RestoreRecycleBinUseCase @Inject constructor(
     private val todoRepository: TodoRepository,
     private val recycleBinRepository: RecycleBinRepository,
-    private val statsRepository: StatsRepository
+    private val statsRepository: StatsRepository,
+    private val database: AppDatabase
 ) {
     suspend operator fun invoke(items: List<RecycleBinItem>) {
         if (items.isEmpty()) return
@@ -27,20 +30,22 @@ class RestoreRecycleBinUseCase @Inject constructor(
             if (item.originalDate < cutoff) today else item.originalDate
         }.distinct()
 
-        orderedItems.forEach { item ->
-            val restoreDate = if (item.originalDate < cutoff) today else item.originalDate
-            val sortOrder = todoRepository.getNextSortOrder(restoreDate)
-            todoRepository.insert(
-                TodoEntity(
-                    content = item.content,
-                    isCompleted = item.wasCompleted,
-                    date = restoreDate,
-                    sortOrder = sortOrder
+        database.withTransaction {
+            orderedItems.forEach { item ->
+                val restoreDate = if (item.originalDate < cutoff) today else item.originalDate
+                val sortOrder = todoRepository.getNextSortOrder(restoreDate)
+                todoRepository.insert(
+                    TodoEntity(
+                        content = item.content,
+                        isCompleted = item.wasCompleted,
+                        date = restoreDate,
+                        sortOrder = sortOrder
+                    )
                 )
-            )
-        }
+            }
 
-        recycleBinRepository.deleteByIds(orderedItems.map { it.id })
+            recycleBinRepository.deleteByIds(orderedItems.map { it.id })
+        }
         refreshStats(restoreDates)
     }
 
