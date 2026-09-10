@@ -1,4 +1,4 @@
-﻿package com.todo.data.local
+package com.todo.data.local
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
@@ -19,7 +19,9 @@ import com.todo.data.local.entity.TodoEntity
         DailyStatsEntity::class
     ],
     version = 1,
-    exportSchema = false
+    // 导出 schema 到 app/schemas 并纳入版本控制：这是后续所有结构变更写 Migration 的基线，
+    // 不可改为 false，也不要下沉为破坏性迁移（fallbackToDestructiveMigration 会清空用户数据）。
+    exportSchema = true
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun todoDao(): TodoDao

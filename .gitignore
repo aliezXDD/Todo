@@ -15,7 +15,6 @@
 .externalNativeBuild
 .cxx
 local.properties
-app/schemas
 /.gh
 .gh
 *.jks
