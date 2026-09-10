@@ -24,6 +24,9 @@ object MotionTokens {
     const val ItemFadeOut = 200
     const val ItemPlacement = 200
 
+    /** 进度类动画（圆环、进度条）：比常规状态动画稍长，避免数字跳动感 */
+    const val Progress = 400
+
     const val SpringMedium = Spring.StiffnessMedium
     const val SpringMediumLow = Spring.StiffnessMediumLow
     const val SpringLow = Spring.StiffnessLow

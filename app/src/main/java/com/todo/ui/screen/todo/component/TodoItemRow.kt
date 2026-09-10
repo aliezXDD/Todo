@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -169,14 +170,15 @@ fun TodoItemRow(
                 )
             }
 
-            Text(
-                text = "≡",
+            // 拖拽把手用真实图标（原来是文本字形 "≡"，字宽与基线会随字体漂移，不够专业）
+            Icon(
+                imageVector = Icons.Filled.Menu,
+                contentDescription = "拖动排序",
                 modifier = dragHandleModifier
                     .align(Alignment.CenterEnd)
-                    .height(24.dp)
+                    .size(20.dp)
                     .padding(horizontal = 2.dp),
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.secondary.copy(alpha = if (isDragging) 0.95f else 0.8f)
+                tint = MaterialTheme.colorScheme.secondary.copy(alpha = if (isDragging) 0.95f else 0.7f)
             )
         }
     }

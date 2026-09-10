@@ -10,7 +10,6 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -37,6 +36,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -269,17 +269,28 @@ fun AddTodoSheet(
                                                     Text(text = preset.content, color = primaryTextColor)
                                                     if (isMultiSelectMode) {
                                                         if (preset.id in selectedPresetIds) {
-                                                            Icon(
-                                                                imageVector = Icons.Filled.Check,
-                                                                contentDescription = null,
-                                                                modifier = Modifier.size(18.dp),
-                                                                tint = secondaryTextColor
-                                                            )
+                                                            // 与待办勾选框同款：选中 = 主题色实底 + 白勾（不再用描边圆圈）
+                                                            Box(
+                                                                modifier = Modifier
+                                                                    .size(18.dp)
+                                                                    .background(MaterialTheme.colorScheme.primary, CircleShape),
+                                                                contentAlignment = Alignment.Center
+                                                            ) {
+                                                                Icon(
+                                                                    imageVector = Icons.Filled.Check,
+                                                                    contentDescription = null,
+                                                                    modifier = Modifier.size(13.dp),
+                                                                    tint = MaterialTheme.colorScheme.onPrimary
+                                                                )
+                                                            }
                                                         } else {
                                                             Box(
                                                                 modifier = Modifier
-                                                                    .size(16.dp)
-                                                                    .border(1.5.dp, secondaryTextColor.copy(alpha = 0.5f), CircleShape)
+                                                                    .size(18.dp)
+                                                                    .background(
+                                                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
+                                                                        shape = CircleShape
+                                                                    )
                                                             )
                                                         }
                                                     }

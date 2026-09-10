@@ -40,6 +40,9 @@ import com.todo.domain.model.DailyStats
 import com.todo.ui.component.EmptyState
 import com.todo.ui.component.GlassCard
 import com.todo.ui.component.GlassTopBar
+import com.todo.ui.theme.RateHigh
+import com.todo.ui.theme.RateLow
+import com.todo.ui.theme.RateMid
 
 @Composable
 fun ChartScreen(
@@ -229,7 +232,8 @@ private fun BarChart(
                         .fillMaxHeight((value / 100f).coerceIn(0f, 1f))
                         .background(
                             color = valueToRateColor(value / 100f),
-                            shape = RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp)
+                            // 柱顶圆角与全局圆角体系对齐（原来 6dp 游离在体系之外）
+                            shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)
                         )
                 )
             }
@@ -287,12 +291,10 @@ private fun LineChart(
 
 private fun valueToRateColor(rate: Float): Color {
     val clamped = rate.coerceIn(0f, 1f)
-    val red = Color(0xFFF8756C)
-    val orange = Color(0xFFF7C476)
-    val green = Color(0xFF96C797)
+    // 数据语义色统一放在 Color.kt，不再散落在屏幕代码里
     return if (clamped < 0.5f) {
-        lerp(red, orange, clamped / 0.5f)
+        lerp(RateLow, RateMid, clamped / 0.5f)
     } else {
-        lerp(orange, green, (clamped - 0.5f) / 0.5f)
+        lerp(RateMid, RateHigh, (clamped - 0.5f) / 0.5f)
     }
 }

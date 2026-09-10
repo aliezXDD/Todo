@@ -65,7 +65,8 @@ fun RecycleBinScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
-    val topActionColor = if (isDark) androidx.compose.ui.graphics.Color(0xFFE6E9F0) else androidx.compose.ui.graphics.Color(0xFF3E4652)
+    // 顶栏动作统一用主题色，不再硬编码（原来浅/深色各写死一个色值，与全局字色体系脱节）
+    val topActionColor = MaterialTheme.colorScheme.secondary
     val groupedItems = remember(uiState.items) {
         uiState.items.groupBy { formatGroupDate(it.deletedAt) }
     }

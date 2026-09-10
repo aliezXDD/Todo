@@ -17,6 +17,11 @@ val DarkAccent = Color(0xFF95A1F0)
 val LightDanger = Color(0xFFD95B5B)
 val DarkDanger = Color(0xFFF08A8A)
 
+// ---- 数据语义色：完成率热力（低 → 中 → 高），供图表复用 ----
+val RateLow = Color(0xFFF8756C)
+val RateMid = Color(0xFFF7C476)
+val RateHigh = Color(0xFF96C797)
+
 // ---- 弹层遮罩：新拟态仍需要压暗背景来突出浮层 ----
 val LightScrim = Color(0x33000000)
 val DarkScrim = Color(0x66000000)

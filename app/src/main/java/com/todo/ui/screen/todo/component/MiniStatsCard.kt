@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.dp
 import com.todo.ui.component.GlassCard
+import com.todo.ui.theme.MotionTokens
 
 /**
  * 今日进度（卡片本身是"表面"，仍走新拟态）。
@@ -35,7 +36,7 @@ fun MiniStatsCard(
     val progress = if (totalCount == 0) 0f else completedCount.toFloat() / totalCount.toFloat()
     val animatedProgress by animateFloatAsState(
         targetValue = progress,
-        animationSpec = tween(durationMillis = 400, easing = FastOutSlowInEasing),
+        animationSpec = tween(durationMillis = MotionTokens.Progress, easing = FastOutSlowInEasing),
         label = "todayProgress"
     )
     val isDarkTheme = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
