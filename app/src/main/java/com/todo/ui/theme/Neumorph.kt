@@ -18,22 +18,22 @@ object Neumorph {
     val LightSurface = Color(0xFFECF0F3)
     val LightShadowDark = Color(0xFFBFCBDE)
     val LightShadowLight = Color(0xFFFFFFFF)
-    val LightRecessed = Color(0xFFE2E7EC)
+    val LightRaised = Color(0xFFF6F9FB)
 
     // ---- 深色：原文只给了浅色方案，这里按同一原理推导（暗影更深、亮影更亮，保证对比可见）----
     val DarkSurface = Color(0xFF23262B)
     val DarkShadowDark = Color(0xFF111316)
     val DarkShadowLight = Color(0xFF373D46)
-    val DarkRecessed = Color(0xFF1E2125)
+    val DarkRaised = Color(0xFF2B3037)
 
     fun surface(isDark: Boolean): Color = if (isDark) DarkSurface else LightSurface
 
     /**
-     * 凹陷区域（滑轨、输入框）专用的"更暗一档"底色。
-     * 纯新拟态靠光影表达凹陷，但在小尺寸元素上"范围"会看不清——这是该风格公认的短板，
-     * 这里用一个仅差几阶的同色系底色补回边界感，同时不引入描边。
+     * 凸起元素（滑轨、输入框、选中项）专用的"更亮一档"底色。
+     * 受光面更亮符合物理直觉；略亮的同色系底色也让元素范围一眼可见，不必引入描边。
+     * 注意：本设计**只用凸起，不用凹陷**——需要降低层级时用"阴影变浅/压平"，而不是内凹。
      */
-    fun recessedSurface(isDark: Boolean): Color = if (isDark) DarkRecessed else LightRecessed
+    fun raisedSurface(isDark: Boolean): Color = if (isDark) DarkRaised else LightRaised
 
     fun shadowDark(isDark: Boolean): Color = if (isDark) DarkShadowDark else LightShadowDark
 

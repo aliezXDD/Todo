@@ -88,13 +88,6 @@ fun TodoItemRow(
     val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
     val itemShape = RoundedCornerShape(NeumorphShapes.Medium)
 
-    // 勾选后整行从凸起按进去（"表面"的状态变化保留；勾选框本身仍是平面）
-    val rowDepth by animateFloatAsState(
-        targetValue = if (todo.isCompleted) 0f else 1f,
-        animationSpec = tween(durationMillis = MotionTokens.ItemState, easing = MotionTokens.StandardEasing),
-        label = "todoRowDepth"
-    )
-
     GlassListItem(
         modifier = modifier
             .fillMaxWidth()
@@ -105,7 +98,6 @@ fun TodoItemRow(
                 onClick = {},
                 onLongClick = onLongPress
             ),
-        depth = rowDepth,
         shape = itemShape,
         minHeight = 44
     ) {

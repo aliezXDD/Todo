@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -50,10 +49,8 @@ import com.todo.ui.component.EmptyState
 import com.todo.ui.component.GlassDialog
 import com.todo.ui.component.GlassListItem
 import com.todo.ui.component.GlassTopBar
-import com.todo.ui.component.neumorph
 import com.todo.ui.theme.MotionTokens
 import com.todo.ui.theme.Neumorph
-import com.todo.ui.theme.NeumorphElevation
 import java.time.Instant
 import java.time.ZoneId
 
@@ -154,19 +151,12 @@ fun RecycleBinScreen(
                                     text = dateLabel,
                                     style = MaterialTheme.typography.titleMedium
                                 )
-                                // 分组分隔改用"刻出来的一道凹槽"：新拟态里没有描边，层级只能靠光影
+                                // 分组分隔：一道很淡的平面细线（不使用凹陷），层级交给间距与字重
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .height(5.dp)
-                                        .neumorph(
-                                            shape = RoundedCornerShape(3.dp),
-                                            isDark = isDark,
-                                            depth = 0f,
-                                            surface = Neumorph.recessedSurface(isDark),
-                                            // 细条要用更小的偏移/模糊，否则阴影比凹槽本身还大
-                                            elevation = NeumorphElevation(offset = 2.dp, blur = 3.dp)
-                                        )
+                                        .height(1.dp)
+                                        .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.10f))
                                 )
                             }
                         }

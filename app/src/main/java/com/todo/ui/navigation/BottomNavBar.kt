@@ -39,6 +39,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.todo.ui.component.neumorph
 import com.todo.ui.theme.MotionTokens
+import com.todo.ui.theme.Neumorph
 import com.todo.ui.theme.NeumorphElevation
 import com.todo.ui.theme.NeumorphShapes
 
@@ -118,8 +119,10 @@ fun BottomNavBar(
                             .neumorph(
                                 shape = itemShape,
                                 isDark = isDark,
-                                depth = if (selected) 0f else 1f,
-                                elevation = if (selected) NeumorphElevation.Medium else NeumorphElevation.None
+                                depth = 1f,
+                                // 选中项是"抬起来"（更亮的受光底 + 小阴影），而不是凹进去
+                                surface = if (selected) Neumorph.raisedSurface(isDark) else Neumorph.surface(isDark),
+                                elevation = if (selected) NeumorphElevation.Small else NeumorphElevation.None
                             )
                             .clickable(
                                 interactionSource = noRipple,

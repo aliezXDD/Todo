@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.unit.lerp
 import com.todo.ui.theme.MotionTokens
 import com.todo.ui.theme.Neumorph
 import com.todo.ui.theme.NeumorphElevation
@@ -115,8 +116,8 @@ fun Modifier.neumorph(
 }
 
 /**
- * 带按压形变的版本：按下时由凸转凹（新拟态最具标志性的交互）。
- * 适用于按钮、FAB、列表项等可点元素。
+ * 按压反馈：**保持凸起方向不变**，按下时把阴影"压平"（收回偏移/模糊、降低强度），
+ * 而不是切换到凹陷——本设计只用凸起，不用内凹。
  */
 @Composable
 fun Modifier.neumorphPress(
@@ -126,17 +127,23 @@ fun Modifier.neumorphPress(
     surface: Color = Neumorph.surface(isDark),
     elevation: NeumorphElevation = NeumorphElevation.Medium
 ): Modifier {
-    val depth by animateFloatAsState(
-        targetValue = if (pressed) 0f else 1f,
+    val pressAmount by animateFloatAsState(
+        targetValue = if (pressed) 1f else 0f,
         animationSpec = tween(durationMillis = MotionTokens.ItemState, easing = MotionTokens.StandardEasing),
-        label = "neumorphDepth"
+        label = "neumorphPress"
+    )
+    val flattened = NeumorphElevation(
+        offset = lerp(elevation.offset, elevation.offset * 0.3f, pressAmount),
+        blur = lerp(elevation.blur, elevation.blur * 0.5f, pressAmount),
+        darkAlpha = elevation.darkAlpha * (1f - 0.40f * pressAmount),
+        lightAlpha = elevation.lightAlpha * (1f - 0.40f * pressAmount)
     )
     return this.neumorph(
         shape = shape,
         isDark = isDark,
-        depth = depth,
+        depth = 1f,
         surface = surface,
-        elevation = elevation
+        elevation = flattened
     )
 }
 
