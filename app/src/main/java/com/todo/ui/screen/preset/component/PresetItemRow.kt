@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
@@ -35,7 +34,6 @@ import androidx.compose.ui.unit.dp
 import com.todo.domain.model.Preset
 import com.todo.ui.component.GlassListItem
 import com.todo.ui.theme.MotionTokens
-import com.todo.ui.theme.NeumorphShapes
 
 @Composable
 fun PresetItemRow(
@@ -64,9 +62,9 @@ fun PresetItemRow(
         },
         label = "presetSelectColor"
     )
-    val shape = RoundedCornerShape(NeumorphShapes.Medium)
     val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
 
+    // 圆角/行高走 GlassListItem 的统一规格（与待办、回收站条目同规格），不在此另行指定
     GlassListItem(
         modifier = modifier
             .fillMaxWidth()

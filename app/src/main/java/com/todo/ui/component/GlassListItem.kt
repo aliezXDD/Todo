@@ -21,6 +21,9 @@ import com.todo.ui.theme.NeumorphShapes
 /**
  * 新拟态列表项：默认凸起；[depth] 传 0 表示"被按进去"（用于已完成/选中态）。
  * [elevation] 传零阴影（offset/blur 均为 0）可得到"与背景齐平"的平面行。
+ *
+ * [shape] 与 [minHeight] 是**所有列表条目的统一规格**（待办、预设、回收站）：
+ * 调用方一般不要再各自指定，否则同样的圆角放在不同行高上会显得一个更圆一个更方。
  */
 @Composable
 fun GlassListItem(
@@ -28,7 +31,7 @@ fun GlassListItem(
     depth: Float = 1f,
     elevation: NeumorphElevation = NeumorphElevation.Medium,
     shape: Shape = RoundedCornerShape(NeumorphShapes.Medium),
-    minHeight: Int = 56,
+    minHeight: Int = 52,
     contentPadding: PaddingValues = PaddingValues(horizontal = 14.dp, vertical = 10.dp),
     onClick: (() -> Unit)? = null,
     content: @Composable () -> Unit

@@ -41,7 +41,6 @@ import androidx.compose.ui.unit.dp
 import com.todo.domain.model.Todo
 import com.todo.ui.component.GlassListItem
 import com.todo.ui.theme.MotionTokens
-import com.todo.ui.theme.NeumorphShapes
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -87,7 +86,6 @@ fun TodoItemRow(
 
     val strikeColor = MaterialTheme.colorScheme.onBackground.copy(alpha = alpha.value)
     val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
-    val itemShape = RoundedCornerShape(NeumorphShapes.Medium)
 
     // 勾选后整行从凸起按进去（"表面"的状态变化保留；勾选框本身仍是平面）
     val rowDepth by animateFloatAsState(
@@ -96,6 +94,7 @@ fun TodoItemRow(
         label = "todoRowDepth"
     )
 
+    // 圆角与行高都不在这里指定：统一走 GlassListItem 的默认规格，保证与预设/回收站条目完全一致
     GlassListItem(
         modifier = modifier
             .fillMaxWidth()
@@ -106,9 +105,7 @@ fun TodoItemRow(
                 onClick = {},
                 onLongClick = onLongPress
             ),
-        depth = rowDepth,
-        shape = itemShape,
-        minHeight = 44
+        depth = rowDepth
     ) {
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
             val handleSpace = 32.dp
