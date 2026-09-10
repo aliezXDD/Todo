@@ -18,7 +18,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import com.todo.data.local.datastore.ThemePreferences
 import com.todo.util.Constants
-import com.todo.ui.theme.MotionTokens
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.components.SingletonComponent
 
 private val LightColorScheme = lightColorScheme(
     primary = LightAccent,
@@ -56,12 +59,22 @@ private val DarkColorScheme = darkColorScheme(
     onError = Color(0xFF12141A)
 )
 
+@EntryPoint
+@InstallIn(SingletonComponent::class)
+interface ThemePreferencesEntryPoint {
+    fun themePreferences(): ThemePreferences
+}
+
 @Composable
 fun TodoTheme(
     content: @Composable () -> Unit
 ) {
     val context = LocalContext.current.applicationContext
-    val preferences = remember(context) { ThemePreferences(context) }
+    // 主题偏好取 Hilt 单例（与 SettingsViewModel 共用同一个实例），避免在此重复构造
+    val preferences = remember(context) {
+        EntryPointAccessors.fromApplication(context, ThemePreferencesEntryPoint::class.java)
+            .themePreferences()
+    }
     val mode by preferences.themeModeFlow.collectAsState(initial = Constants.THEME_MODE_SYSTEM)
     val systemDark = isSystemInDarkTheme()
     val useDark = when (mode) {
