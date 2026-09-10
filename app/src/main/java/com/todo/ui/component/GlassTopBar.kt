@@ -141,7 +141,6 @@ private fun Modifier.glassTopBarOverlay(
         is Outline.Generic -> outline.path
         is Outline.Rounded -> Path().apply { addRoundRect(outline.roundRect) }
         is Outline.Rectangle -> Path().apply { addRect(outline.rect) }
-        else -> Path().apply { addRect(outline.bounds) }
     }
 
     clipPath(mask) {

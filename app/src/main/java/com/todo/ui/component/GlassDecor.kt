@@ -71,7 +71,6 @@ fun Modifier.glassOverlay(
                 val bottom = (outline.rect.bottom - insetPx).coerceAtLeast(top)
                 addRect(Rect(left, top, right, bottom))
             }
-            else -> Path().apply { addRect(outline.bounds) }
         }
 
         val shadowAlpha = if (isDark) 0.18f else 0.12f
