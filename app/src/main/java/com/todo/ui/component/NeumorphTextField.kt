@@ -18,7 +18,6 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.unit.lerp
 import com.todo.ui.theme.MotionTokens
 import com.todo.ui.theme.Neumorph
 import com.todo.ui.theme.NeumorphElevation
@@ -41,17 +40,12 @@ fun NeumorphTextField(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val focused by interactionSource.collectIsFocusedAsState()
-    // 聚焦时"再抬高一点"，而不是凹进去
-    val lift by animateFloatAsState(
-        targetValue = if (focused) 1f else 0f,
+    val depth by animateFloatAsState(
+        targetValue = if (focused) 0f else 0.12f,
         animationSpec = tween(MotionTokens.ItemReveal, easing = MotionTokens.StandardEasing),
-        label = "fieldLift"
+        label = "fieldDepth"
     )
     val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
-    val fieldElevation = NeumorphElevation(
-        offset = lerp(elevation.offset, elevation.offset * 1.5f, lift),
-        blur = lerp(elevation.blur, elevation.blur * 1.5f, lift)
-    )
 
     OutlinedTextField(
         value = value,
@@ -59,9 +53,9 @@ fun NeumorphTextField(
         modifier = modifier.neumorph(
             shape = shape,
             isDark = isDark,
-            depth = 1f,
-            surface = Neumorph.raisedSurface(isDark),
-            elevation = fieldElevation
+            depth = depth,
+            surface = Neumorph.recessedSurface(isDark),
+            elevation = elevation
         ),
         textStyle = textStyle,
         shape = shape,
@@ -86,17 +80,12 @@ fun NeumorphTextField(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val focused by interactionSource.collectIsFocusedAsState()
-    // 聚焦时"再抬高一点"，而不是凹进去
-    val lift by animateFloatAsState(
-        targetValue = if (focused) 1f else 0f,
+    val depth by animateFloatAsState(
+        targetValue = if (focused) 0f else 0.12f,
         animationSpec = tween(MotionTokens.ItemReveal, easing = MotionTokens.StandardEasing),
-        label = "fieldLift"
+        label = "fieldDepth"
     )
     val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
-    val fieldElevation = NeumorphElevation(
-        offset = lerp(elevation.offset, elevation.offset * 1.5f, lift),
-        blur = lerp(elevation.blur, elevation.blur * 1.5f, lift)
-    )
 
     OutlinedTextField(
         value = value,
@@ -104,9 +93,9 @@ fun NeumorphTextField(
         modifier = modifier.neumorph(
             shape = shape,
             isDark = isDark,
-            depth = 1f,
-            surface = Neumorph.raisedSurface(isDark),
-            elevation = fieldElevation
+            depth = depth,
+            surface = Neumorph.recessedSurface(isDark),
+            elevation = elevation
         ),
         textStyle = textStyle,
         shape = shape,
