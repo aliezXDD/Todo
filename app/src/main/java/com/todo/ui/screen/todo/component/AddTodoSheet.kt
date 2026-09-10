@@ -91,13 +91,13 @@ fun AddTodoSheet(
                 val tabTrackShape = RoundedCornerShape(NeumorphShapes.Small)
                 SecondaryTabRow(
                     selectedTabIndex = selectedTabIndex,
-                    // 滑轨整体凹陷：用"更暗一档的凹陷底色 + 更强的内阴影"，让选项卡的范围一眼可见
+                    // 滑轨靠"更暗一档的底色"划定范围（颜色负责区分、光影只做辅助），避免高光抢戏
                     modifier = Modifier.neumorph(
                         shape = tabTrackShape,
                         isDark = isDark,
                         depth = 0f,
                         surface = Neumorph.recessedSurface(isDark),
-                        elevation = NeumorphElevation.Medium
+                        elevation = NeumorphElevation.Small
                     ),
                     containerColor = Color.Transparent,
                     indicator = {

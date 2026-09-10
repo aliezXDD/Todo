@@ -18,20 +18,21 @@ object Neumorph {
     val LightSurface = Color(0xFFECF0F3)
     val LightShadowDark = Color(0xFFBFCBDE)
     val LightShadowLight = Color(0xFFFFFFFF)
-    val LightRecessed = Color(0xFFE2E7EC)
+    val LightRecessed = Color(0xFFDCE2E9)
 
     // ---- 深色：原文只给了浅色方案，这里按同一原理推导（暗影更深、亮影更亮，保证对比可见）----
     val DarkSurface = Color(0xFF23262B)
     val DarkShadowDark = Color(0xFF111316)
     val DarkShadowLight = Color(0xFF373D46)
-    val DarkRecessed = Color(0xFF1E2125)
+    val DarkRecessed = Color(0xFF191C20)
 
     fun surface(isDark: Boolean): Color = if (isDark) DarkSurface else LightSurface
 
     /**
-     * 凹陷区域（滑轨、输入框）专用的"更暗一档"底色。
-     * 纯新拟态靠光影表达凹陷，但在小尺寸元素上"范围"会看不清——这是该风格公认的短板，
-     * 这里用一个仅差几阶的同色系底色补回边界感，同时不引入描边。
+     * 凹陷区域（滑轨、输入框、选中项）的专用底色，比背景**明显暗一档**。
+     *
+     * 这是本设计表达"范围"的主要手段：不靠描边，也不靠强光影，而是靠**颜色差**让凹陷区一眼可辨，
+     * 阴影只补一点点纵深。相应地，亮影（高光）已在 [com.todo.ui.component.neumorph] 里统一收弱。
      */
     fun recessedSurface(isDark: Boolean): Color = if (isDark) DarkRecessed else LightRecessed
 
