@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.todo.domain.model.DailyRecord
 import com.todo.ui.component.GlassCard
+import com.todo.ui.theme.NeumorphElevation
 import com.todo.util.DateUtils
 
 /**
@@ -37,7 +38,11 @@ fun HistoryDayCard(
     val total = record.todos.size
     val completed = record.todos.count { it.isCompleted }
 
-    GlassCard(modifier = modifier.fillMaxWidth()) {
+    // 用"列表项级"阴影（与其他列表项一致），而不是卡片级——一屏里多张卡片用大阴影会互相压盖
+    GlassCard(
+        modifier = modifier.fillMaxWidth(),
+        elevation = NeumorphElevation.Medium
+    ) {
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),

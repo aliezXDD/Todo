@@ -90,7 +90,7 @@ fun TodaySection(
                         .weight(1f)
                         .fillMaxWidth()
                         .verticalScroll(scrollState),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
                     onSettle = { fromIndex, toIndex ->
                         if (fromIndex !in localTodos.indices || toIndex !in localTodos.indices || fromIndex == toIndex) {
                             return@ReorderableColumn

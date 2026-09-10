@@ -143,7 +143,8 @@ fun RecycleBinScreen(
                         .fillMaxSize()
                         .padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = listBottomInset),
                     state = listState,
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                    // 同上：让相邻条目的光影不互相压盖
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     groupedItems.forEach { (dateLabel, groupItems) ->
                         item(key = "header_$dateLabel") {

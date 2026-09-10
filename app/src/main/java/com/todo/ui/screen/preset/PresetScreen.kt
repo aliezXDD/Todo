@@ -88,7 +88,8 @@ fun PresetScreen(
                     modifier = Modifier.fillMaxSize(),
                     state = listState,
                     contentPadding = PaddingValues(bottom = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                    // 间距按阴影扩散范围给足（偏移 7dp + 模糊 11dp 的一半），避免相邻条目光影互相压盖
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     items(uiState.presets, key = { it.id }) { preset ->
                         PresetItemRow(

@@ -17,10 +17,16 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.todo.ui.component.EmptyState
-import com.todo.ui.component.GlassCard
 import com.todo.ui.component.GlassTopBar
 import com.todo.ui.screen.todo.component.HistoryDayCard
 
+/**
+ * 往日记录。
+ *
+ * 这里**不再**套一层大卡片：新拟态的表面色与背景完全相同，"外层卡片 + 内层卡片"两层不透明同色
+ * 叠在一起时，视觉上会糊成一整块（看起来像被一块纯色遮罩盖住）。现在让每一天自己作为
+ * 一张凸起卡片直接落在背景上，边界由各自的光影给出。
+ */
 @Composable
 fun HistoryScreen(
     onBack: () -> Unit,
@@ -39,30 +45,31 @@ fun HistoryScreen(
             overlayBelowContent = true
         )
 
-        GlassCard(
+        Column(
             modifier = Modifier
-                .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 84.dp)
                 .fillMaxSize()
+                .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 84.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text(
-                    text = "最近 7 天的历史待办",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+            Text(
+                text = "最近 7 天",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
 
-                if (uiState.historyRecords.isEmpty()) {
-                    EmptyState(
-                        text = "暂无往日记录",
-                        modifier = Modifier.fillMaxSize()
-                    )
-                } else {
-                    LazyColumn(
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        items(uiState.historyRecords, key = { it.date }) { record ->
-                            HistoryDayCard(record = record)
-                        }
+            if (uiState.historyRecords.isEmpty()) {
+                EmptyState(
+                    text = "暂无往日记录",
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else {
+                // 间距按"阴影扩散范围"给足（偏移 + 模糊的一半 ≈ 12dp），否则相邻卡片的光影互相压盖
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(uiState.historyRecords, key = { it.date }) { record ->
+                        HistoryDayCard(record = record)
                     }
                 }
             }
