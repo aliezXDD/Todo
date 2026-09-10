@@ -1,4 +1,4 @@
-﻿package com.todo.ui.component
+package com.todo.ui.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -14,35 +14,28 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.dp
-import com.todo.ui.theme.DarkGlassSurface
-import com.todo.ui.theme.DarkGlassSurfaceStrong
-import com.todo.ui.theme.LightGlassSurface
-import com.todo.ui.theme.LightGlassSurfaceStrong
+import com.todo.ui.theme.Neumorph
+import com.todo.ui.theme.NeumorphShapes
 
+/**
+ * 新拟态底部面板：面板表面与页面背景同色（仍是"同一块材质"），靠上缘圆角与浮层阴影区分。
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GlassBottomSheet(
     onDismissRequest: () -> Unit,
-    opaqueBackground: Boolean = false,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
     val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
-    val bgColor = when {
-        opaqueBackground && isDark -> DarkGlassSurfaceStrong
-        opaqueBackground && !isDark -> LightGlassSurfaceStrong
-        isDark -> DarkGlassSurface.copy(alpha = 0.96f)
-        else -> LightGlassSurface.copy(alpha = 0.92f)
-    }
 
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
         modifier = modifier,
-        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
-        containerColor = bgColor,
+        shape = RoundedCornerShape(topStart = NeumorphShapes.Large, topEnd = NeumorphShapes.Large),
+        containerColor = Neumorph.surface(isDark),
         dragHandle = {
             Box(
                 modifier = Modifier
@@ -51,13 +44,14 @@ fun GlassBottomSheet(
                     .fillMaxWidth(),
                 contentAlignment = Alignment.Center
             ) {
+                // 拖拽把手用中性灰：新拟态是浅色表面，原来那抹白色在浅色下会完全看不见
                 Box(
                     modifier = Modifier
                         .height(4.dp)
                         .fillMaxWidth(0.15f)
                         .background(
-                            color = Color.White.copy(alpha = if (isDark) 0.56f else 0.65f),
-                            shape = RoundedCornerShape(999.dp)
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.22f),
+                            shape = RoundedCornerShape(NeumorphShapes.Pill)
                         )
                 )
             }

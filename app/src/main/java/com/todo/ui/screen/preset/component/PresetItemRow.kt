@@ -27,7 +27,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.foundation.layout.offset
@@ -35,8 +34,8 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import com.todo.domain.model.Preset
 import com.todo.ui.component.GlassListItem
-import com.todo.ui.component.glassOverlay
 import com.todo.ui.theme.MotionTokens
+import com.todo.ui.theme.NeumorphShapes
 
 @Composable
 fun PresetItemRow(
@@ -65,19 +64,12 @@ fun PresetItemRow(
         },
         label = "presetSelectColor"
     )
-    val shape = RoundedCornerShape(16.dp)
+    val shape = RoundedCornerShape(NeumorphShapes.Medium)
     val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
 
     GlassListItem(
         modifier = modifier
             .fillMaxWidth()
-            .glassOverlay(
-                shape = shape,
-                isDark = isDark,
-                bottomAlphaLight = 0.06f,
-                bottomAlphaDark = 0.14f
-            )
-            .clip(shape)
             .pointerInput(preset.id) {
                 detectTapGestures(
                     onDoubleTap = { onDoubleClick() },

@@ -33,7 +33,7 @@ import androidx.compose.ui.graphics.luminance
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.todo.ui.component.GradientBackground
+import com.todo.ui.component.NeumorphBackground
 import com.todo.ui.navigation.BottomNavBar
 import com.todo.ui.navigation.NavGraph
 import com.todo.ui.navigation.Screen
@@ -85,7 +85,7 @@ private fun TodoRoot() {
     val showBottomBar = listOf(Screen.Preset.route, Screen.Todo.route, Screen.Settings.route)
         .any { route -> currentDestination?.hierarchy?.any { it.route == route } == true }
 
-    GradientBackground {
+    NeumorphBackground {
         Box(modifier = Modifier.fillMaxSize()) {
             Scaffold(
                 modifier = Modifier.fillMaxSize(),

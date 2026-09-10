@@ -1,10 +1,20 @@
 package com.todo.ui.navigation
 
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
@@ -12,30 +22,30 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.Spring
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.todo.ui.theme.DarkGlassSurface
-import com.todo.ui.theme.LightGlassBorder
+import com.todo.ui.component.neumorph
 import com.todo.ui.theme.MotionTokens
+import com.todo.ui.theme.NeumorphElevation
+import com.todo.ui.theme.NeumorphShapes
 
+/**
+ * 新拟态底部导航：整条栏是一块凸起的同色材质，**选中项凹进去**（凹陷 = 选中态）。
+ * 未选中项为与背景齐平的平面，不额外加任何颜色块——层级全部交给光影。
+ */
 @Composable
 fun BottomNavBar(
     navController: NavHostController,
@@ -44,12 +54,13 @@ fun BottomNavBar(
     val navBackStackEntry = navController.currentBackStackEntryAsState().value
     val currentDestination = navBackStackEntry?.destination
     val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
-    val container = if (isDark) DarkGlassSurface.copy(alpha = 0.90f) else Color.White.copy(alpha = 0.95f)
-    val border = if (isDark) Color.White.copy(alpha = 0.12f) else LightGlassBorder
-    val shape = RoundedCornerShape(24.dp)
-    val shadowColor = if (isDark) Color.White.copy(alpha = 0.10f) else Color.Black.copy(alpha = 0.14f)
 
-    val items = listOf(
+    val barShape = RoundedCornerShape(NeumorphShapes.Large)
+    val itemShape = RoundedCornerShape(NeumorphShapes.Medium)
+    val accent = MaterialTheme.colorScheme.primary
+    val idleColor = MaterialTheme.colorScheme.secondary
+
+    val items: List<Triple<Screen, String, ImageVector>> = listOf(
         Triple(Screen.Preset, "预设", Icons.AutoMirrored.Filled.List),
         Triple(Screen.Todo, "待办", Icons.Filled.CheckCircle),
         Triple(Screen.Settings, "设置", Icons.Filled.Settings)
@@ -64,84 +75,83 @@ fun BottomNavBar(
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .shadow(
-                    elevation = 6.dp,
-                    shape = shape,
-                    ambientColor = shadowColor,
-                    spotColor = shadowColor
+                .neumorph(
+                    shape = barShape,
+                    isDark = isDark,
+                    depth = 1f,
+                    elevation = NeumorphElevation.XLarge
                 ),
-            color = container,
-            shape = shape,
-            border = BorderStroke(1.dp, border),
+            shape = barShape,
+            color = Color.Transparent,
+            contentColor = MaterialTheme.colorScheme.onSurface,
             tonalElevation = 0.dp,
             shadowElevation = 0.dp
         ) {
-            NavigationBar(
-                containerColor = Color.Transparent,
-                tonalElevation = 0.dp
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(64.dp)
+                    .padding(horizontal = 8.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 items.forEach { (screen, label, icon) ->
                     val selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true
+                    val noRipple = remember { MutableInteractionSource() }
+
                     val iconScale by animateFloatAsState(
-                        targetValue = if (selected) 1.12f else 1f,
+                        targetValue = if (selected) 1.06f else 1f,
                         animationSpec = spring(
                             dampingRatio = Spring.DampingRatioNoBouncy,
                             stiffness = MotionTokens.SpringMedium
                         ),
                         label = "bottomIconScale"
                     )
-                    val iconTint by animateColorAsState(
-                        targetValue = if (selected) {
-                            MaterialTheme.colorScheme.primary
-                        } else if (isDark) {
-                            MaterialTheme.colorScheme.secondary
-                        } else {
-                            Color(0xFF4E5661)
-                        },
-                        label = "bottomIconTint"
+                    val tint by animateColorAsState(
+                        targetValue = if (selected) accent else idleColor,
+                        label = "bottomTint"
                     )
-                    val labelAlpha by animateFloatAsState(
-                        targetValue = if (selected) 1f else 0.78f,
-                        animationSpec = spring(
-                            dampingRatio = Spring.DampingRatioNoBouncy,
-                            stiffness = MotionTokens.SpringMediumLow
-                        ),
-                        label = "bottomLabelAlpha"
-                    )
-                    NavigationBarItem(
-                        selected = selected,
-                        onClick = {
-                            navController.navigate(screen.route) {
-                                launchSingleTop = true
-                                restoreState = true
-                                popUpTo(Screen.Todo.route) {
-                                    saveState = true
+
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                            .neumorph(
+                                shape = itemShape,
+                                isDark = isDark,
+                                depth = if (selected) 0f else 1f,
+                                elevation = if (selected) NeumorphElevation.Medium else NeumorphElevation.None
+                            )
+                            .clickable(
+                                interactionSource = noRipple,
+                                indication = null
+                            ) {
+                                navController.navigate(screen.route) {
+                                    launchSingleTop = true
+                                    restoreState = true
+                                    popUpTo(Screen.Todo.route) {
+                                        saveState = true
+                                    }
                                 }
-                            }
-                        },
-                        icon = {
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
                             Icon(
                                 imageVector = icon,
                                 contentDescription = label,
                                 modifier = Modifier.scale(iconScale),
-                                tint = iconTint
+                                tint = tint
                             )
-                        },
-                        label = {
                             Text(
                                 text = label,
-                                color = iconTint.copy(alpha = labelAlpha)
+                                color = tint,
+                                style = MaterialTheme.typography.labelSmall
                             )
-                        },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = iconTint,
-                            selectedTextColor = iconTint,
-                            unselectedIconColor = iconTint,
-                            unselectedTextColor = iconTint,
-                        indicatorColor = if (isDark) Color.White.copy(alpha = 0.24f) else Color.White
-                    ),
-                        modifier = Modifier.padding(horizontal = 2.dp)
-                    )
+                        }
+                    }
                 }
             }
         }

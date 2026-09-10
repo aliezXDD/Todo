@@ -3,7 +3,6 @@ package com.todo.ui.screen.preset.component
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -36,16 +34,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.dp
 import com.todo.domain.model.Preset
-import com.todo.ui.theme.DarkGlassBorder
-import com.todo.ui.theme.DarkGlassScrim
-import com.todo.ui.theme.DarkGlassSurface
-import com.todo.ui.theme.LightGlassBorder
-import com.todo.ui.theme.LightGlassScrim
-import com.todo.ui.theme.LightGlassSurface
+import com.todo.ui.theme.DarkScrim
+import com.todo.ui.theme.LightScrim
 import com.todo.ui.theme.MotionTokens
-import com.todo.ui.component.glassOverlay
-import com.todo.ui.component.glassTextFieldColors
-import com.todo.ui.component.glassTextFieldShape
+import com.todo.ui.theme.NeumorphElevation
+import com.todo.ui.theme.NeumorphShapes
+import com.todo.ui.component.NeumorphTextField
+import com.todo.ui.component.neumorph
 
 @Composable
 fun PresetEditDialog(
@@ -64,12 +59,9 @@ fun PresetEditDialog(
     val isCreateMode = editingPreset == null
     val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
 
-    val titleColor = if (isDark) Color.White else MaterialTheme.colorScheme.onSurface
-    val contentColor = if (isDark) Color.White.copy(alpha = 0.92f) else MaterialTheme.colorScheme.onSurface
-    // 底层卡片不透明度 100%（不再半透明）
-    val containerColor = if (isDark) DarkGlassSurface else LightGlassSurface
-    val borderColor = if (isDark) DarkGlassBorder else LightGlassBorder
-    val scrimColor = if (isDark) DarkGlassScrim else LightGlassScrim
+    val titleColor = MaterialTheme.colorScheme.onSurface
+    val contentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.92f)
+    val scrimColor = if (isDark) DarkScrim else LightScrim
     val noRipple = remember { MutableInteractionSource() }
 
     AnimatedVisibility(
@@ -113,16 +105,15 @@ fun PresetEditDialog(
             Surface(
                 modifier = Modifier
                     .fillMaxWidth(0.9f)
-                    // 与「编辑待办」玻璃卡片类似的高光层（底部/顶部高光 + 外阴影），颜色仍保持不透明度 100%
-                    .glassOverlay(
-                        shape = RoundedCornerShape(20.dp),
+                    .neumorph(
+                        shape = RoundedCornerShape(NeumorphShapes.Large),
                         isDark = isDark,
-                        bottomAlphaLight = 0.06f,
-                        bottomAlphaDark = 0.14f
+                        depth = 1f,
+                        elevation = NeumorphElevation.XLarge
                     ),
-                shape = RoundedCornerShape(20.dp),
-                color = containerColor,
-                border = BorderStroke(1.dp, borderColor)
+                shape = RoundedCornerShape(NeumorphShapes.Large),
+                color = Color.Transparent,
+                contentColor = MaterialTheme.colorScheme.onSurface
             ) {
                 Column(
                     modifier = Modifier
@@ -139,13 +130,11 @@ fun PresetEditDialog(
                         color = titleColor
                     )
 
-                    OutlinedTextField(
+                    NeumorphTextField(
                         value = input,
                         onValueChange = { input = it },
                         modifier = Modifier.fillMaxWidth(),
-                        shape = glassTextFieldShape(),
-                        colors = glassTextFieldColors(),
-                        placeholder = { Text("输入预设内容...") },
+                        placeholder = "输入预设内容...",
                         singleLine = true
                     )
 

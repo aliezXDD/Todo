@@ -5,7 +5,6 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -25,6 +24,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
@@ -37,7 +37,11 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.todo.domain.model.Todo
 import com.todo.ui.component.GlassListItem
+import com.todo.ui.component.neumorph
 import com.todo.ui.theme.MotionTokens
+import com.todo.ui.theme.Neumorph
+import com.todo.ui.theme.NeumorphElevation
+import com.todo.ui.theme.NeumorphShapes
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -83,7 +87,19 @@ fun TodoItemRow(
 
     val strikeColor = MaterialTheme.colorScheme.onBackground.copy(alpha = alpha.value)
     val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
-    val itemShape = RoundedCornerShape(16.dp)
+    val itemShape = RoundedCornerShape(NeumorphShapes.Medium)
+
+    // 新拟态的标志性语义：勾选 = 从背景里"按进去"，整行与勾选框一起由凸转凹
+    val rowDepth by animateFloatAsState(
+        targetValue = if (todo.isCompleted) 0f else 1f,
+        animationSpec = tween(durationMillis = MotionTokens.ItemState, easing = MotionTokens.StandardEasing),
+        label = "todoRowDepth"
+    )
+    val checkboxDepth by animateFloatAsState(
+        targetValue = if (todo.isCompleted) 0f else 1f,
+        animationSpec = tween(durationMillis = MotionTokens.ItemState, easing = MotionTokens.StandardEasing),
+        label = "todoCheckboxDepth"
+    )
 
     GlassListItem(
         modifier = modifier
@@ -94,6 +110,8 @@ fun TodoItemRow(
                 onClick = {},
                 onLongClick = onLongPress
             ),
+        depth = rowDepth,
+        shape = itemShape,
         minHeight = 44
     ) {
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
@@ -110,15 +128,16 @@ fun TodoItemRow(
                     modifier = Modifier
                         .size(24.dp)
                         .scale(checkboxScale.value)
-                        .background(
-                            color = if (todo.isCompleted) MaterialTheme.colorScheme.primary else Color.Transparent,
-                            shape = RoundedCornerShape(7.dp)
-                        )
-                        .then(
-                            if (todo.isCompleted) Modifier else Modifier.background(
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
-                                shape = RoundedCornerShape(7.dp)
-                            )
+                        .neumorph(
+                            shape = RoundedCornerShape(7.dp),
+                            isDark = isDark,
+                            depth = checkboxDepth,
+                            surface = if (todo.isCompleted) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                Neumorph.surface(isDark)
+                            },
+                            elevation = NeumorphElevation.Small
                         )
                         .clickable { onCheckedChange(!todo.isCompleted) },
                     contentAlignment = Alignment.Center

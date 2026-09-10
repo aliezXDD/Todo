@@ -8,7 +8,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -33,14 +32,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.dp
-import com.todo.ui.theme.DarkGlassBorder
-import com.todo.ui.theme.DarkGlassScrim
-import com.todo.ui.theme.DarkGlassSurface
-import com.todo.ui.theme.LightGlassBorder
-import com.todo.ui.theme.LightGlassScrim
-import com.todo.ui.theme.LightGlassSurface
+import com.todo.ui.theme.DarkScrim
+import com.todo.ui.theme.LightScrim
 import com.todo.ui.theme.MotionTokens
+import com.todo.ui.theme.NeumorphElevation
+import com.todo.ui.theme.NeumorphShapes
 
+/**
+ * 新拟态对话框：与背景同色的凸起面板 + 遮罩。
+ * 弹层用最大的阴影层级（浮得最高），内部按钮仍是文字按钮（新拟态不引入额外描边）。
+ */
 @Composable
 fun GlassDialog(
     visible: Boolean = true,
@@ -52,21 +53,13 @@ fun GlassDialog(
     cancelButtonRole: DialogButtonRole = DialogButtonRole.SECONDARY,
     confirmTextColor: Color? = null,
     cancelTextColor: Color? = null,
-    surfaceAlphaDelta: Float = 0f,
     onConfirm: () -> Unit,
     onCancel: () -> Unit
 ) {
     val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
-    val baseAlpha = if (isDark) 0.92f else 0.94f
-    val bg = if (isDark) {
-        DarkGlassSurface.copy(alpha = (baseAlpha + surfaceAlphaDelta).coerceIn(0f, 1f))
-    } else {
-        LightGlassSurface.copy(alpha = (baseAlpha + surfaceAlphaDelta).coerceIn(0f, 1f))
-    }
-    val border = if (isDark) DarkGlassBorder else LightGlassBorder
-    val titleColor = if (isDark) Color.White else MaterialTheme.colorScheme.onSurface
-    val messageColor = if (isDark) Color.White.copy(alpha = 0.92f) else MaterialTheme.colorScheme.onSurface
-    val scrimColor = if (isDark) DarkGlassScrim else LightGlassScrim
+    val titleColor = MaterialTheme.colorScheme.onSurface
+    val messageColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.92f)
+    val scrimColor = if (isDark) DarkScrim else LightScrim
     val noRipple = remember { MutableInteractionSource() }
     val transitionState = remember { MutableTransitionState(false) }
     val confirmRoleColor by animateColorAsState(
@@ -133,21 +126,21 @@ fun GlassDialog(
         ) {
             Surface(
                 modifier = Modifier
-                    .glassOverlay(
-                        shape = RoundedCornerShape(20.dp),
-                        isDark = isDark,
-                        bottomAlphaLight = 0.06f,
-                        bottomAlphaDark = 0.14f
-                    )
                     .fillMaxWidth(0.85f)
+                    .neumorph(
+                        shape = RoundedCornerShape(NeumorphShapes.Large),
+                        isDark = isDark,
+                        depth = 1f,
+                        elevation = NeumorphElevation.XLarge
+                    )
                     .clickable(
                         interactionSource = noRipple,
                         indication = null,
                         onClick = {}
                     ),
-                shape = RoundedCornerShape(20.dp),
-                color = bg,
-                border = BorderStroke(1.dp, border),
+                shape = RoundedCornerShape(NeumorphShapes.Large),
+                color = Color.Transparent,
+                contentColor = MaterialTheme.colorScheme.onSurface,
                 tonalElevation = 0.dp,
                 shadowElevation = 0.dp
             ) {
@@ -184,12 +177,11 @@ fun DialogActionTextButton(
     fallbackColor: Color? = null,
     onClick: () -> Unit
 ) {
-    val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
     val animatedColor by animateColorAsState(
         targetValue = when (role) {
             DialogButtonRole.PRIMARY -> MaterialTheme.colorScheme.primary
             DialogButtonRole.DANGER -> MaterialTheme.colorScheme.error
-            DialogButtonRole.SECONDARY -> if (isDark) Color.White else MaterialTheme.colorScheme.onSurface
+            DialogButtonRole.SECONDARY -> MaterialTheme.colorScheme.onSurface
         },
         animationSpec = tween(durationMillis = MotionTokens.DialogEnter, easing = MotionTokens.StandardEasing),
         label = "dialogActionColor"
@@ -205,4 +197,3 @@ enum class DialogButtonRole {
     DANGER,
     SECONDARY
 }
-

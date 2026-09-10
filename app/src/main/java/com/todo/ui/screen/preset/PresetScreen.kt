@@ -19,18 +19,12 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.luminance
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInRoot
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -41,10 +35,7 @@ import com.todo.ui.component.GlassToast
 import com.todo.ui.screen.preset.component.PresetEditDialog
 import com.todo.ui.screen.preset.component.PresetItemRow
 import com.todo.ui.screen.preset.component.PresetTopBar
-import com.todo.ui.theme.GradientDarkBottom
-import com.todo.ui.theme.GradientDarkTop
-import com.todo.ui.theme.GradientLightBottom
-import com.todo.ui.theme.GradientLightTop
+import com.todo.ui.theme.Neumorph
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -90,22 +81,11 @@ fun PresetScreen(
                 val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
                 val listState = rememberLazyListState()
                 val showFade by remember { derivedStateOf { listState.canScrollForward } }
-
-                // 采样列表容器在屏幕中的位置对应的背景渐变色，使底部渐隐与背景精确贴合（而非用固定端色）。
-                val density = LocalDensity.current
-                val screenHeightPx = with(density) { LocalConfiguration.current.screenHeightDp.dp.toPx() }
-                var listBottomPx by remember { mutableFloatStateOf(0f) }
-                val bgTop = if (isDark) GradientDarkTop else GradientLightTop
-                val bgBottom = if (isDark) GradientDarkBottom else GradientLightBottom
-                val bottomFadeColor = if (screenHeightPx > 0f)
-                    lerp(bgTop, bgBottom, (listBottomPx / screenHeightPx).coerceIn(0f, 1f)) else bgBottom
+                // 背景已是纯色，底部渐隐直接用背景色即可，无需再采样渐变
+                val bottomFadeColor = Neumorph.surface(isDark)
 
                 LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .onGloballyPositioned { coords ->
-                            listBottomPx = coords.positionInRoot().y + coords.size.height
-                        },
+                    modifier = Modifier.fillMaxSize(),
                     state = listState,
                     contentPadding = PaddingValues(bottom = 8.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -160,7 +140,6 @@ fun PresetScreen(
         cancelText = "取消",
         confirmButtonRole = DialogButtonRole.DANGER,
         cancelButtonRole = DialogButtonRole.SECONDARY,
-        surfaceAlphaDelta = 0.04f,
         onConfirm = viewModel::confirmDeleteSelected,
         onCancel = viewModel::dismissDeleteConfirm
     )

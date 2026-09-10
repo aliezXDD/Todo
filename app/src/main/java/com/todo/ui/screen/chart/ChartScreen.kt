@@ -56,7 +56,6 @@ fun ChartScreen(
             title = "完成统计",
             navigationIcon = Icons.AutoMirrored.Filled.ArrowBack,
             onNavigationClick = onBack,
-            glassEffect = true,
             overlayBelowContent = true,
             actions = {
                 TextButton(onClick = viewModel::toggleChartType) {

@@ -8,23 +8,20 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.todo.ui.component.GlassButton
 import com.todo.ui.component.GlassFAB
-import com.todo.ui.component.glassOverlay
 import com.todo.ui.screen.todo.component.AddTodoSheet
 import com.todo.ui.screen.todo.component.EditTodoSheet
 import com.todo.ui.screen.todo.component.MiniStatsCard
 import com.todo.ui.screen.todo.component.TodaySection
+import com.todo.ui.theme.NeumorphShapes
 
 @Composable
 fun TodoScreen(
@@ -33,10 +30,8 @@ fun TodoScreen(
     viewModel: TodoViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
-    // 「往日记录」按钮：表面圆角 14dp、描边圆角 16dp（描边比按钮略松，仅对该按钮生效）
-    val historyButtonShape = RoundedCornerShape(14.dp)
-    val historyBorderShape = RoundedCornerShape(16.dp)
+    // 「往日记录」按钮：与卡片同一套圆角语言
+    val historyButtonShape = RoundedCornerShape(NeumorphShapes.Small)
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -56,17 +51,9 @@ fun TodoScreen(
                 onClick = onNavigateToHistory,
                 glassSurface = true,
                 shape = historyButtonShape,
-                borderShape = historyBorderShape,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp)
-                    .clip(historyButtonShape)
-                    .glassOverlay(
-                        shape = historyButtonShape,
-                        isDark = isDark,
-                        bottomAlphaLight = 0.06f,
-                        bottomAlphaDark = 0.14f
-                    )
             )
 
             TodaySection(

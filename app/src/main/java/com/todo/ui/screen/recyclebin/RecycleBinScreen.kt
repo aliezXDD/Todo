@@ -37,7 +37,6 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -51,10 +50,8 @@ import com.todo.ui.component.EmptyState
 import com.todo.ui.component.GlassDialog
 import com.todo.ui.component.GlassListItem
 import com.todo.ui.component.GlassTopBar
-import com.todo.ui.component.glassOverlay
 import com.todo.ui.theme.MotionTokens
-import com.todo.ui.theme.GradientDarkBottom
-import com.todo.ui.theme.GradientLightBottom
+import com.todo.ui.theme.Neumorph
 import java.time.Instant
 import java.time.ZoneId
 
@@ -96,7 +93,6 @@ fun RecycleBinScreen(
                     onBack()
                 }
             },
-            glassEffect = true,
             overlayBelowContent = true,
             titleAlignStart = uiState.isMultiSelectMode,
             actions = {
@@ -183,8 +179,8 @@ fun RecycleBinScreen(
                             .background(
                                 Brush.verticalGradient(
                                     colors = listOf(
-                                        Color.Transparent,
-                                        if (isDark) GradientDarkBottom else GradientLightBottom
+                                        Neumorph.surface(isDark).copy(alpha = 0f),
+                                        Neumorph.surface(isDark)
                                     )
                                 )
                             )
@@ -221,13 +217,6 @@ private fun RecycleBinRow(
     GlassListItem(
         modifier = Modifier
             .fillMaxWidth()
-            .glassOverlay(
-                shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
-                isDark = isDark,
-                bottomAlphaLight = 0.06f,
-                bottomAlphaDark = 0.14f
-            )
-            .clip(androidx.compose.foundation.shape.RoundedCornerShape(16.dp))
             .combinedClickable(
                 onClick = onClick,
                 onLongClick = onLongClick

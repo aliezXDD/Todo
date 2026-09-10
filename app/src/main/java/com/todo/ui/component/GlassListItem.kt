@@ -1,8 +1,5 @@
 package com.todo.ui.component
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,44 +10,51 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.dp
-import com.todo.ui.theme.DarkGlassBorder
-import com.todo.ui.theme.DarkGlassSurface
-import com.todo.ui.theme.LightGlassBorder
-import com.todo.ui.theme.LightGlassSurface
+import androidx.compose.foundation.layout.PaddingValues
+import com.todo.ui.theme.NeumorphElevation
+import com.todo.ui.theme.NeumorphShapes
 
+/**
+ * 新拟态列表项：默认凸起；[depth] 传 0 表示"被按进去"（用于已完成/选中态）。
+ * [elevation] 传零阴影（offset/blur 均为 0）可得到"与背景齐平"的平面行。
+ */
 @Composable
 fun GlassListItem(
     modifier: Modifier = Modifier,
+    depth: Float = 1f,
+    elevation: NeumorphElevation = NeumorphElevation.Medium,
+    shape: Shape = RoundedCornerShape(NeumorphShapes.Medium),
     minHeight: Int = 56,
     contentPadding: PaddingValues = PaddingValues(horizontal = 14.dp, vertical = 10.dp),
     content: @Composable () -> Unit
 ) {
     val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
-    val bgColor = if (isDark) DarkGlassSurface.copy(alpha = 0.72f) else LightGlassSurface.copy(alpha = 0.78f)
-    val borderColor = if (isDark) DarkGlassBorder else LightGlassBorder
-    val shape = RoundedCornerShape(16.dp)
 
     Surface(
-        modifier = modifier
-            .fillMaxWidth()
-            .defaultMinSize(minHeight = minHeight.dp),
+        modifier = modifier.neumorph(
+            shape = shape,
+            isDark = isDark,
+            depth = depth,
+            elevation = elevation
+        ),
         shape = shape,
-        color = bgColor,
-        border = BorderStroke(1.dp, borderColor),
+        color = Color.Transparent,
+        contentColor = MaterialTheme.colorScheme.onSurface,
         tonalElevation = 0.dp,
         shadowElevation = 0.dp
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .defaultMinSize(minHeight = minHeight.dp)
                 .padding(contentPadding),
-            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             content()
         }
     }
 }
-

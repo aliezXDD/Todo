@@ -36,7 +36,6 @@ fun HistoryScreen(
             title = "往日记录",
             navigationIcon = Icons.AutoMirrored.Filled.ArrowBack,
             onNavigationClick = onBack,
-            glassEffect = true,
             overlayBelowContent = true
         )
 

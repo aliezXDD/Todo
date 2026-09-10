@@ -6,7 +6,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -23,16 +22,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.dp
-import com.todo.ui.theme.DarkGlassBorder
-import com.todo.ui.theme.DarkGlassSurface
-import com.todo.ui.theme.LightGlassBorder
-import com.todo.ui.theme.LightGlassSurface
 import com.todo.ui.theme.MotionTokens
+import com.todo.ui.theme.NeumorphElevation
+import com.todo.ui.theme.NeumorphShapes
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 
 /**
- * 玻璃质感的一次性轻提示：订阅 [messageFlow]，每次收到新消息显示一段时间后自动消失。
+ * 新拟态的一次性轻提示：订阅 [messageFlow]，每次收到新消息显示一段时间后自动消失。
  * 用计数 [tick] 重置定时器，因此连续收到相同内容的消息也能正确重新计时。
  */
 @Composable
@@ -45,9 +42,6 @@ fun GlassToast(
     var tick by remember { mutableIntStateOf(0) }
 
     val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
-    val bgColor = if (isDark) DarkGlassSurface.copy(alpha = 0.88f) else LightGlassSurface.copy(alpha = 0.94f)
-    val borderColor = if (isDark) DarkGlassBorder else LightGlassBorder
-    val textColor = if (isDark) Color.White else MaterialTheme.colorScheme.onSurface
 
     LaunchedEffect(Unit) {
         messageFlow.collect { value ->
@@ -92,13 +86,21 @@ fun GlassToast(
         )
     ) {
         Surface(
-            shape = RoundedCornerShape(14.dp),
-            color = bgColor,
-            border = BorderStroke(1.dp, borderColor)
+            modifier = Modifier.neumorph(
+                shape = RoundedCornerShape(NeumorphShapes.Medium),
+                isDark = isDark,
+                depth = 1f,
+                elevation = NeumorphElevation.Large
+            ),
+            shape = RoundedCornerShape(NeumorphShapes.Medium),
+            color = Color.Transparent,
+            contentColor = MaterialTheme.colorScheme.onSurface,
+            tonalElevation = 0.dp,
+            shadowElevation = 0.dp
         ) {
             Text(
                 text = message ?: "",
-                color = textColor,
+                color = MaterialTheme.colorScheme.onSurface,
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)
             )

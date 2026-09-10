@@ -1,6 +1,5 @@
 package com.todo.ui.component
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
@@ -9,41 +8,40 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.luminance
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.todo.ui.theme.DarkGlassBorder
-import com.todo.ui.theme.DarkGlassSurface
-import com.todo.ui.theme.LightGlassBorder
-import com.todo.ui.theme.LightGlassSurface
+import com.todo.ui.theme.NeumorphElevation
+import com.todo.ui.theme.NeumorphShapes
 
+/**
+ * 新拟态卡片：与背景同色、无描边，靠一对亮/暗阴影"从背景里凸起"。
+ * 底色由 [neumorph] 填充（因此这里 Surface 用透明色），否则凹陷时内阴影会被底色盖住。
+ */
 @Composable
 fun GlassCard(
     modifier: Modifier = Modifier,
-    highlightScale: Float = 1f,
-    drawShadow: Boolean = true,
-    shadowElevation: Dp = 0.dp,
+    shape: Shape = RoundedCornerShape(NeumorphShapes.Large),
+    depth: Float = 1f,
+    elevation: NeumorphElevation = NeumorphElevation.Large,
     fillMaxHeight: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
-    val containerColor = if (isDark) DarkGlassSurface.copy(alpha = 0.82f) else LightGlassSurface.copy(alpha = 0.92f)
-    val borderColor = if (isDark) DarkGlassBorder else LightGlassBorder
-    val shape = RoundedCornerShape(16.dp)
 
     Surface(
-        modifier = modifier.glassOverlay(
+        modifier = modifier.neumorph(
             shape = shape,
             isDark = isDark,
-            bottomAlphaLight = 0.06f * highlightScale,
-            bottomAlphaDark = 0.14f * highlightScale,
-            drawOuterShadow = drawShadow
+            depth = depth,
+            elevation = elevation
         ),
         shape = shape,
-        color = containerColor,
-        border = BorderStroke(1.dp, borderColor),
+        color = Color.Transparent,
+        contentColor = MaterialTheme.colorScheme.onSurface,
         tonalElevation = 0.dp,
-        shadowElevation = shadowElevation
+        shadowElevation = 0.dp
     ) {
         // fillMaxHeight=true 时让内容撑满卡片高度（配合外部 weight 固定卡片高度）；默认仍按内容高度
         Box(
@@ -57,4 +55,3 @@ fun GlassCard(
         }
     }
 }
-

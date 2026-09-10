@@ -42,7 +42,6 @@ fun SettingsScreen(
     Column(modifier = Modifier.fillMaxSize()) {
         GlassTopBar(
             title = "设置",
-            glassEffect = true,
             overlayBelowContent = true
         )
 
@@ -96,10 +95,7 @@ fun SettingsScreen(
                 }
             }
 
-            GlassCard(
-                modifier = Modifier.fillMaxWidth(),
-                drawShadow = false
-            ) {
+            GlassCard(modifier = Modifier.fillMaxWidth()) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,

@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -30,7 +29,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
@@ -48,13 +46,11 @@ import com.todo.domain.model.Preset
 import com.todo.ui.component.GlassBottomSheet
 import com.todo.ui.component.GlassButton
 import com.todo.ui.component.GlassCard
-import com.todo.ui.component.glassTextFieldColors
-import com.todo.ui.component.glassTextFieldShape
-import com.todo.ui.theme.DarkGlassBorder
-import com.todo.ui.theme.DarkGlassSurface
-import com.todo.ui.theme.LightGlassBorder
-import com.todo.ui.theme.LightGlassSurface
+import com.todo.ui.component.NeumorphTextField
+import com.todo.ui.component.neumorph
 import com.todo.ui.theme.MotionTokens
+import com.todo.ui.theme.NeumorphElevation
+import com.todo.ui.theme.NeumorphShapes
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -80,36 +76,33 @@ fun AddTodoSheet(
     val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
     val secondaryTextColor = if (isDark) Color(0xFFB6BDCA) else Color(0xFF6F7785)
     val primaryTextColor = if (isDark) Color(0xFFEDEFF4) else MaterialTheme.colorScheme.onSurface
-    val tabContainerColor = if (isDark) DarkGlassSurface.copy(alpha = 0.56f) else LightGlassSurface.copy(alpha = 0.54f)
-    val tabBorderColor = if (isDark) DarkGlassBorder else LightGlassBorder
-    val tabIndicatorColor = if (isDark) Color(0xFFDDE2EB) else Color(0xFF778191)
-    val tabSelectedColor = if (isDark) Color.White else MaterialTheme.colorScheme.onSurface
-    val tabUnselectedColor = if (isDark) Color.White.copy(alpha = 0.72f) else Color(0xFF6F7785)
-    val presetItemBgColor = if (isDark) DarkGlassSurface.copy(alpha = 0.42f) else LightGlassSurface.copy(alpha = 0.54f)
-    val presetItemBorderColor = if (isDark) DarkGlassBorder else LightGlassBorder
+    val tabIndicatorColor = MaterialTheme.colorScheme.primary
+    val tabSelectedColor = MaterialTheme.colorScheme.onSurface
+    val tabUnselectedColor = MaterialTheme.colorScheme.secondary
 
     GlassBottomSheet(
-        onDismissRequest = onDismiss,
-        opaqueBackground = true
+        onDismissRequest = onDismiss
     ) {
         GlassCard(
-            modifier = Modifier.fillMaxWidth(),
-            highlightScale = 0.45f
+            modifier = Modifier.fillMaxWidth()
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                val tabTrackShape = RoundedCornerShape(NeumorphShapes.Small)
                 SecondaryTabRow(
                     selectedTabIndex = selectedTabIndex,
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(14.dp))
-                        .border(1.dp, tabBorderColor, RoundedCornerShape(14.dp)),
-                    containerColor = tabContainerColor,
+                    // 滑轨整体凹陷（新拟态里"可选择区域"的语义）；容器色透明，内阴影才看得见
+                    modifier = Modifier.neumorph(
+                        shape = tabTrackShape,
+                        isDark = isDark,
+                        depth = 0f,
+                        elevation = NeumorphElevation.Small
+                    ),
+                    containerColor = Color.Transparent,
                     indicator = {
-                        // 当前选中项下方的白色下滑条：圆角矩形（上下四角圆润），并上移露出下方圆角、避免被底边/描边挡住
-                        // 指示条偏移由 TabIndicatorScope 按下标提供（旧的 TabPosition 版本已废弃）
+                        // 选中项下方的主题色指示条：凹陷滑轨 + 指示条，全程无描边
                         Box(
                             modifier = Modifier
                                 .tabIndicatorOffset(selectedTabIndex)
-                                .offset(y = (-1).dp)
                                 .padding(horizontal = 7.dp)
                                 .fillMaxWidth()
                                 .height(3.dp)
@@ -187,13 +180,11 @@ fun AddTodoSheet(
                                         .padding(top = 2.dp),
                                     verticalArrangement = Arrangement.spacedBy(10.dp)
                                 ) {
-                                    OutlinedTextField(
+                                    NeumorphTextField(
                                         value = manualInput,
                                         onValueChange = { manualInput = it },
                                         modifier = Modifier.fillMaxWidth(),
-                                        shape = glassTextFieldShape(),
-                                        colors = glassTextFieldColors(),
-                                        placeholder = { Text("输入待办内容...") }
+                                        placeholder = "输入待办内容..."
                                     )
                                     Row(
                                         modifier = Modifier.fillMaxWidth(),
@@ -228,13 +219,11 @@ fun AddTodoSheet(
                                         .padding(top = 2.dp),
                                     verticalArrangement = Arrangement.spacedBy(10.dp)
                                 ) {
-                                    OutlinedTextField(
+                                    NeumorphTextField(
                                         value = searchQuery,
                                         onValueChange = onSearchQueryChange,
                                         modifier = Modifier.fillMaxWidth(),
-                                        shape = glassTextFieldShape(),
-                                        colors = glassTextFieldColors(),
-                                        placeholder = { Text("搜索预设...") }
+                                        placeholder = "搜索预设..."
                                     )
 
                                     if (presets.isEmpty()) {
@@ -254,9 +243,12 @@ fun AddTodoSheet(
                                                 Row(
                                                     modifier = Modifier
                                                         .fillMaxWidth()
-                                                        .clip(RoundedCornerShape(14.dp))
-                                                        .background(presetItemBgColor)
-                                                        .border(1.dp, presetItemBorderColor, RoundedCornerShape(14.dp))
+                                                        .neumorph(
+                                                            shape = RoundedCornerShape(NeumorphShapes.Small),
+                                                            isDark = isDark,
+                                                            depth = 0f,
+                                                            elevation = NeumorphElevation.Small
+                                                        )
                                                         .combinedClickable(
                                                             onClick = {
                                                                 if (isMultiSelectMode) {

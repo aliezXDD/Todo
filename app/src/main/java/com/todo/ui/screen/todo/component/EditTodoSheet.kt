@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -26,8 +25,7 @@ import com.todo.domain.model.Todo
 import com.todo.ui.component.GlassBottomSheet
 import com.todo.ui.component.GlassButton
 import com.todo.ui.component.GlassCard
-import com.todo.ui.component.glassTextFieldColors
-import com.todo.ui.component.glassTextFieldShape
+import com.todo.ui.component.NeumorphTextField
 
 @Composable
 fun EditTodoSheet(
@@ -50,8 +48,7 @@ fun EditTodoSheet(
     }
 
     GlassBottomSheet(
-        onDismissRequest = onDismiss,
-        opaqueBackground = true
+        onDismissRequest = onDismiss
     ) {
         GlassCard(modifier = Modifier.fillMaxWidth()) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -60,14 +57,12 @@ fun EditTodoSheet(
                     style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.onSurface
                 )
-                OutlinedTextField(
+                NeumorphTextField(
                     value = input,
                     onValueChange = { input = it },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .focusRequester(focusRequester),
-                    shape = glassTextFieldShape(),
-                    colors = glassTextFieldColors()
+                        .focusRequester(focusRequester)
                 )
                 Row(
                     modifier = Modifier.fillMaxWidth(),
