@@ -1,4 +1,4 @@
-﻿package com.todo.data.repository
+package com.todo.data.repository
 
 import com.todo.data.local.dao.RecycleBinDao
 import com.todo.data.local.entity.RecycleBinEntity
@@ -17,11 +17,7 @@ class RecycleBinRepository @Inject constructor(
 
     suspend fun insertAll(items: List<RecycleBinEntity>) = recycleBinDao.insertAll(items)
 
-    suspend fun delete(item: RecycleBinEntity) = recycleBinDao.delete(item)
-
     suspend fun deleteByIds(ids: List<Long>) = recycleBinDao.deleteByIds(ids)
 
     suspend fun deleteOlderThan(cutoffTimestamp: Long) = recycleBinDao.deleteOlderThan(cutoffTimestamp)
-
-    fun getCount(): Flow<Int> = recycleBinDao.getCount().distinctUntilChanged()
 }

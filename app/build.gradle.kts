@@ -74,8 +74,6 @@ dependencies {
 
     implementation(libs.androidx.work.runtime.ktx)
 
-    implementation(libs.vico.compose.m3)
-
     implementation(libs.reorderable)
 
     implementation(libs.kotlinx.coroutines.android)

@@ -1,4 +1,4 @@
-﻿package com.todo.data.repository
+package com.todo.data.repository
 
 import com.todo.data.local.dao.TodoDao
 import com.todo.data.local.entity.TodoEntity
@@ -23,11 +23,7 @@ class TodoRepository @Inject constructor(
 
     suspend fun insert(todo: TodoEntity): Long = todoDao.insert(todo)
 
-    suspend fun update(todo: TodoEntity) = todoDao.update(todo)
-
     suspend fun delete(todo: TodoEntity) = todoDao.delete(todo)
-
-    suspend fun deleteAllByDate(date: String) = todoDao.deleteAllByDate(date)
 
     suspend fun updateCompleted(id: Long, isCompleted: Boolean) = todoDao.updateCompleted(id, isCompleted)
 

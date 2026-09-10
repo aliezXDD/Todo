@@ -1,4 +1,4 @@
-﻿package com.todo.data.local
+package com.todo.data.local
 
 import android.content.Context
 import androidx.room.Room
@@ -11,6 +11,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import com.todo.util.Constants
 import javax.inject.Singleton
 
 @Module
@@ -23,7 +24,7 @@ object DatabaseModule {
         return Room.databaseBuilder(
             context,
             AppDatabase::class.java,
-            "todo_database"
+            Constants.DATABASE_NAME
         ).build()
     }
 

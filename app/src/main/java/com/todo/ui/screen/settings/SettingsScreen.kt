@@ -31,8 +31,6 @@ import com.todo.R
 import com.todo.ui.component.GlassCard
 import com.todo.ui.component.GlassTopBar
 import com.todo.util.Constants
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
 
 @Composable
 fun SettingsScreen(

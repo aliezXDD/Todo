@@ -1,4 +1,4 @@
-﻿package com.todo.data.repository
+package com.todo.data.repository
 
 import com.todo.data.local.dao.DailyStatsDao
 import com.todo.data.local.entity.DailyStatsEntity
@@ -11,9 +11,6 @@ import javax.inject.Singleton
 class StatsRepository @Inject constructor(
     private val dailyStatsDao: DailyStatsDao
 ) {
-    fun getRecentStats(limit: Int = 30): Flow<List<DailyStatsEntity>> =
-        dailyStatsDao.getRecentStats(limit).distinctUntilChanged()
-
     fun getStatsBetween(startDate: String, endDate: String): Flow<List<DailyStatsEntity>> =
         dailyStatsDao.getStatsBetween(startDate, endDate).distinctUntilChanged()
 

@@ -28,7 +28,6 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -50,14 +49,9 @@ import com.todo.ui.component.DialogButtonRole
 import com.todo.domain.model.RecycleBinItem
 import com.todo.ui.component.EmptyState
 import com.todo.ui.component.GlassDialog
-import com.todo.ui.component.GlassCard
 import com.todo.ui.component.GlassListItem
 import com.todo.ui.component.GlassTopBar
 import com.todo.ui.component.glassOverlay
-import com.todo.ui.theme.DarkGlassBorder
-import com.todo.ui.theme.DarkGlassSurface
-import com.todo.ui.theme.LightGlassBorder
-import com.todo.ui.theme.LightGlassSurface
 import com.todo.ui.theme.MotionTokens
 import com.todo.ui.theme.GradientDarkBottom
 import com.todo.ui.theme.GradientLightBottom

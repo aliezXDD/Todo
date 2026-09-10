@@ -1,4 +1,4 @@
-﻿package com.todo.data.local.dao
+package com.todo.data.local.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
@@ -9,9 +9,6 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface DailyStatsDao {
-    @Query("SELECT * FROM daily_stats ORDER BY date DESC LIMIT :limit")
-    fun getRecentStats(limit: Int = 30): Flow<List<DailyStatsEntity>>
-
     @Query("SELECT * FROM daily_stats WHERE date BETWEEN :startDate AND :endDate ORDER BY date ASC")
     fun getStatsBetween(startDate: String, endDate: String): Flow<List<DailyStatsEntity>>
 

@@ -1,11 +1,10 @@
-﻿package com.todo.data.local.dao
+package com.todo.data.local.dao
 
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Update
 import com.todo.data.local.entity.TodoEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -26,14 +25,8 @@ interface TodoDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(todo: TodoEntity): Long
 
-    @Update
-    suspend fun update(todo: TodoEntity)
-
     @Delete
     suspend fun delete(todo: TodoEntity)
-
-    @Query("DELETE FROM todos WHERE date = :date")
-    suspend fun deleteAllByDate(date: String)
 
     @Query("UPDATE todos SET isCompleted = :isCompleted WHERE id = :id")
     suspend fun updateCompleted(id: Long, isCompleted: Boolean)
