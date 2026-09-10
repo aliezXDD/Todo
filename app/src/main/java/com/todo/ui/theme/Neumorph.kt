@@ -14,17 +14,26 @@ import androidx.compose.ui.unit.dp
  * 3. 深度承载状态语义：凸起 = 未选/可点，凹陷 = 选中/输入/进度槽，按下 = 由凸转凹。
  */
 object Neumorph {
-    // ---- 浅色：采用原文给出的经典配色 ----
+    // ---- 浅色：背景沿用原文的 #ECF0F3，但阴影整体加深一档（原 #D1D9E6 在真机上偏弱）----
     val LightSurface = Color(0xFFECF0F3)
-    val LightShadowDark = Color(0xFFD1D9E6)
+    val LightShadowDark = Color(0xFFBFCBDE)
     val LightShadowLight = Color(0xFFFFFFFF)
+    val LightRecessed = Color(0xFFE2E7EC)
 
-    // ---- 深色：原文只给了浅色方案，这里按同一原理推导（底=略亮的深灰，暗影更暗、亮影更亮）----
+    // ---- 深色：原文只给了浅色方案，这里按同一原理推导（暗影更深、亮影更亮，保证对比可见）----
     val DarkSurface = Color(0xFF23262B)
-    val DarkShadowDark = Color(0xFF191B1F)
-    val DarkShadowLight = Color(0xFF2E3239)
+    val DarkShadowDark = Color(0xFF111316)
+    val DarkShadowLight = Color(0xFF373D46)
+    val DarkRecessed = Color(0xFF1E2125)
 
     fun surface(isDark: Boolean): Color = if (isDark) DarkSurface else LightSurface
+
+    /**
+     * 凹陷区域（滑轨、输入框）专用的"更暗一档"底色。
+     * 纯新拟态靠光影表达凹陷，但在小尺寸元素上"范围"会看不清——这是该风格公认的短板，
+     * 这里用一个仅差几阶的同色系底色补回边界感，同时不引入描边。
+     */
+    fun recessedSurface(isDark: Boolean): Color = if (isDark) DarkRecessed else LightRecessed
 
     fun shadowDark(isDark: Boolean): Color = if (isDark) DarkShadowDark else LightShadowDark
 
@@ -47,16 +56,16 @@ data class NeumorphElevation(
         val None = NeumorphElevation(offset = 0.dp, blur = 0.dp)
 
         /** 小元素：勾选框、小圆点、chip */
-        val Small = NeumorphElevation(offset = 3.dp, blur = 6.dp)
+        val Small = NeumorphElevation(offset = 4.dp, blur = 7.dp)
 
-        /** 列表项、按钮、开关 */
-        val Medium = NeumorphElevation(offset = 5.dp, blur = 10.dp)
+        /** 列表项、按钮、开关、凹陷滑轨 */
+        val Medium = NeumorphElevation(offset = 7.dp, blur = 11.dp)
 
         /** 卡片、面板、输入框 */
-        val Large = NeumorphElevation(offset = 7.dp, blur = 14.dp)
+        val Large = NeumorphElevation(offset = 10.dp, blur = 15.dp)
 
         /** 浮层：FAB、吸顶栏、底部面板 */
-        val XLarge = NeumorphElevation(offset = 9.dp, blur = 18.dp)
+        val XLarge = NeumorphElevation(offset = 13.dp, blur = 20.dp)
     }
 }
 

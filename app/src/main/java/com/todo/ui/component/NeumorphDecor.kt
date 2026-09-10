@@ -52,8 +52,8 @@ fun Modifier.neumorph(
         val blurPx = elevation.blur.toPx().coerceAtLeast(0.1f)
 
         // 深色模式下亮影要收敛（深底不会像浅底那样反射出明显白光），否则会脏。
-        val darkBase = elevation.darkAlpha * if (isDark) 0.90f else 1f
-        val lightBase = elevation.lightAlpha * if (isDark) 0.50f else 1f
+        val darkBase = elevation.darkAlpha * if (isDark) 0.95f else 1f
+        val lightBase = elevation.lightAlpha * if (isDark) 0.62f else 1f
 
         val darkPaint = shadowPaint(Neumorph.shadowDark(isDark).toArgb(), blurPx)
         val lightPaint = shadowPaint(Neumorph.shadowLight(isDark).toArgb(), blurPx)

@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
 import com.todo.ui.theme.MotionTokens
+import com.todo.ui.theme.Neumorph
 import com.todo.ui.theme.NeumorphElevation
 import com.todo.ui.theme.NeumorphShapes
 
@@ -53,6 +54,7 @@ fun NeumorphTextField(
             shape = shape,
             isDark = isDark,
             depth = depth,
+            surface = Neumorph.recessedSurface(isDark),
             elevation = elevation
         ),
         textStyle = textStyle,
@@ -92,6 +94,7 @@ fun NeumorphTextField(
             shape = shape,
             isDark = isDark,
             depth = depth,
+            surface = Neumorph.recessedSurface(isDark),
             elevation = elevation
         ),
         textStyle = textStyle,

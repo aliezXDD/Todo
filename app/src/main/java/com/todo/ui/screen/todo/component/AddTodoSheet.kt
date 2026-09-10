@@ -49,6 +49,7 @@ import com.todo.ui.component.GlassCard
 import com.todo.ui.component.NeumorphTextField
 import com.todo.ui.component.neumorph
 import com.todo.ui.theme.MotionTokens
+import com.todo.ui.theme.Neumorph
 import com.todo.ui.theme.NeumorphElevation
 import com.todo.ui.theme.NeumorphShapes
 
@@ -74,8 +75,8 @@ fun AddTodoSheet(
     var selectedTabIndex by remember { mutableStateOf(0) }
     var manualInput by remember { mutableStateOf("") }
     val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
-    val secondaryTextColor = if (isDark) Color(0xFFB6BDCA) else Color(0xFF6F7785)
-    val primaryTextColor = if (isDark) Color(0xFFEDEFF4) else MaterialTheme.colorScheme.onSurface
+    val secondaryTextColor = MaterialTheme.colorScheme.secondary
+    val primaryTextColor = MaterialTheme.colorScheme.onSurface
     val tabIndicatorColor = MaterialTheme.colorScheme.primary
     val tabSelectedColor = MaterialTheme.colorScheme.onSurface
     val tabUnselectedColor = MaterialTheme.colorScheme.secondary
@@ -90,12 +91,13 @@ fun AddTodoSheet(
                 val tabTrackShape = RoundedCornerShape(NeumorphShapes.Small)
                 SecondaryTabRow(
                     selectedTabIndex = selectedTabIndex,
-                    // 滑轨整体凹陷（新拟态里"可选择区域"的语义）；容器色透明，内阴影才看得见
+                    // 滑轨整体凹陷：用"更暗一档的凹陷底色 + 更强的内阴影"，让选项卡的范围一眼可见
                     modifier = Modifier.neumorph(
                         shape = tabTrackShape,
                         isDark = isDark,
                         depth = 0f,
-                        elevation = NeumorphElevation.Small
+                        surface = Neumorph.recessedSurface(isDark),
+                        elevation = NeumorphElevation.Medium
                     ),
                     containerColor = Color.Transparent,
                     indicator = {
@@ -105,7 +107,7 @@ fun AddTodoSheet(
                                 .tabIndicatorOffset(selectedTabIndex)
                                 .padding(horizontal = 7.dp)
                                 .fillMaxWidth()
-                                .height(3.dp)
+                                .height(4.dp)
                                 .clip(RoundedCornerShape(2.dp))
                                 .background(tabIndicatorColor)
                         )

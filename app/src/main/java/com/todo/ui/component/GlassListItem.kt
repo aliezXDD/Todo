@@ -30,23 +30,17 @@ fun GlassListItem(
     shape: Shape = RoundedCornerShape(NeumorphShapes.Medium),
     minHeight: Int = 56,
     contentPadding: PaddingValues = PaddingValues(horizontal = 14.dp, vertical = 10.dp),
+    onClick: (() -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
     val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
-
-    Surface(
-        modifier = modifier.neumorph(
-            shape = shape,
-            isDark = isDark,
-            depth = depth,
-            elevation = elevation
-        ),
+    val itemModifier = modifier.neumorph(
         shape = shape,
-        color = Color.Transparent,
-        contentColor = MaterialTheme.colorScheme.onSurface,
-        tonalElevation = 0.dp,
-        shadowElevation = 0.dp
-    ) {
+        isDark = isDark,
+        depth = depth,
+        elevation = elevation
+    )
+    val inner: @Composable () -> Unit = {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -56,5 +50,29 @@ fun GlassListItem(
         ) {
             content()
         }
+    }
+
+    // 同 GlassCard：可点击时用 Surface 的点击重载裁水波纹，调用方不要再自己 clip()
+    if (onClick != null) {
+        Surface(
+            onClick = onClick,
+            modifier = itemModifier,
+            shape = shape,
+            color = Color.Transparent,
+            contentColor = MaterialTheme.colorScheme.onSurface,
+            tonalElevation = 0.dp,
+            shadowElevation = 0.dp,
+            content = inner
+        )
+    } else {
+        Surface(
+            modifier = itemModifier,
+            shape = shape,
+            color = Color.Transparent,
+            contentColor = MaterialTheme.colorScheme.onSurface,
+            tonalElevation = 0.dp,
+            shadowElevation = 0.dp,
+            content = inner
+        )
     }
 }

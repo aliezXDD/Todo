@@ -1,28 +1,30 @@
 package com.todo.ui.screen.settings
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -30,6 +32,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.todo.R
 import com.todo.ui.component.GlassCard
 import com.todo.ui.component.GlassTopBar
+import com.todo.ui.component.neumorph
+import com.todo.ui.theme.Neumorph
+import com.todo.ui.theme.NeumorphElevation
+import com.todo.ui.theme.NeumorphShapes
 import com.todo.util.Constants
 
 @Composable
@@ -59,10 +65,6 @@ fun SettingsScreen(
                         selected = uiState.themeMode == Constants.THEME_MODE_SYSTEM,
                         onClick = { viewModel.setThemeMode(Constants.THEME_MODE_SYSTEM) }
                     )
-                    HorizontalDivider(
-                        thickness = 1.dp,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
-                    )
                     ThemeOptionRow(
                         label = "浅色模式",
                         selected = uiState.themeMode == Constants.THEME_MODE_LIGHT,
@@ -77,10 +79,8 @@ fun SettingsScreen(
             }
 
             GlassCard(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
-                    .clickable(onClick = onNavigateToRecycleBin)
+                modifier = Modifier.fillMaxWidth(),
+                onClick = onNavigateToRecycleBin
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -136,21 +136,51 @@ private fun ThemeOptionRow(
     selected: Boolean,
     onClick: () -> Unit
 ) {
+    val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
+    val noRipple = remember { MutableInteractionSource() }
+    val rowSurface = if (selected) Neumorph.recessedSurface(isDark) else Neumorph.surface(isDark)
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .clickable(onClick = onClick),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        RadioButton(
-            selected = selected,
-            onClick = onClick,
-            colors = RadioButtonDefaults.colors(
-                selectedColor = MaterialTheme.colorScheme.primary,
-                unselectedColor = MaterialTheme.colorScheme.secondary
+            // 选中行整体凹进去、未选中保持平面：层级完全靠光影，不用任何描边或色块
+            .neumorph(
+                shape = RoundedCornerShape(NeumorphShapes.Small),
+                isDark = isDark,
+                depth = if (selected) 0f else 1f,
+                surface = rowSurface,
+                elevation = if (selected) NeumorphElevation.Small else NeumorphElevation.None
             )
-        )
+            .clickable(
+                interactionSource = noRipple,
+                indication = null,
+                onClick = onClick
+            )
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        // 新拟态单选：未选 = 凸起的空圈；选中 = 凹陷 + 凸起的主题色圆点
+        Box(
+            modifier = Modifier
+                .size(20.dp)
+                .neumorph(
+                    shape = CircleShape,
+                    isDark = isDark,
+                    depth = if (selected) 0f else 1f,
+                    surface = rowSurface,
+                    elevation = NeumorphElevation.Small
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            if (selected) {
+                Box(
+                    modifier = Modifier
+                        .size(9.dp)
+                        .background(MaterialTheme.colorScheme.primary, CircleShape)
+                )
+            }
+        }
         Text(
             text = label,
             color = MaterialTheme.colorScheme.onSurface,

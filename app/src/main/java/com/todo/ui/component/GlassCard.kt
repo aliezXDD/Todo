@@ -26,24 +26,18 @@ fun GlassCard(
     depth: Float = 1f,
     elevation: NeumorphElevation = NeumorphElevation.Large,
     fillMaxHeight: Boolean = false,
+    onClick: (() -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
     val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
-
-    Surface(
-        modifier = modifier.neumorph(
-            shape = shape,
-            isDark = isDark,
-            depth = depth,
-            elevation = elevation
-        ),
+    val cardModifier = modifier.neumorph(
         shape = shape,
-        color = Color.Transparent,
-        contentColor = MaterialTheme.colorScheme.onSurface,
-        tonalElevation = 0.dp,
-        shadowElevation = 0.dp
-    ) {
-        // fillMaxHeight=true 时让内容撑满卡片高度（配合外部 weight 固定卡片高度）；默认仍按内容高度
+        isDark = isDark,
+        depth = depth,
+        elevation = elevation
+    )
+    // fillMaxHeight=true 时让内容撑满卡片高度（配合外部 weight 固定卡片高度）；默认仍按内容高度
+    val inner: @Composable () -> Unit = {
         Box(
             modifier = if (fillMaxHeight) {
                 Modifier.fillMaxHeight().padding(16.dp)
@@ -53,5 +47,30 @@ fun GlassCard(
         ) {
             content()
         }
+    }
+
+    // 可点击时走 Surface 的点击重载：水波纹会被裁到圆角内，调用方因此**不需要**再自己 clip()
+    // （在 neumorph 之前调用 clip() 会把外阴影一起裁掉，这是阴影显得很浅的常见原因）
+    if (onClick != null) {
+        Surface(
+            onClick = onClick,
+            modifier = cardModifier,
+            shape = shape,
+            color = Color.Transparent,
+            contentColor = MaterialTheme.colorScheme.onSurface,
+            tonalElevation = 0.dp,
+            shadowElevation = 0.dp,
+            content = inner
+        )
+    } else {
+        Surface(
+            modifier = cardModifier,
+            shape = shape,
+            color = Color.Transparent,
+            contentColor = MaterialTheme.colorScheme.onSurface,
+            tonalElevation = 0.dp,
+            shadowElevation = 0.dp,
+            content = inner
+        )
     }
 }

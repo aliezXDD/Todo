@@ -3,7 +3,6 @@ package com.todo
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
-import android.graphics.Color as AndroidColor
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
@@ -30,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.toArgb
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -38,6 +38,7 @@ import com.todo.ui.navigation.BottomNavBar
 import com.todo.ui.navigation.NavGraph
 import com.todo.ui.navigation.Screen
 import com.todo.ui.theme.MotionTokens
+import com.todo.ui.theme.Neumorph
 import com.todo.ui.theme.TodoTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -55,9 +56,6 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-// 底部导航栏底色：与整体深色底保持一致
-private val NavigationBarScrim: Int = AndroidColor.parseColor("#0F0F11")
-
 @Composable
 private fun ConfigureSystemBars() {
     val context = LocalContext.current
@@ -69,10 +67,13 @@ private fun ConfigureSystemBars() {
         // 不直接写 window.statusBarColor / navigationBarColor —— 自 API 35 起系统会忽略这两个值。
         activity.enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.auto(
-                AndroidColor.TRANSPARENT,
-                AndroidColor.TRANSPARENT
+                Neumorph.LightSurface.toArgb(),
+                Neumorph.DarkSurface.toArgb()
             ) { isDark },
-            navigationBarStyle = SystemBarStyle.dark(NavigationBarScrim)
+            navigationBarStyle = SystemBarStyle.auto(
+                Neumorph.LightSurface.toArgb(),
+                Neumorph.DarkSurface.toArgb()
+            ) { isDark }
         )
     }
 }
