@@ -1,30 +1,27 @@
 package com.todo.ui.screen.settings
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -32,10 +29,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.todo.R
 import com.todo.ui.component.GlassCard
 import com.todo.ui.component.GlassTopBar
-import com.todo.ui.component.neumorph
-import com.todo.ui.theme.Neumorph
-import com.todo.ui.theme.NeumorphElevation
-import com.todo.ui.theme.NeumorphShapes
 import com.todo.util.Constants
 
 @Composable
@@ -136,51 +129,22 @@ private fun ThemeOptionRow(
     selected: Boolean,
     onClick: () -> Unit
 ) {
-    val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
-    val noRipple = remember { MutableInteractionSource() }
-    val rowSurface = if (selected) Neumorph.recessedSurface(isDark) else Neumorph.surface(isDark)
-
+    // 单选按钮属于状态指示类元素，按要求保持平面设计
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            // 选中行整体凹进去、未选中保持平面：层级完全靠光影，不用任何描边或色块
-            .neumorph(
-                shape = RoundedCornerShape(NeumorphShapes.Small),
-                isDark = isDark,
-                depth = if (selected) 0f else 1f,
-                surface = rowSurface,
-                elevation = if (selected) NeumorphElevation.Small else NeumorphElevation.None
-            )
-            .clickable(
-                interactionSource = noRipple,
-                indication = null,
-                onClick = onClick
-            )
-            .padding(horizontal = 12.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .clickable(onClick = onClick),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        // 新拟态单选：未选 = 凸起的空圈；选中 = 凹陷 + 凸起的主题色圆点
-        Box(
-            modifier = Modifier
-                .size(20.dp)
-                .neumorph(
-                    shape = CircleShape,
-                    isDark = isDark,
-                    depth = if (selected) 0f else 1f,
-                    surface = rowSurface,
-                    elevation = NeumorphElevation.Small
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            if (selected) {
-                Box(
-                    modifier = Modifier
-                        .size(9.dp)
-                        .background(MaterialTheme.colorScheme.primary, CircleShape)
-                )
-            }
-        }
+        RadioButton(
+            selected = selected,
+            onClick = onClick,
+            colors = RadioButtonDefaults.colors(
+                selectedColor = MaterialTheme.colorScheme.primary,
+                unselectedColor = MaterialTheme.colorScheme.secondary
+            )
+        )
         Text(
             text = label,
             color = MaterialTheme.colorScheme.onSurface,
