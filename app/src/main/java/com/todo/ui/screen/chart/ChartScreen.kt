@@ -40,6 +40,7 @@ import com.todo.domain.model.DailyStats
 import com.todo.ui.component.EmptyState
 import com.todo.ui.component.GlassCard
 import com.todo.ui.component.GlassTopBar
+import com.todo.ui.component.neumorphOverlay
 import com.todo.ui.theme.NeumorphShapes
 import com.todo.ui.theme.RateHigh
 import com.todo.ui.theme.RateLow
@@ -59,6 +60,8 @@ fun ChartScreen(
         GlassTopBar(
             title = "完成统计",
             navigationIcon = Icons.AutoMirrored.Filled.ArrowBack,
+            // 与回收站/往日记录同理：吸顶栏抬到内容之上，它的阴影才不会被下方卡片的不透明填充硬切
+            modifier = Modifier.neumorphOverlay(),
             onNavigationClick = onBack,
             overlayBelowContent = true,
             actions = {

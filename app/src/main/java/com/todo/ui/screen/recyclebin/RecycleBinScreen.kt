@@ -50,6 +50,7 @@ import com.todo.ui.component.GlassTopBar
 import com.todo.ui.component.NeumorphScrollFade
 import com.todo.ui.component.NeumorphScrollFadeHeight
 import com.todo.ui.component.neumorph
+import com.todo.ui.component.neumorphOverlay
 import com.todo.ui.theme.MotionTokens
 import com.todo.ui.theme.Neumorph
 import com.todo.ui.theme.NeumorphElevation
@@ -88,6 +89,9 @@ fun RecycleBinScreen(
         GlassTopBar(
             title = if (uiState.isMultiSelectMode) "" else "回收站",
             navigationIcon = Icons.AutoMirrored.Filled.ArrowBack,
+            // 吸顶栏浮在列表之上：不抬高的话，它溢出到列表范围内的阴影会被列表的渐隐带盖掉，
+            // 看起来像被一条直线硬切（下方的次级条目仍按列表的渐隐处理）
+            modifier = Modifier.neumorphOverlay(),
             onNavigationClick = {
                 if (uiState.isMultiSelectMode) {
                     viewModel.clearMultiSelect()

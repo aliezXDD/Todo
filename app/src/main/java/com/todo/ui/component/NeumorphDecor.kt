@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.zIndex
 import com.todo.ui.theme.MotionTokens
 import com.todo.ui.theme.Neumorph
 import com.todo.ui.theme.NeumorphElevation
@@ -114,6 +115,15 @@ fun Modifier.neumorph(
         }
     }
 }
+
+/**
+ * 把元素抬到同级内容之上：用于"浮在滚动内容之上"的吸顶栏这类元素。
+ *
+ * **为什么需要**：同级元素按声明顺序绘制，后声明的在上。滚动列表上下缘那条与背景同色的渐隐带
+ * （以及次级条目自身的不透明同色填充）会盖住声明在它之前的元素；吸顶栏溢出的光影一旦落进列表范围，
+ * 就会被盖掉——看起来就是栏的阴影被一条直线硬切。抬到更高图层后，栏的阴影自然落在列表内容之上。
+ */
+fun Modifier.neumorphOverlay(): Modifier = this.zIndex(1f)
 
 /**
  * 带按压形变的版本：按下时由凸转凹（新拟态最具标志性的交互）。

@@ -26,6 +26,7 @@ import com.todo.ui.component.GlassDialog
 import com.todo.ui.component.GlassToast
 import com.todo.ui.component.NeumorphScrollFade
 import com.todo.ui.component.NeumorphScrollFadeHeight
+import com.todo.ui.component.neumorphOverlay
 import com.todo.ui.screen.preset.component.PresetEditDialog
 import com.todo.ui.screen.preset.component.PresetItemRow
 import com.todo.ui.screen.preset.component.PresetTopBar
@@ -64,7 +65,11 @@ fun PresetScreen(
             onCancelClick = viewModel::clearMultiSelect,
             onSelectAllClick = viewModel::selectAll,
             onDeleteClick = viewModel::requestDeleteSelected,
-            modifier = Modifier.padding(horizontal = 16.dp)
+            // 标题卡片浮在列表之上：不抬高的话，它溢出到列表范围内的阴影会被列表的渐隐带盖掉，
+            // 看起来像被一条直线硬切（下方的次级条目仍按列表的渐隐处理）
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .neumorphOverlay()
         )
 
         if (uiState.presets.isEmpty()) {

@@ -21,6 +21,7 @@ import com.todo.ui.component.EmptyState
 import com.todo.ui.component.GlassTopBar
 import com.todo.ui.component.NeumorphScrollFade
 import com.todo.ui.component.NeumorphScrollFadeHeight
+import com.todo.ui.component.neumorphOverlay
 import com.todo.ui.screen.todo.component.HistoryDayCard
 
 /**
@@ -44,6 +45,8 @@ fun HistoryScreen(
         GlassTopBar(
             title = "往日记录",
             navigationIcon = Icons.AutoMirrored.Filled.ArrowBack,
+            // 与回收站同理：吸顶栏抬到列表之上，它的阴影才不会被列表的渐隐带硬切
+            modifier = Modifier.neumorphOverlay(),
             onNavigationClick = onBack,
             overlayBelowContent = true
         )
