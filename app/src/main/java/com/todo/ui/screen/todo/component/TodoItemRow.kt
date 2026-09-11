@@ -4,10 +4,7 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -28,7 +25,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,7 +40,6 @@ import com.todo.ui.component.GlassListItem
 import com.todo.ui.theme.MotionTokens
 import com.todo.ui.theme.NeumorphShapes
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TodoItemRow(
     todo: Todo,
@@ -96,18 +91,15 @@ fun TodoItemRow(
         label = "todoRowDepth"
     )
 
-    // 圆角与行高都不在这里指定：统一走 GlassListItem 的默认规格，保证与预设/回收站条目完全一致
+    // 圆角、行高、点击反馈都不在这里指定：统一走 GlassListItem 的默认规格，
+    // 保证与预设/回收站条目完全一致（含长按进编辑与那圈同形水波纹）。
+    // 之前这里自己挂 combinedClickable(indication = null)，于是整行点下去没有任何反馈
     GlassListItem(
         modifier = modifier
             .fillMaxWidth()
-            .scale(rowScale.value)
-            .combinedClickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
-                onClick = {},
-                onLongClick = onLongPress
-            ),
-        depth = rowDepth
+            .scale(rowScale.value),
+        depth = rowDepth,
+        onLongClick = onLongPress
     ) {
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
             val handleSpace = 32.dp

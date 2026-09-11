@@ -5,7 +5,6 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,9 +25,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
@@ -105,7 +104,6 @@ fun BottomNavBar(
             ) {
                 items.forEach { (screen, label, icon) ->
                     val selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true
-                    val noRipple = remember { MutableInteractionSource() }
 
                     val iconScale by animateFloatAsState(
                         targetValue = if (selected) 1.06f else 1f,
@@ -130,10 +128,10 @@ fun BottomNavBar(
                                 depth = if (selected) 0f else 1f,
                                 elevation = if (selected) NeumorphElevation.Medium else NeumorphElevation.None
                             )
-                            .clickable(
-                                interactionSource = noRipple,
-                                indication = null
-                            ) {
+                            // 波纹与条目同形：先按形状裁剪再挂点击（与列表条目同一套规则）。
+                            // 原来这里是 indication = null（按下没有任何反馈），未选中项点下去像"没反应"
+                            .clip(itemShape)
+                            .clickable {
                                 navController.navigate(screen.route) {
                                     launchSingleTop = true
                                     restoreState = true
