@@ -35,7 +35,7 @@ fun PresetItemRow(
     isSelected: Boolean,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
-    onDoubleClick: () -> Unit,
+    onDoubleClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val indicatorScale = animateFloatAsState(

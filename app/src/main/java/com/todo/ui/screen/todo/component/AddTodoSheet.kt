@@ -8,24 +8,15 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,9 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.luminance
@@ -46,14 +35,18 @@ import com.todo.domain.model.Preset
 import com.todo.ui.component.GlassBottomSheet
 import com.todo.ui.component.GlassButton
 import com.todo.ui.component.GlassCard
+import com.todo.ui.component.NeumorphScrollFade
+import com.todo.ui.component.NeumorphScrollFadeHeight
 import com.todo.ui.component.NeumorphTextField
-import com.todo.ui.component.neumorph
+import com.todo.ui.screen.preset.component.PresetItemRow
 import com.todo.ui.theme.MotionTokens
+import com.todo.ui.theme.Neumorph
 import com.todo.ui.theme.NeumorphElevation
-import com.todo.ui.theme.NeumorphShapes
 import kotlinx.coroutines.delay
 
-@OptIn(ExperimentalFoundationApi::class)
+/** 面板内容的左右留白：滚动列表用"视口占满整宽 + 条目自己内缩这个值"的方式，其余内容也按它对齐 */
+private val AddSheetGutter = 16.dp
+
 @Composable
 fun AddTodoSheet(
     visible: Boolean,
@@ -76,7 +69,6 @@ fun AddTodoSheet(
     var manualInput by remember { mutableStateOf("") }
     val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
     val secondaryTextColor = MaterialTheme.colorScheme.secondary
-    val primaryTextColor = MaterialTheme.colorScheme.onSurface
 
     // 点 + 打开面板后直接弹出键盘（与「编辑待办」同一做法：等 sheet 的节点挂上再请求焦点）。
     // 切回"手动输入"这一档时也会重新拉起键盘。
@@ -97,19 +89,25 @@ fun AddTodoSheet(
             // 面板外围那一圈"深色边框"就是这张卡片自己的暗影——它与按钮溢出的光影在同一处相遇，
             // 于是按钮的影子看起来被那圈深色框挡掉了。面板本身就是那块"表面"（GlassBottomSheet
             // 与页面同色），内容直接落在它上面即可，不需要再套一圈有阴影的框。
-            elevation = NeumorphElevation.None
+            elevation = NeumorphElevation.None,
+            // 横向内边距交给各块自己（见 AddSheetGutter）：预设列表因此能拿到比条目更宽的视口，
+            // 条目凸起时光影才有地方落，不会被列表边界硬切（与预设页同一套做法）
+            contentPadding = PaddingValues(vertical = 16.dp)
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 // 与「编辑待办」面板同一套排布：标题 → 内容 → 两颗动作按钮
                 Text(
                     text = "添加待办",
                     style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(horizontal = AddSheetGutter)
                 )
                 // 二选一 = 两颗普通 GlassButton（与下面「完成/添加」完全同一套样式），
                 // 只用深度区分状态：当前选中的那颗凹着（凹陷 = 已选中），另一颗凸起
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = AddSheetGutter),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     GlassButton(
@@ -183,6 +181,7 @@ fun AddTodoSheet(
                                     onValueChange = { manualInput = it },
                                     modifier = Modifier
                                         .fillMaxWidth()
+                                        .padding(horizontal = AddSheetGutter)
                                         .focusRequester(manualInputFocus),
                                     placeholder = "输入待办内容...",
                                     singleLine = true,
@@ -206,7 +205,9 @@ fun AddTodoSheet(
                                     NeumorphTextField(
                                         value = searchQuery,
                                         onValueChange = onSearchQueryChange,
-                                        modifier = Modifier.fillMaxWidth(),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = AddSheetGutter),
                                         placeholder = "搜索预设..."
                                     )
 
@@ -214,74 +215,46 @@ fun AddTodoSheet(
                                         Text(
                                             text = "暂无预设，去预设页面添加吧",
                                             style = MaterialTheme.typography.bodyMedium,
-                                            color = secondaryTextColor
+                                            color = secondaryTextColor,
+                                            modifier = Modifier.padding(horizontal = AddSheetGutter)
                                         )
                                     } else {
-                                        LazyColumn(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .heightIn(max = 300.dp),
-                                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                                        // 视口占满整宽、条目自己内缩 AddSheetGutter：
+                                        // 条目是**凸起**的（与预设页、待办条目同一套外观），
+                                        // 光影需要地方落，否则在列表左右边界会被硬切
+                                        NeumorphScrollFade(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            fadeColor = Neumorph.surface(isDark)
                                         ) {
-                                            items(presets, key = { it.id }) { preset ->
-                                                Row(
-                                                    modifier = Modifier
-                                                        .fillMaxWidth()
-                                                        .neumorph(
-                                                            shape = RoundedCornerShape(NeumorphShapes.Small),
-                                                            isDark = isDark,
-                                                            depth = 0f,
-                                                            elevation = NeumorphElevation.Small
-                                                        )
-                                                        // 同滑轨：先裁成条目形状，水波纹才不会从圆角外露出方块
-                                                        .clip(RoundedCornerShape(NeumorphShapes.Small))
-                                                        .combinedClickable(
-                                                            onClick = {
-                                                                if (isMultiSelectMode) {
-                                                                    onTogglePresetSelect(preset)
-                                                                } else {
-                                                                    onPresetClick(preset)
-                                                                }
-                                                            },
-                                                            onLongClick = {
-                                                                onPresetLongPress(preset)
+                                            LazyColumn(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .heightIn(max = 300.dp),
+                                                contentPadding = PaddingValues(
+                                                    start = AddSheetGutter,
+                                                    end = AddSheetGutter,
+                                                    top = NeumorphScrollFadeHeight,
+                                                    bottom = NeumorphScrollFadeHeight
+                                                ),
+                                                // 与预设页同样的间距（阴影扩散范围的一半）
+                                                verticalArrangement = Arrangement.spacedBy(12.dp)
+                                            ) {
+                                                items(presets, key = { it.id }) { preset ->
+                                                    // 直接复用预设页的条目组件：外观、圆角、行高、水波纹完全一致。
+                                                    // 这里不传 onDoubleClick，所以单击就是单击（没有双击等待）
+                                                    PresetItemRow(
+                                                        preset = preset,
+                                                        isMultiSelectMode = isMultiSelectMode,
+                                                        isSelected = preset.id in selectedPresetIds,
+                                                        onClick = {
+                                                            if (isMultiSelectMode) {
+                                                                onTogglePresetSelect(preset)
+                                                            } else {
+                                                                onPresetClick(preset)
                                                             }
-                                                        )
-                                                        .padding(horizontal = 14.dp, vertical = 10.dp),
-                                                    horizontalArrangement = Arrangement.SpaceBetween
-                                                ) {
-                                                    Text(text = preset.content, color = primaryTextColor)
-                                                    if (isMultiSelectMode) {
-                                                        if (preset.id in selectedPresetIds) {
-                                                            // 与待办勾选框同款：选中 = 主题色实底 + 白勾，
-                                                            // 形状为小方块圆角（不用正圆）
-                                                            Box(
-                                                                modifier = Modifier
-                                                                    .size(18.dp)
-                                                                    .background(
-                                                                        MaterialTheme.colorScheme.primary,
-                                                                        RoundedCornerShape(NeumorphShapes.Marker)
-                                                                    ),
-                                                                contentAlignment = Alignment.Center
-                                                            ) {
-                                                                Icon(
-                                                                    imageVector = Icons.Filled.Check,
-                                                                    contentDescription = null,
-                                                                    modifier = Modifier.size(13.dp),
-                                                                    tint = MaterialTheme.colorScheme.onPrimary
-                                                                )
-                                                            }
-                                                        } else {
-                                                            Box(
-                                                                modifier = Modifier
-                                                                    .size(18.dp)
-                                                                    .background(
-                                                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
-                                                                        shape = RoundedCornerShape(NeumorphShapes.Marker)
-                                                                    )
-                                                            )
-                                                        }
-                                                    }
+                                                        },
+                                                        onLongClick = { onPresetLongPress(preset) }
+                                                    )
                                                 }
                                             }
                                         }
@@ -289,7 +262,9 @@ fun AddTodoSheet(
 
                                     if (isMultiSelectMode) {
                                         Row(
-                                            modifier = Modifier.fillMaxWidth(),
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(horizontal = AddSheetGutter),
                                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                                         ) {
                                             GlassButton(
