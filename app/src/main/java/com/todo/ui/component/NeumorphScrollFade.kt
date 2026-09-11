@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -33,15 +34,17 @@ val NeumorphScrollFadeHeight: Dp = 16.dp
  *
  * **用它就不要再用"能滚才显示"的开关式渐隐**：那种做法在滚到端点时会突然出现/消失（也是一种硬切），
  * 而这里的两条带子常驻，静止时它们只覆盖内衬区域（与背景同色，什么也看不见）。
+ *
+ * [fadeColor] 必须和列表**背后的那一层**一致：列表直接落在页面上（预设/回收站/往日记录）用默认的
+ * [Neumorph.background]；列表若在一个卡片/面板内部（今日），要传 [Neumorph.surface]。
  */
 @Composable
 fun NeumorphScrollFade(
     modifier: Modifier = Modifier,
+    fadeColor: Color = Neumorph.background(MaterialTheme.colorScheme.onSurface.luminance() > 0.7f),
     content: @Composable () -> Unit
 ) {
-    val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
-    val surface = Neumorph.surface(isDark)
-    val clear = surface.copy(alpha = 0f)
+    val clear = fadeColor.copy(alpha = 0f)
 
     Box(modifier = modifier) {
         content()
@@ -52,7 +55,7 @@ fun NeumorphScrollFade(
                 .align(Alignment.TopCenter)
                 .fillMaxWidth()
                 .height(NeumorphScrollFadeHeight)
-                .background(Brush.verticalGradient(colors = listOf(surface, clear)))
+                .background(Brush.verticalGradient(colors = listOf(fadeColor, clear)))
         )
         // 下缘：方向相反
         Box(
@@ -60,7 +63,7 @@ fun NeumorphScrollFade(
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
                 .height(NeumorphScrollFadeHeight)
-                .background(Brush.verticalGradient(colors = listOf(clear, surface)))
+                .background(Brush.verticalGradient(colors = listOf(clear, fadeColor)))
         )
     }
 }

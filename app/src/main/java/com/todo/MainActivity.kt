@@ -67,11 +67,11 @@ private fun ConfigureSystemBars() {
         // 不直接写 window.statusBarColor / navigationBarColor —— 自 API 35 起系统会忽略这两个值。
         activity.enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.auto(
-                Neumorph.LightSurface.toArgb(),
+                Neumorph.LightBackground.toArgb(),
                 Neumorph.DarkSurface.toArgb()
             ) { isDark },
             navigationBarStyle = SystemBarStyle.auto(
-                Neumorph.LightSurface.toArgb(),
+                Neumorph.LightBackground.toArgb(),
                 Neumorph.DarkSurface.toArgb()
             ) { isDark }
         )
@@ -90,12 +90,11 @@ private fun TodoRoot() {
         Box(modifier = Modifier.fillMaxSize()) {
             Scaffold(
                 modifier = Modifier.fillMaxSize(),
-                // 用主题的 surface 而不是 Color.Transparent：Scaffold 根部是一层 Surface，
-                // 它会按 containerColor 反查 contentColor 并注入 LocalContentColor。
-                // 透明色不在配色表里 → 反查得到 Unspecified → 任何"没写颜色"的 Text 会退回
-                // LocalContentColor 的默认值 Color.Black，深色模式下就成了黑字压深底。
-                // 这里给的正好是新拟态背景色，视觉上完全等价，同时让全局文字继承 onSurface。
-                containerColor = MaterialTheme.colorScheme.surface,
+                // 用色板里的 background（= 最底层页面底色）而不是 Color.Transparent：
+                // Scaffold 根部是一层 Surface，它会按 containerColor 反查 contentColor 并注入
+                // LocalContentColor。透明色不在配色表里 → 反查得到 Unspecified → 任何"没写颜色"的
+                // Text 会退回 LocalContentColor 的默认值 Color.Black（深色下就成了黑字压深底）。
+                containerColor = MaterialTheme.colorScheme.background,
                 contentWindowInsets = WindowInsets(0, 0, 0, 0)
             ) { innerPadding ->
                 AppNavContent(innerPadding = innerPadding, navController = navController)

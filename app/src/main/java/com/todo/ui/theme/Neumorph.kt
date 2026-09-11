@@ -16,6 +16,8 @@ import androidx.compose.ui.unit.dp
 object Neumorph {
     // ---- 浅色：背景沿用原文的 #ECF0F3，但阴影整体加深一档（原 #D1D9E6 在真机上偏弱）----
     val LightSurface = Color(0xFFECF0F3)
+    /** 浅色下"最底层页面底色"：比 [LightSurface] 深一档（元素本身不变） */
+    val LightBackground = Color(0xFFE1E5E8)
     val LightShadowDark = Color(0xFFBFCBDE)
     val LightShadowLight = Color(0xFFFFFFFF)
     val LightRecessed = Color(0xFFDCE2E9)
@@ -27,6 +29,14 @@ object Neumorph {
     val DarkRecessed = Color(0xFF191C20)
 
     fun surface(isDark: Boolean): Color = if (isDark) DarkSurface else LightSurface
+
+    /**
+     * **最底层页面底色**：只有它背后的那一大片空处用它，卡片、条目、按钮、浮层等全部仍用 [surface]。
+     *
+     * 浅色下比表面再深一档，让"页面底"与"卡片面"有一点点区分（卡片因此更像一层浮起来的板）；
+     * 深色下与表面同色——深色的观感已经合适，不动。
+     */
+    fun background(isDark: Boolean): Color = if (isDark) DarkSurface else LightBackground
 
     /**
      * 凹陷区域（滑轨、输入框、选中项）的专用底色，比背景**明显暗一档**。

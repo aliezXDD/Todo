@@ -19,6 +19,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import com.todo.domain.model.Todo
@@ -26,6 +27,7 @@ import com.todo.ui.component.EmptyState
 import com.todo.ui.component.GlassCard
 import com.todo.ui.component.NeumorphScrollFade
 import com.todo.ui.component.NeumorphScrollFadeHeight
+import com.todo.ui.theme.Neumorph
 import com.todo.util.DateUtils
 import sh.calvin.reorderable.ReorderableColumn
 
@@ -55,6 +57,7 @@ fun TodaySection(
         localTodos = todos
     }
     val scrollState = rememberScrollState()
+    val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
 
     GlassCard(
         modifier = modifier
@@ -94,11 +97,13 @@ fun TodaySection(
                         .padding(vertical = 24.dp)
                 )
             } else {
-                // 列表上下缘各一条常驻渐隐：条目滚出列表边界时，溢出的光影会被容器硬切
+                // 列表上下缘各一条常驻渐隐：条目滚出列表边界时，溢出的光影会被容器硬切。
+                // 这条列表在**卡片内部**，所以渐隐色要用表面色（不是页面底色）
                 NeumorphScrollFade(
                     modifier = Modifier
                         .weight(1f)
-                        .fillMaxWidth()
+                        .fillMaxWidth(),
+                    fadeColor = Neumorph.surface(isDark)
                 ) {
                     ReorderableColumn(
                         list = localTodos,

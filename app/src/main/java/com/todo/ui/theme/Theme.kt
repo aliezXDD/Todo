@@ -28,7 +28,8 @@ private val LightColorScheme = lightColorScheme(
     onPrimary = Color.White,
     primaryContainer = LightPrimaryContainer,
     onPrimaryContainer = LightPrimaryText,
-    background = Neumorph.LightSurface,
+    // 只有"最底层页面底色"用 background，其余一切仍用 surface
+    background = Neumorph.LightBackground,
     onBackground = LightPrimaryText,
     surface = Neumorph.LightSurface,
     onSurface = LightPrimaryText,
