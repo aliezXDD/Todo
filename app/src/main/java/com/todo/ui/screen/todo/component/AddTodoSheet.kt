@@ -9,12 +9,8 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -48,7 +44,6 @@ import com.todo.ui.component.GlassButton
 import com.todo.ui.component.GlassCard
 import com.todo.ui.component.NeumorphTextField
 import com.todo.ui.component.neumorph
-import com.todo.ui.component.neumorphPress
 import com.todo.ui.theme.MotionTokens
 import com.todo.ui.theme.NeumorphElevation
 import com.todo.ui.theme.NeumorphShapes
@@ -96,24 +91,24 @@ fun AddTodoSheet(
                     style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.onSurface
                 )
-                // 二选一由 Tab 行改成两颗并列的状态按钮：当前选中的那块**凹进去**（凹陷 = 已选中），
-                // 另一块**凸起**（凸起 = 可点）；未选中那块按下时由凸转凹，状态与按下是同一种语言
+                // 二选一 = 两颗普通 GlassButton（与下面「完成/添加」完全同一套样式），
+                // 只用深度区分状态：当前选中的那颗凹着（凹陷 = 已选中），另一颗凸起
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    AddSheetSwitchButton(
+                    GlassButton(
                         text = "手动输入",
-                        selected = selectedTabIndex == 0,
-                        isDark = isDark,
                         onClick = { selectedTabIndex = 0 },
+                        glassSurface = true,
+                        recessed = selectedTabIndex == 0,
                         modifier = Modifier.weight(1f)
                     )
-                    AddSheetSwitchButton(
+                    GlassButton(
                         text = "从预设选择",
-                        selected = selectedTabIndex == 1,
-                        isDark = isDark,
                         onClick = { selectedTabIndex = 1 },
+                        glassSurface = true,
+                        recessed = selectedTabIndex == 1,
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -322,52 +317,3 @@ fun AddTodoSheet(
         }
     }
 }
-
-/**
- * 面板顶部的"二选一"按钮（手动输入 / 从预设选择）。
- *
- * 与「编辑待办」面板里的按钮同高同形（同上下的 12dp 内边距、同圆角），区别只在状态：
- * 当前选中的那块**凹进去**（凹陷 = 已选中），另一块**凸起**（凸起 = 可点）；
- * 未选中那块按下时由凸转凹、松手弹回，所以"状态"和"按下"用的是同一种语言。
- * 波纹被裁进按钮形状内（和列表条目同一套规则）。
- */
-@Composable
-private fun AddSheetSwitchButton(
-    text: String,
-    selected: Boolean,
-    isDark: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val shape = RoundedCornerShape(NeumorphShapes.Corner)
-    val interactionSource = remember { MutableInteractionSource() }
-    val pressed by interactionSource.collectIsPressedAsState()
-
-    Box(
-        modifier = modifier
-            .neumorphPress(
-                shape = shape,
-                isDark = isDark,
-                // 已经凹着的那块不需要再"按进去"
-                pressed = pressed && !selected,
-                elevation = NeumorphElevation.Medium,
-                restDepth = if (selected) 0f else 1f
-            )
-            .clip(shape)
-            .clickable(
-                interactionSource = interactionSource,
-                indication = LocalIndication.current,
-                onClick = onClick
-            )
-            // 与 GlassButton 相同的上下内边距，两颗按钮因此和底部动作按钮一样高
-            .padding(horizontal = 20.dp, vertical = 12.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.labelLarge,
-            color = if (selected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.secondary
-        )
-    }
-}
-

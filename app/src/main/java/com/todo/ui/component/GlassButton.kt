@@ -25,6 +25,9 @@ import com.todo.ui.theme.NeumorphShapes
  *
  * [glassSurface] = true 得到"与背景同色"的次级按钮；false 得到以主题色为表面的主操作按钮。
  * 表面由 [neumorphPress] 填充，因此 Button 自身容器色透明。
+ *
+ * [recessed] = true 表示"这一颗是当前选中项"：静止时就凹着（凹陷 = 已选中），
+ * 与底部导航选中项、列表里的选中条目同一种语义。二选一的分段按钮因此不必另造组件。
  */
 @Composable
 fun GlassButton(
@@ -33,6 +36,7 @@ fun GlassButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     glassSurface: Boolean = false,
+    recessed: Boolean = false,
     shape: Shape = RoundedCornerShape(NeumorphShapes.Small)
 ) {
     val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
@@ -48,9 +52,10 @@ fun GlassButton(
         modifier = modifier.neumorphPress(
             shape = shape,
             isDark = isDark,
-            pressed = pressed && enabled,
+            pressed = pressed && enabled && !recessed,
             surface = if (enabled) surfaceColor else surfaceColor.copy(alpha = 0.45f),
-            elevation = NeumorphElevation.Medium
+            elevation = NeumorphElevation.Medium,
+            restDepth = if (recessed) 0f else 1f
         ),
         enabled = enabled,
         shape = shape,
