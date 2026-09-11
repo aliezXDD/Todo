@@ -109,7 +109,8 @@ fun PresetEditDialog(
                         shape = RoundedCornerShape(NeumorphShapes.Large),
                         isDark = isDark,
                         depth = 1f,
-                        elevation = NeumorphElevation.XLarge
+                        // 弹窗不带上高光：只用投影表达"浮在遮罩之上"
+                        elevation = NeumorphElevation.Dialog
                     ),
                 shape = RoundedCornerShape(NeumorphShapes.Large),
                 color = Color.Transparent,
