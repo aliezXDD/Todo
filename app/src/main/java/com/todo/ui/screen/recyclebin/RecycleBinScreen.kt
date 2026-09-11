@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,12 +32,10 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.luminance
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
@@ -48,6 +47,8 @@ import com.todo.ui.component.EmptyState
 import com.todo.ui.component.GlassDialog
 import com.todo.ui.component.GlassListItem
 import com.todo.ui.component.GlassTopBar
+import com.todo.ui.component.NeumorphScrollFade
+import com.todo.ui.component.NeumorphScrollFadeHeight
 import com.todo.ui.component.neumorph
 import com.todo.ui.theme.MotionTokens
 import com.todo.ui.theme.Neumorph
@@ -139,14 +140,24 @@ fun RecycleBinScreen(
                 modifier = Modifier.fillMaxSize()
             )
         } else {
-            Box(modifier = Modifier.fillMaxSize()) {
-                val listState = rememberLazyListState()
-                val showFade by remember { derivedStateOf { listState.canScrollForward } }
+            val listState = rememberLazyListState()
+            // 上下缘各一条常驻渐隐：条目滚出列表边界时，溢出的光影会被容器硬切
+            NeumorphScrollFade(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = listBottomInset)
+            ) {
                 LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = listBottomInset),
+                    modifier = Modifier.fillMaxSize(),
                     state = listState,
+                    // 上下内衬与渐隐带同高（列表第一个元素就是日期标题，顶部内衬不足会被淡化）；
+                    // 左右 16dp 是条目的实际位置，视口本身仍比条目宽，用来容纳条目溢出的光影
+                    contentPadding = PaddingValues(
+                        start = 16.dp,
+                        end = 16.dp,
+                        top = NeumorphScrollFadeHeight,
+                        bottom = NeumorphScrollFadeHeight
+                    ),
                     // 同上：让相邻条目的光影不互相压盖
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
@@ -186,23 +197,6 @@ fun RecycleBinScreen(
                             )
                         }
                     }
-                }
-
-                if (showFade) {
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .fillMaxWidth()
-                            .height(56.dp)
-                            .background(
-                                Brush.verticalGradient(
-                                    colors = listOf(
-                                        Neumorph.surface(isDark).copy(alpha = 0f),
-                                        Neumorph.surface(isDark)
-                                    )
-                                )
-                            )
-                    )
                 }
             }
         }

@@ -1,6 +1,7 @@
 package com.todo.ui.component
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -26,6 +27,7 @@ fun GlassCard(
     depth: Float = 1f,
     elevation: NeumorphElevation = NeumorphElevation.Large,
     fillMaxHeight: Boolean = false,
+    contentPadding: PaddingValues = PaddingValues(16.dp),
     onClick: (() -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
@@ -36,13 +38,15 @@ fun GlassCard(
         depth = depth,
         elevation = elevation
     )
-    // fillMaxHeight=true 时让内容撑满卡片高度（配合外部 weight 固定卡片高度）；默认仍按内容高度
+    // fillMaxHeight=true 时让内容撑满卡片高度（配合外部 weight 固定卡片高度）；默认仍按内容高度。
+    // contentPadding 可传"只有纵向"的值：内部若有一条滚动列表，让它越出卡片的左右内边距、
+    // 由列表自己把条目内缩（见 TodaySection），条目溢出的光影才不会被滚动视口硬切。
     val inner: @Composable () -> Unit = {
         Box(
             modifier = if (fillMaxHeight) {
-                Modifier.fillMaxHeight().padding(16.dp)
+                Modifier.fillMaxHeight().padding(contentPadding)
             } else {
-                Modifier.padding(16.dp)
+                Modifier.padding(contentPadding)
             }
         ) {
             content()
