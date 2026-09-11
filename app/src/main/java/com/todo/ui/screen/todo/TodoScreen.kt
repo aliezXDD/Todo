@@ -59,7 +59,7 @@ fun TodoScreen(
             TodaySection(
                 todos = uiState.todayTodos,
                 onToggleTodo = viewModel::toggleTodo,
-                onLongPressTodo = viewModel::startEdit,
+                onEditTodo = viewModel::startEdit,
                 onReorderFinished = viewModel::commitReorder,
                 modifier = Modifier.weight(1f)
             )

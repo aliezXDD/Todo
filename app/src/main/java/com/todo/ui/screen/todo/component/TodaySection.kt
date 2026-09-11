@@ -34,7 +34,7 @@ import sh.calvin.reorderable.ReorderableColumn
 fun TodaySection(
     todos: List<Todo>,
     onToggleTodo: (Todo, Boolean) -> Unit,
-    onLongPressTodo: (Todo) -> Unit,
+    onEditTodo: (Todo) -> Unit,
     onReorderFinished: (List<Todo>) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -126,7 +126,7 @@ fun TodaySection(
                             todo = todo,
                             isDragging = rowDragging,
                             onCheckedChange = { checked -> onToggleTodo(todo, checked) },
-                            onLongPress = { onLongPressTodo(todo) },
+                            onEdit = { onEditTodo(todo) },
                             dragHandleModifier = with(this) {
                                 Modifier.draggableHandle(
                                     onDragStarted = {

@@ -45,7 +45,7 @@ fun TodoItemRow(
     todo: Todo,
     isDragging: Boolean,
     onCheckedChange: (Boolean) -> Unit,
-    onLongPress: () -> Unit,
+    onEdit: () -> Unit,
     modifier: Modifier = Modifier,
     dragHandleModifier: Modifier = Modifier
 ) {
@@ -92,14 +92,15 @@ fun TodoItemRow(
     )
 
     // 圆角、行高、点击反馈都不在这里指定：统一走 GlassListItem 的默认规格，
-    // 保证与预设/回收站条目完全一致（含长按进编辑与那圈同形水波纹）。
-    // 之前这里自己挂 combinedClickable(indication = null)，于是整行点下去没有任何反馈
+    // 保证与预设/回收站条目完全一致（含那圈同形水波纹）。
+    // 单击整行 = 进编辑：勾选框有自己的点击区（只切换完成状态），拖拽把手有自己的拖拽手势，
+    // 所以点条目本体不会误触这两者。
     GlassListItem(
         modifier = modifier
             .fillMaxWidth()
             .scale(rowScale.value),
         depth = rowDepth,
-        onLongClick = onLongPress
+        onClick = onEdit
     ) {
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
             val handleSpace = 32.dp
