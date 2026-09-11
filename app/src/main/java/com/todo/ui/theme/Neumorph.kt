@@ -24,6 +24,8 @@ object Neumorph {
 
     // ---- 深色：原文只给了浅色方案，这里按同一原理推导（暗影更深、亮影更亮，保证对比可见）----
     val DarkSurface = Color(0xFF23262B)
+    /** 深色下"最底层页面底色"：比 [DarkSurface] 亮一点点（元素本身不变） */
+    val DarkBackground = Color(0xFF282B30)
     val DarkShadowDark = Color(0xFF111316)
     val DarkShadowLight = Color(0xFF373D46)
     val DarkRecessed = Color(0xFF191C20)
@@ -33,10 +35,10 @@ object Neumorph {
     /**
      * **最底层页面底色**：只有它背后的那一大片空处用它，卡片、条目、按钮、浮层等全部仍用 [surface]。
      *
-     * 浅色下比表面再深一档，让"页面底"与"卡片面"有一点点区分（卡片因此更像一层浮起来的板）；
-     * 深色下与表面同色——深色的观感已经合适，不动。
+     * 两个主题各比自己的表面再亮/再暗一档，让"页面底"与"卡片面"分开一点：
+     * 浅色下更深、深色下稍亮（深色里卡片因此比底略暗，靠暗影和亮影撑起层次）。
      */
-    fun background(isDark: Boolean): Color = if (isDark) DarkSurface else LightBackground
+    fun background(isDark: Boolean): Color = if (isDark) DarkBackground else LightBackground
 
     /**
      * 凹陷区域（滑轨、输入框、选中项）的专用底色，比背景**明显暗一档**。

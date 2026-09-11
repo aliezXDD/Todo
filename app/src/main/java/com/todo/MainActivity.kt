@@ -68,11 +68,11 @@ private fun ConfigureSystemBars() {
         activity.enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.auto(
                 Neumorph.LightBackground.toArgb(),
-                Neumorph.DarkSurface.toArgb()
+                Neumorph.DarkBackground.toArgb()
             ) { isDark },
             navigationBarStyle = SystemBarStyle.auto(
                 Neumorph.LightBackground.toArgb(),
-                Neumorph.DarkSurface.toArgb()
+                Neumorph.DarkBackground.toArgb()
             ) { isDark }
         )
     }

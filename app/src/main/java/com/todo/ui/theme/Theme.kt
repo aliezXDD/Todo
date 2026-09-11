@@ -47,7 +47,8 @@ private val DarkColorScheme = darkColorScheme(
     onPrimary = Color(0xFF12141A),
     primaryContainer = DarkPrimaryContainer,
     onPrimaryContainer = DarkPrimaryText,
-    background = Neumorph.DarkSurface,
+    // 只有"最底层页面底色"用 background，其余一切仍用 surface
+    background = Neumorph.DarkBackground,
     onBackground = DarkPrimaryText,
     surface = Neumorph.DarkSurface,
     onSurface = DarkPrimaryText,
