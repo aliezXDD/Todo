@@ -9,14 +9,17 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -27,8 +30,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SecondaryTabRow
-import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -38,7 +39,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.dp
 import com.todo.domain.model.Preset
@@ -47,6 +47,7 @@ import com.todo.ui.component.GlassButton
 import com.todo.ui.component.GlassCard
 import com.todo.ui.component.NeumorphTextField
 import com.todo.ui.component.neumorph
+import com.todo.ui.component.neumorphPress
 import com.todo.ui.theme.MotionTokens
 import com.todo.ui.theme.NeumorphElevation
 import com.todo.ui.theme.NeumorphShapes
@@ -75,9 +76,6 @@ fun AddTodoSheet(
     val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
     val secondaryTextColor = MaterialTheme.colorScheme.secondary
     val primaryTextColor = MaterialTheme.colorScheme.onSurface
-    val tabIndicatorColor = MaterialTheme.colorScheme.primary
-    val tabSelectedColor = MaterialTheme.colorScheme.onSurface
-    val tabUnselectedColor = MaterialTheme.colorScheme.secondary
 
     GlassBottomSheet(
         onDismissRequest = onDismiss
@@ -86,48 +84,31 @@ fun AddTodoSheet(
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                val tabTrackShape = RoundedCornerShape(NeumorphShapes.Small)
-                SecondaryTabRow(
-                    selectedTabIndex = selectedTabIndex,
-                    // 滑轨和底部导航的选中项用同一套凹陷语言：表面色与背景相同，范围只由内阴影给出。
-                    // 之前这里铺了一层更暗的槽底色，深色下那块颜色比阴影还抢眼（发黑），也和其余凹陷元素不一致；
-                    // 为了范围依然清楚，阴影从 Small 提到 Medium（与导航选中项同档）。
-                    // clip 必须跟在 neumorph 之后：Tab 自带的水波纹是方块，不裁的话会从滑轨四角露出来
-                    modifier = Modifier
-                        .neumorph(
-                            shape = tabTrackShape,
-                            isDark = isDark,
-                            depth = 0f,
-                            elevation = NeumorphElevation.Medium
-                        )
-                        .clip(tabTrackShape),
-                    containerColor = Color.Transparent,
-                    indicator = {
-                        // 选中项下方的主题色指示条：凹陷滑轨 + 指示条，全程无描边
-                        Box(
-                            modifier = Modifier
-                                .tabIndicatorOffset(selectedTabIndex)
-                                .padding(horizontal = 7.dp)
-                                .fillMaxWidth()
-                                .height(4.dp)
-                                .clip(RoundedCornerShape(NeumorphShapes.Corner))
-                                .background(tabIndicatorColor)
-                        )
-                    }
+                // 与「编辑待办」面板同一套排布：标题 → 内容 → 两颗动作按钮
+                Text(
+                    text = "添加待办",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                // 二选一由 Tab 行改成两颗并列的状态按钮：当前选中的那块**凹进去**（凹陷 = 已选中），
+                // 另一块**凸起**（凸起 = 可点）；未选中那块按下时由凸转凹，状态与按下是同一种语言
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Tab(
+                    AddSheetSwitchButton(
+                        text = "手动输入",
                         selected = selectedTabIndex == 0,
+                        isDark = isDark,
                         onClick = { selectedTabIndex = 0 },
-                        selectedContentColor = tabSelectedColor,
-                        unselectedContentColor = tabUnselectedColor,
-                        text = { Text("手动输入") }
+                        modifier = Modifier.weight(1f)
                     )
-                    Tab(
+                    AddSheetSwitchButton(
+                        text = "从预设选择",
                         selected = selectedTabIndex == 1,
+                        isDark = isDark,
                         onClick = { selectedTabIndex = 1 },
-                        selectedContentColor = tabSelectedColor,
-                        unselectedContentColor = tabUnselectedColor,
-                        text = { Text("从预设选择") }
+                        modifier = Modifier.weight(1f)
                     )
                 }
 
@@ -182,7 +163,7 @@ fun AddTodoSheet(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .padding(top = 2.dp),
-                                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                                    verticalArrangement = Arrangement.spacedBy(12.dp)
                                 ) {
                                     NeumorphTextField(
                                         value = manualInput,
@@ -192,11 +173,12 @@ fun AddTodoSheet(
                                     )
                                     Row(
                                         modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                        horizontalArrangement = Arrangement.spacedBy(12.dp)
                                     ) {
                                         GlassButton(
                                             text = "完成",
                                             onClick = onDismiss,
+                                            // 与「编辑待办」里的“删除”同色：玻璃面 = 次要行动
                                             glassSurface = true,
                                             modifier = Modifier.weight(1f)
                                         )
@@ -208,8 +190,7 @@ fun AddTodoSheet(
                                                     manualInput = ""
                                                 }
                                             },
-                                            // 输入框有内容 → 主题浅紫色（主操作）；无内容 → 与“完成”相同的玻璃色（次要）
-                                            glassSurface = !manualInput.isNotBlank(),
+                                            // 主行动用主题色，和「编辑待办」里的“保存”一致
                                             modifier = Modifier.weight(1f)
                                         )
                                     }
@@ -221,7 +202,7 @@ fun AddTodoSheet(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .padding(top = 2.dp),
-                                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                                    verticalArrangement = Arrangement.spacedBy(12.dp)
                                 ) {
                                     NeumorphTextField(
                                         value = searchQuery,
@@ -310,16 +291,18 @@ fun AddTodoSheet(
                                     if (isMultiSelectMode) {
                                         Row(
                                             modifier = Modifier.fillMaxWidth(),
-                                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                            horizontalArrangement = Arrangement.spacedBy(12.dp)
                                         ) {
-                                            GlassButton(
-                                                text = "添加选中项",
-                                                onClick = onAddSelected,
-                                                modifier = Modifier.weight(1f)
-                                            )
                                             GlassButton(
                                                 text = "取消",
                                                 onClick = onExitMultiSelect,
+                                                // 玻璃面 = 次要行动（与「编辑待办」里的“删除”同色）
+                                                glassSurface = true,
+                                                modifier = Modifier.weight(1f)
+                                            )
+                                            GlassButton(
+                                                text = "添加选中项",
+                                                onClick = onAddSelected,
                                                 modifier = Modifier.weight(1f)
                                             )
                                         }
@@ -331,6 +314,54 @@ fun AddTodoSheet(
                 }
             }
         }
+    }
+}
+
+/**
+ * 面板顶部的"二选一"按钮（手动输入 / 从预设选择）。
+ *
+ * 与「编辑待办」面板里的按钮同高同形（同上下的 12dp 内边距、同圆角），区别只在状态：
+ * 当前选中的那块**凹进去**（凹陷 = 已选中），另一块**凸起**（凸起 = 可点）；
+ * 未选中那块按下时由凸转凹、松手弹回，所以"状态"和"按下"用的是同一种语言。
+ * 波纹被裁进按钮形状内（和列表条目同一套规则）。
+ */
+@Composable
+private fun AddSheetSwitchButton(
+    text: String,
+    selected: Boolean,
+    isDark: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val shape = RoundedCornerShape(NeumorphShapes.Corner)
+    val interactionSource = remember { MutableInteractionSource() }
+    val pressed by interactionSource.collectIsPressedAsState()
+
+    Box(
+        modifier = modifier
+            .neumorphPress(
+                shape = shape,
+                isDark = isDark,
+                // 已经凹着的那块不需要再"按进去"
+                pressed = pressed && !selected,
+                elevation = NeumorphElevation.Medium,
+                restDepth = if (selected) 0f else 1f
+            )
+            .clip(shape)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = LocalIndication.current,
+                onClick = onClick
+            )
+            // 与 GlassButton 相同的上下内边距，两颗按钮因此和底部动作按钮一样高
+            .padding(horizontal = 20.dp, vertical = 12.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelLarge,
+            color = if (selected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.secondary
+        )
     }
 }
 
