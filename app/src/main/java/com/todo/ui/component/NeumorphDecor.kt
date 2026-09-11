@@ -32,13 +32,17 @@ import com.todo.ui.theme.NeumorphElevation
  *
  * 约定：**表面色由本修饰符填充**，调用方把自己的 Surface/Box 底色设为 [Color.Transparent]，
  * 这样凹陷的内阴影才能落在「同色底之上、文字内容之下」（这是新拟态的关键层级）。
+ *
+ * [innerElevation] 只影响**凹陷**（内阴影）那套几何与强度：像"勾选后按进去的待办条目"这类元素，
+ * 需要内阴影的扩散比列表项的默认档位再收一点，而凸起时的外阴影保持不变。
  */
 fun Modifier.neumorph(
     shape: Shape,
     isDark: Boolean,
     depth: Float = 1f,
     surface: Color = Neumorph.surface(isDark),
-    elevation: NeumorphElevation = NeumorphElevation.Medium
+    elevation: NeumorphElevation = NeumorphElevation.Medium,
+    innerElevation: NeumorphElevation = elevation
 ): Modifier {
     val clampedDepth = depth.coerceIn(0f, 1f)
     return drawWithCache {
@@ -51,6 +55,8 @@ fun Modifier.neumorph(
         val androidPath = path.asAndroidPath()
         val offsetPx = elevation.offset.toPx()
         val blurPx = elevation.blur.toPx().coerceAtLeast(0.1f)
+        val innerOffsetPx = innerElevation.offset.toPx()
+        val innerBlurPx = innerElevation.blur.toPx().coerceAtLeast(0.1f)
 
         // 高光（亮影）整体收弱：纯白亮影在浅色底上容易"过曝"，反而比暗影更抢眼。
         // 层级主要交给暗影与底色差异，亮影只做点睛；深色底上需要收得更狠。
@@ -60,11 +66,22 @@ fun Modifier.neumorph(
         // 全都发死），所以深色下的**凹陷暗影单独收弱**；浅色下两者一致，凸起的外阴影也完全不受影响。
         val convexDark = elevation.darkAlpha * if (isDark) 0.95f else 1f
         val convexLight = elevation.lightAlpha * if (isDark) 0.42f else 0.68f
-        val concaveDark = elevation.darkAlpha * if (isDark) 0.5f else 1f
-        val concaveLight = convexLight
+        val concaveDark = innerElevation.darkAlpha * if (isDark) 0.5f else 1f
+        val concaveLight = innerElevation.lightAlpha * if (isDark) 0.42f else 0.68f
 
         val darkPaint = shadowPaint(Neumorph.shadowDark(isDark).toArgb(), blurPx)
         val lightPaint = shadowPaint(Neumorph.shadowLight(isDark).toArgb(), blurPx)
+        // 凹陷用自己的一套画笔（模糊半径不同，而 BlurMaskFilter 是建在画笔上的）
+        val innerDarkPaint = if (clampedDepth < 1f) {
+            shadowPaint(Neumorph.shadowDark(isDark).toArgb(), innerBlurPx)
+        } else {
+            darkPaint
+        }
+        val innerLightPaint = if (clampedDepth < 1f) {
+            shadowPaint(Neumorph.shadowLight(isDark).toArgb(), innerBlurPx)
+        } else {
+            lightPaint
+        }
 
         // 凹陷的阴影源：把「形状以外」的区域偏移后画进形状内部，等价于 CSS 的 inset box-shadow。
         val inversePath = if (clampedDepth < 1f) {
@@ -100,18 +117,18 @@ fun Modifier.neumorph(
             drawPath(path, surface)
 
             if (innerScale > 0.01f && inversePath != null) {
-                darkPaint.alpha = alphaOf(concaveDark * innerScale)
-                lightPaint.alpha = alphaOf(concaveLight * innerScale)
+                innerDarkPaint.alpha = alphaOf(concaveDark * innerScale)
+                innerLightPaint.alpha = alphaOf(concaveLight * innerScale)
                 clipPath(path) {
                     drawIntoCanvas { canvas ->
                         val native = canvas.nativeCanvas
                         native.save()
-                        native.translate(offsetPx, offsetPx)
-                        native.drawPath(inversePath, darkPaint)
+                        native.translate(innerOffsetPx, innerOffsetPx)
+                        native.drawPath(inversePath, innerDarkPaint)
                         native.restore()
                         native.save()
-                        native.translate(-offsetPx, -offsetPx)
-                        native.drawPath(inversePath, lightPaint)
+                        native.translate(-innerOffsetPx, -innerOffsetPx)
+                        native.drawPath(inversePath, innerLightPaint)
                         native.restore()
                     }
                 }

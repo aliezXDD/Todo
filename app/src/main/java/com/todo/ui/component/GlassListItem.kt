@@ -28,6 +28,8 @@ import com.todo.ui.theme.NeumorphShapes
 /**
  * 新拟态列表项：默认凸起；[depth] 传 0 表示"被按进去"（用于已完成/选中态）。
  * [elevation] 传零阴影（offset/blur 均为 0）可得到"与背景齐平"的平面行。
+ * [innerElevation] 单独描述"按进去之后"那套内阴影（不传就等于 [elevation]）：
+ * 需要凹陷的扩散范围更收一点时（例如勾选后的待办条目）用它，凸起时的外阴影不受影响。
  *
  * [shape] 与 [minHeight] 是**所有列表条目的统一规格**（待办、预设、回收站）：
  * 调用方一般不要再各自指定，否则同样的圆角放在不同行高上会显得一个更圆一个更方。
@@ -43,6 +45,7 @@ fun GlassListItem(
     modifier: Modifier = Modifier,
     depth: Float = 1f,
     elevation: NeumorphElevation = NeumorphElevation.Medium,
+    innerElevation: NeumorphElevation = elevation,
     shape: Shape = RoundedCornerShape(NeumorphShapes.Medium),
     minHeight: Int = 52,
     contentPadding: PaddingValues = PaddingValues(horizontal = 14.dp, vertical = 10.dp),
@@ -56,7 +59,8 @@ fun GlassListItem(
         shape = shape,
         isDark = isDark,
         depth = depth,
-        elevation = elevation
+        elevation = elevation,
+        innerElevation = innerElevation
     )
 
     // 点击层挂在内容行上，而不是挂在 neumorph 之外的调用方 modifier 上：

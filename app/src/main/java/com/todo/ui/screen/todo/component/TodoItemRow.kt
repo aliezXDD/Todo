@@ -37,7 +37,14 @@ import androidx.compose.ui.unit.dp
 import com.todo.domain.model.Todo
 import com.todo.ui.component.GlassListItem
 import com.todo.ui.theme.MotionTokens
+import com.todo.ui.theme.NeumorphElevation
 import com.todo.ui.theme.NeumorphShapes
+
+/**
+ * 勾选后"按进去"那套内阴影的几何：比列表项默认档位（偏移 7 + 模糊 11）略收一点，
+ * 右下角那圈白色高光因此不会铺得那么开。凸起时的外阴影仍走默认档位，不受影响。
+ */
+private val CompletedRowInnerElevation = NeumorphElevation(offset = 6.dp, blur = 9.dp)
 
 @Composable
 fun TodoItemRow(
@@ -98,6 +105,7 @@ fun TodoItemRow(
             .fillMaxWidth()
             .scale(rowScale.value),
         depth = rowDepth,
+        innerElevation = CompletedRowInnerElevation,
         onClick = onEdit
     ) {
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
