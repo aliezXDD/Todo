@@ -22,7 +22,6 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.todo.ui.theme.NeumorphElevation
 import com.todo.ui.theme.NeumorphShapes
-import com.todo.ui.theme.dropOnly
 
 /**
  * 卡片涟漪的半径上限。
@@ -48,13 +47,10 @@ fun GlassCard(
     elevation: NeumorphElevation = NeumorphElevation.Large,
     fillMaxHeight: Boolean = false,
     contentPadding: PaddingValues = PaddingValues(16.dp),
-    dropOnly: Boolean = false,
     onClick: (() -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
     val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
-    // 二级界面的卡片只留投影（不带左上高光），见 NeumorphElevation.dropOnly
-    val effectiveElevation = if (dropOnly) elevation.dropOnly(isDark) else elevation
     val interactionSource = remember { MutableInteractionSource() }
     val pressed by interactionSource.collectIsPressedAsState()
 
@@ -62,7 +58,7 @@ fun GlassCard(
         shape = shape,
         isDark = isDark,
         pressed = pressed && onClick != null,
-        elevation = effectiveElevation,
+        elevation = elevation,
         restDepth = depth
     )
 
