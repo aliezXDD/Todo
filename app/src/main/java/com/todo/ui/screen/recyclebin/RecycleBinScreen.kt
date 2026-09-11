@@ -172,9 +172,16 @@ fun RecycleBinScreen(
                             ) {
                                 Text(
                                     text = dateLabel,
-                                    style = MaterialTheme.typography.titleMedium
+                                    style = MaterialTheme.typography.titleMedium,
+                                    // 必须显式给色：这里不在任何 Surface 内，LocalContentColor 会退回
+                                    // 它的默认值 Color.Black，深色模式下就是"黑字压在深底上"
+                                    color = MaterialTheme.colorScheme.onSurface
                                 )
-                                // 分组分隔改用"刻出来的一道凹槽"：新拟态里没有描边，层级只能靠光影
+                                // 分组分隔改用"刻出来的一道凹槽"：新拟态里没有描边，层级只能靠光影。
+                                // 细条要用更小的偏移/模糊，否则阴影比凹槽本身还大；
+                                // 深色下还要把内高光单独提回来：全局把深色内高光统一压到 0.42 是为大表面调的，
+                                // 这条只有 5dp 高的凹槽下半截因此几乎等于背景色，整条看着像"一道渐渐消失的暗影"
+                                // 而不是刻出来的线。这里让它拿到和浅色同量的内高光（0.42 × 1.5 ≈ 0.63）
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -185,7 +192,11 @@ fun RecycleBinScreen(
                                             depth = 0f,
                                             surface = Neumorph.recessedSurface(isDark),
                                             // 细条要用更小的偏移/模糊，否则阴影比凹槽本身还大
-                                            elevation = NeumorphElevation(offset = 2.dp, blur = 3.dp)
+                                            elevation = NeumorphElevation(
+                                                offset = 2.dp,
+                                                blur = 3.dp,
+                                                lightAlpha = if (isDark) 1.5f else 1f
+                                            )
                                         )
                                 )
                             }
