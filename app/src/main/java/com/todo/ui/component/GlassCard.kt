@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -23,12 +24,20 @@ import com.todo.ui.theme.NeumorphElevation
 import com.todo.ui.theme.NeumorphShapes
 
 /**
+ * 卡片涟漪的半径上限。
+ *
+ * Material 默认的涟漪会一路铺满整张卡片，在大表面上看起来就是"整张卡变浅了一档"（深色下尤其像
+ * 颜色出错）。给一个固定半径后，它只是触点附近的一圈水波，卡片其余部分颜色始终不变。
+ */
+private val CardRippleRadius = 48.dp
+
+/**
  * 新拟态卡片：与背景同色、无描边，靠一对亮/暗阴影"从背景里凸起"。
  * 底色由 [neumorph] 填充（因此这里 Surface 用透明色），否则凹陷时内阴影会被底色盖住。
  *
- * [onClick] 不为空时，按下会把卡片**按进去**（凸→凹），与按钮、FAB 是同一套反馈。
- * 这里刻意**不用** Material 的水波纹：它在小按钮上是局部涟漪，在整张卡片上却等于给整张卡
- * 糊一层 ~12% 的浅色，看起来就是"卡片颜色偶尔变浅了"——那不是新拟态的表达方式（深度才表达按压）。
+ * [onClick] 不为空时有两种反馈，和按钮、FAB 保持一致：
+ * 1. 按下把卡片**按进去**（凸→凹）—— 新拟态里表达按压的方式；
+ * 2. 触点处一圈水波纹（半径见 [CardRippleRadius]，不会铺满整张卡）。
  */
 @Composable
 fun GlassCard(
@@ -68,7 +77,7 @@ fun GlassCard(
                     if (onClick != null) {
                         Modifier.clickable(
                             interactionSource = interactionSource,
-                            indication = null,
+                            indication = ripple(radius = CardRippleRadius),
                             role = Role.Button,
                             onClick = onClick
                         )
