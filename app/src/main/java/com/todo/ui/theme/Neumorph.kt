@@ -16,8 +16,8 @@ import androidx.compose.ui.unit.dp
 object Neumorph {
     // ---- 浅色：背景沿用原文的 #ECF0F3，但阴影整体加深一档（原 #D1D9E6 在真机上偏弱）----
     val LightSurface = Color(0xFFECF0F3)
-    /** 浅色下"最底层页面底色"：比 [LightSurface] 深一档（元素本身不变） */
-    val LightBackground = Color(0xFFE1E5E8)
+    /** 浅色下"最底层页面底色"：比 [LightSurface] 深两档（元素本身不变） */
+    val LightBackground = Color(0xFFD9DEE2)
     val LightShadowDark = Color(0xFFBFCBDE)
     val LightShadowLight = Color(0xFFFFFFFF)
     val LightRecessed = Color(0xFFDCE2E9)
