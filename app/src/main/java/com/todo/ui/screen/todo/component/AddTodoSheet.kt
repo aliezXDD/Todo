@@ -83,10 +83,11 @@ fun AddTodoSheet(
     ) {
         GlassCard(
             modifier = Modifier.fillMaxWidth(),
-            // 内边距必须 ≥ 内侧按钮的光影扩散（偏移 7 + 模糊 11 ≈ 18dp），否则那圈光影会与卡片
-            // 边缘相交：要么被边缘切掉，要么越出边缘压在卡片的框上。给到 20dp 后，按钮的光影完整地
-            // 待在卡片之内，框与影互不相干。
-            contentPadding = PaddingValues(20.dp)
+            // 卡片只当布局容器用：**不画任何光影**。
+            // 面板外围那一圈"深色边框"就是这张卡片自己的暗影——它与按钮溢出的光影在同一处相遇，
+            // 于是按钮的影子看起来被那圈深色框挡掉了。面板本身就是那块"表面"（GlassBottomSheet
+            // 与页面同色），内容直接落在它上面即可，不需要再套一圈有阴影的框。
+            elevation = NeumorphElevation.None
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 // 与「编辑待办」面板同一套排布：标题 → 内容 → 两颗动作按钮

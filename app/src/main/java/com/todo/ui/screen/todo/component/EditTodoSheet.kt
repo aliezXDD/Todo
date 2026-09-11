@@ -2,7 +2,6 @@ package com.todo.ui.screen.todo.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
@@ -27,6 +26,7 @@ import com.todo.ui.component.GlassBottomSheet
 import com.todo.ui.component.GlassButton
 import com.todo.ui.component.GlassCard
 import com.todo.ui.component.NeumorphTextField
+import com.todo.ui.theme.NeumorphElevation
 
 @Composable
 fun EditTodoSheet(
@@ -53,9 +53,9 @@ fun EditTodoSheet(
     ) {
         GlassCard(
             modifier = Modifier.fillMaxWidth(),
-            // 与「添加待办」同一规格：内边距 ≥ 内侧按钮的光影扩散（≈18dp），
-            // 光影才不会和卡片边缘相交
-            contentPadding = PaddingValues(20.dp)
+            // 与「添加待办」同一规格：卡片只当布局容器，不画光影，
+            // 免得面板外围出现一圈深色边框、与内侧按钮的光影打架
+            elevation = NeumorphElevation.None
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(
