@@ -6,8 +6,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -27,6 +30,7 @@ import com.todo.ui.component.GlassToast
 import com.todo.ui.component.NeumorphScrollFade
 import com.todo.ui.component.NeumorphScrollFadeHeight
 import com.todo.ui.component.neumorphOverlay
+import com.todo.ui.navigation.BottomNavBarHeight
 import com.todo.ui.screen.preset.component.PresetEditDialog
 import com.todo.ui.screen.preset.component.PresetItemRow
 import com.todo.ui.screen.preset.component.PresetTopBar
@@ -81,12 +85,17 @@ fun PresetScreen(
             )
         } else {
             val listState = rememberLazyListState()
+            // 列表止于底栏上沿：用真实内边距算（系统导航栏 + 底栏自身高度），而不是写死 140dp——
+            // 写死会让列表在底栏上方留出一截空白，条目离底栏还有一段距离就在"半空中"淡没了。
+            // 底栏不透明且画在最上层，条目到达这条线时正好被栏的阴影区接住，不会露在栏的两侧。
+            val bottomBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
+                BottomNavBarHeight
             // 上下缘各一条常驻渐隐（旧写法是"还能滚才出现"的 56dp 底隐，滚到端点时会突然出现/消失，
             // 那本身也是一种硬切；常驻的两条带子静止时只覆盖与背景同色的内衬区，看不见）
             NeumorphScrollFade(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(bottom = 140.dp)
+                    .padding(bottom = bottomBarInset)
             ) {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),

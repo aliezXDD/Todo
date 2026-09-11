@@ -43,6 +43,15 @@ import com.todo.ui.theme.NeumorphElevation
 import com.todo.ui.theme.NeumorphShapes
 
 /**
+ * 底栏自身占用的高度（不含系统导航栏内边距）：外层上下各 8dp + 栏体 64dp。
+ *
+ * 页面里需要"内容止于底栏上沿"时用它换算（再加上 `WindowInsets.navigationBars`），
+ * 不要再写 140dp 这类魔法数——那会在底栏上方留出一截空白：滚动条目还没到栏就被裁掉，
+ * 看起来像"在半空中消失"。
+ */
+val BottomNavBarHeight = 80.dp
+
+/**
  * 新拟态底部导航：整条栏是一块凸起的同色材质，**选中项凹进去**（凹陷 = 选中态）。
  * 未选中项为与背景齐平的平面，不额外加任何颜色块——层级全部交给光影。
  */
