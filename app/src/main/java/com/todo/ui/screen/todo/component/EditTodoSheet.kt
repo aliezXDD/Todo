@@ -2,7 +2,6 @@ package com.todo.ui.screen.todo.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
@@ -51,12 +50,7 @@ fun EditTodoSheet(
     GlassBottomSheet(
         onDismissRequest = onDismiss
     ) {
-        GlassCard(
-            modifier = Modifier.fillMaxWidth(),
-            // 与「添加待办」同一规格：卡片会按形状裁剪内部内容，内侧按钮溢出的光影需要约 18dp，
-            // 16dp 会让它正好被卡片边缘切掉
-            contentPadding = PaddingValues(20.dp)
-        ) {
+        GlassCard(modifier = Modifier.fillMaxWidth()) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(
                     text = "编辑待办",

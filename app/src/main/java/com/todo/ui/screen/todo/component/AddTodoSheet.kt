@@ -82,10 +82,7 @@ fun AddTodoSheet(
         onDismissRequest = onDismiss
     ) {
         GlassCard(
-            modifier = Modifier.fillMaxWidth(),
-            // 卡片是"框"，它会按自己的形状裁剪内部内容：内侧按钮溢出的光影（偏移 7 + 模糊 11）
-            // 大约需要 18dp 才完整，原来的 16dp 会让那圈光影正好被卡片边缘切掉，所以留到 20dp
-            contentPadding = PaddingValues(20.dp)
+            modifier = Modifier.fillMaxWidth()
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 // 与「编辑待办」面板同一套排布：标题 → 内容 → 两颗动作按钮
