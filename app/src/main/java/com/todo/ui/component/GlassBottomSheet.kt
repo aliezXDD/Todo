@@ -3,7 +3,6 @@ package com.todo.ui.component
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -22,16 +21,12 @@ import com.todo.ui.theme.NeumorphShapes
 
 /**
  * 新拟态底部面板：面板表面与页面背景同色（仍是"同一块材质"），靠上缘圆角与浮层阴影区分。
- *
- * [contentPadding] 可以只给纵向：面板里若有滚动列表，让它自己占满整个宽度、由列表把条目内缩
- * （见 [NeumorphScrollFade] 与 AddTodoSheet），条目溢出的光影才不会被滚动视口硬切。
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GlassBottomSheet(
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier,
-    contentPadding: PaddingValues = PaddingValues(horizontal = 20.dp, vertical = 14.dp),
     content: @Composable () -> Unit
 ) {
     val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
@@ -66,7 +61,7 @@ fun GlassBottomSheet(
             modifier = Modifier
                 .fillMaxWidth()
                 .navigationBarsPadding()
-                .padding(contentPadding)
+                .padding(horizontal = 20.dp, vertical = 14.dp)
                 .padding(bottom = 10.dp)
         ) {
             content()
