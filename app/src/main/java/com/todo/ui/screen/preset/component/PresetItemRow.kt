@@ -21,7 +21,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.todo.domain.model.Preset
@@ -93,7 +92,8 @@ fun PresetItemRow(
                             modifier = Modifier
                                 .offset(y = with(LocalDensity.current) { (-1.dp.toPx() + 1f).toDp() })
                                 .size(16.dp),
-                            tint = Color.White
+                            // 与 + 号同一取色（浅色白勾、深色深色勾）
+                            tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }
                 }

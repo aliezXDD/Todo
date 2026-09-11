@@ -303,7 +303,8 @@ private fun RecycleBinRow(
                             imageVector = Icons.Filled.Check,
                             contentDescription = null,
                             modifier = Modifier.offset(y = with(LocalDensity.current) { (-1.dp.toPx() + 1f).toDp() }).size(16.dp),
-                            tint = androidx.compose.ui.graphics.Color.White
+                            // 与 + 号同一取色（浅色白勾、深色深色勾）
+                            tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }
                 }

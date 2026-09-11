@@ -32,7 +32,6 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.todo.domain.model.Todo
@@ -82,7 +81,6 @@ fun TodoItemRow(
     )
 
     val strikeColor = MaterialTheme.colorScheme.onBackground.copy(alpha = alpha.value)
-    val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
 
     // 勾选后整行从凸起按进去（"表面"的状态变化保留；勾选框本身仍是平面）
     val rowDepth by animateFloatAsState(
@@ -139,7 +137,9 @@ fun TodoItemRow(
                             imageVector = Icons.Filled.Check,
                             contentDescription = null,
                             modifier = Modifier.size(16.dp).scale(checkMarkScale.value),
-                            tint = if (isDark) Color.White else MaterialTheme.colorScheme.onPrimary
+                            // 与 + 号同一取色：浅色下是白勾，深色下随 onPrimary 变成深色
+                            // （深色模式的主色是浅紫，白勾在上面看不清）
+                            tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }
                 }
