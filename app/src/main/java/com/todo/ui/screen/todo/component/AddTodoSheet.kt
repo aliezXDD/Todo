@@ -82,7 +82,11 @@ fun AddTodoSheet(
         onDismissRequest = onDismiss
     ) {
         GlassCard(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            // 内边距必须 ≥ 内侧按钮的光影扩散（偏移 7 + 模糊 11 ≈ 18dp），否则那圈光影会与卡片
+            // 边缘相交：要么被边缘切掉，要么越出边缘压在卡片的框上。给到 20dp 后，按钮的光影完整地
+            // 待在卡片之内，框与影互不相干。
+            contentPadding = PaddingValues(20.dp)
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 // 与「编辑待办」面板同一套排布：标题 → 内容 → 两颗动作按钮
