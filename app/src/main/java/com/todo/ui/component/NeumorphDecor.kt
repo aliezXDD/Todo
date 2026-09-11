@@ -58,6 +58,13 @@ fun Modifier.neumorph(
         val innerOffsetPx = innerElevation.offset.toPx()
         val innerBlurPx = innerElevation.blur.toPx().coerceAtLeast(0.1f)
 
+        // 亮影（高光）比暗影收一点：暗影负责"沉下去"的体积感，亮影只做点睛——
+        // 铺得和暗影一样开，元素边缘会整圈发白、发脏。
+        // 只作用于**凸起**的那层外高光；凹陷的内高光与所有暗影都保持原样。
+        val highlightScale = 0.75f
+        val highlightOffsetPx = offsetPx * highlightScale
+        val highlightBlurPx = blurPx * highlightScale
+
         // 高光（亮影）整体收弱：纯白亮影在浅色底上容易"过曝"，反而比暗影更抢眼。
         // 层级主要交给暗影与底色差异，亮影只做点睛；深色底上需要收得更狠。
         //
@@ -70,7 +77,8 @@ fun Modifier.neumorph(
         val concaveLight = innerElevation.lightAlpha * if (isDark) 0.42f else 0.68f
 
         val darkPaint = shadowPaint(Neumorph.shadowDark(isDark).toArgb(), blurPx)
-        val lightPaint = shadowPaint(Neumorph.shadowLight(isDark).toArgb(), blurPx)
+        // 凸起的外高光用收窄后的模糊半径（BlurMaskFilter 建在画笔上，所以必须单独一支）
+        val lightPaint = shadowPaint(Neumorph.shadowLight(isDark).toArgb(), highlightBlurPx)
         // 凹陷用自己的一套画笔（模糊半径不同，而 BlurMaskFilter 是建在画笔上的）
         val innerDarkPaint = if (clampedDepth < 1f) {
             shadowPaint(Neumorph.shadowDark(isDark).toArgb(), innerBlurPx)
@@ -107,7 +115,7 @@ fun Modifier.neumorph(
                     native.drawPath(androidPath, darkPaint)
                     native.restore()
                     native.save()
-                    native.translate(-offsetPx, -offsetPx)
+                    native.translate(-highlightOffsetPx, -highlightOffsetPx)
                     native.drawPath(androidPath, lightPaint)
                     native.restore()
                 }
