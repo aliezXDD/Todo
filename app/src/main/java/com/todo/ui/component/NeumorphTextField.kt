@@ -26,6 +26,10 @@ import com.todo.ui.theme.NeumorphShapes
 /**
  * 新拟态输入框 = 一块**凹陷**的材质（这是新拟态里"可输入"的标准语义）。
  * 不用描边表示聚焦，而是聚焦时再"按深一点"（depth 由 0.12 → 0）。
+ *
+ * 凹陷**不靠更深的底色**：这里和底部导航选中项、勾选后的待办行、面板里的预设行一样，
+ * 表面色与背景完全相同，凹陷只由内阴影给出。原来给输入框单独铺了一层更暗的槽底色，
+ * 在深色下那层颜色比阴影本身还抢眼，整块看起来"发黑"，和其余凹陷元素也不一致。
  */
 @Composable
 fun NeumorphTextField(
@@ -54,7 +58,6 @@ fun NeumorphTextField(
             shape = shape,
             isDark = isDark,
             depth = depth,
-            surface = Neumorph.recessedSurface(isDark),
             elevation = elevation
         ),
         textStyle = textStyle,
@@ -94,7 +97,6 @@ fun NeumorphTextField(
             shape = shape,
             isDark = isDark,
             depth = depth,
-            surface = Neumorph.recessedSurface(isDark),
             elevation = elevation
         ),
         textStyle = textStyle,

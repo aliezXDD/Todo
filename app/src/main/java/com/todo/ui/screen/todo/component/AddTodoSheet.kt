@@ -48,7 +48,6 @@ import com.todo.ui.component.GlassCard
 import com.todo.ui.component.NeumorphTextField
 import com.todo.ui.component.neumorph
 import com.todo.ui.theme.MotionTokens
-import com.todo.ui.theme.Neumorph
 import com.todo.ui.theme.NeumorphElevation
 import com.todo.ui.theme.NeumorphShapes
 
@@ -90,15 +89,16 @@ fun AddTodoSheet(
                 val tabTrackShape = RoundedCornerShape(NeumorphShapes.Small)
                 SecondaryTabRow(
                     selectedTabIndex = selectedTabIndex,
-                    // 滑轨靠"更暗一档的底色"划定范围（颜色负责区分、光影只做辅助），避免高光抢戏
+                    // 滑轨和底部导航的选中项用同一套凹陷语言：表面色与背景相同，范围只由内阴影给出。
+                    // 之前这里铺了一层更暗的槽底色，深色下那块颜色比阴影还抢眼（发黑），也和其余凹陷元素不一致；
+                    // 为了范围依然清楚，阴影从 Small 提到 Medium（与导航选中项同档）。
                     // clip 必须跟在 neumorph 之后：Tab 自带的水波纹是方块，不裁的话会从滑轨四角露出来
                     modifier = Modifier
                         .neumorph(
                             shape = tabTrackShape,
                             isDark = isDark,
                             depth = 0f,
-                            surface = Neumorph.recessedSurface(isDark),
-                            elevation = NeumorphElevation.Small
+                            elevation = NeumorphElevation.Medium
                         )
                         .clip(tabTrackShape),
                     containerColor = Color.Transparent,
