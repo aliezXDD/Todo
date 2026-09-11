@@ -14,17 +14,18 @@ import androidx.compose.ui.unit.dp
  * 3. 深度承载状态语义：凸起 = 未选/可点，凹陷 = 选中/输入/进度槽，按下 = 由凸转凹。
  */
 object Neumorph {
-    // ---- 浅色：背景沿用原文的 #ECF0F3，但阴影整体加深一档（原 #D1D9E6 在真机上偏弱）----
-    val LightSurface = Color(0xFFECF0F3)
-    val LightShadowDark = Color(0xFFBFCBDE)
+    // ---- 浅色：在原文 #ECF0F3 的基础上整体压暗一点点（-3/通道），阴影相应同移，比例不变 ----
+    val LightSurface = Color(0xFFE9EDF0)
+    val LightShadowDark = Color(0xFFBCC8DB)
     val LightShadowLight = Color(0xFFFFFFFF)
-    val LightRecessed = Color(0xFFDCE2E9)
+    val LightRecessed = Color(0xFFD9DFE6)
 
     // ---- 深色：原文只给了浅色方案，这里按同一原理推导（暗影更深、亮影更亮，保证对比可见）----
-    val DarkSurface = Color(0xFF23262B)
-    val DarkShadowDark = Color(0xFF111316)
-    val DarkShadowLight = Color(0xFF373D46)
-    val DarkRecessed = Color(0xFF191C20)
+    // 底色整体提亮一档（+5/通道），凹陷与阴影同步上移，保持原本的明暗差 ----
+    val DarkSurface = Color(0xFF282B30)
+    val DarkShadowDark = Color(0xFF16181B)
+    val DarkShadowLight = Color(0xFF3C424B)
+    val DarkRecessed = Color(0xFF1E2125)
 
     fun surface(isDark: Boolean): Color = if (isDark) DarkSurface else LightSurface
 

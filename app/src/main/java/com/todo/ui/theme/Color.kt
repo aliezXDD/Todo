@@ -27,9 +27,10 @@ val LightScrim = Color(0x33000000)
 val DarkScrim = Color(0x66000000)
 
 // ---- Material 补充 token（配新拟态底色）----
-val LightSurfaceVariant = Color(0xFFE2E7EC)
-val DarkSurfaceVariant = Color(0xFF2B2F36)
-val LightOutline = Color(0xFFC6CEDA)
-val DarkOutline = Color(0xFF3C4149)
+// 与 Neumorph 的表面色同步微调（浅色 -3、深色 +5，保持彼此关系不变）
+val LightSurfaceVariant = Color(0xFFDFE4E9)
+val DarkSurfaceVariant = Color(0xFF303439)
+val LightOutline = Color(0xFFC3CBD7)
+val DarkOutline = Color(0xFF41464E)
 val LightPrimaryContainer = Color(0xFFDDE2F8)
 val DarkPrimaryContainer = Color(0xFF3A4265)
