@@ -123,20 +123,21 @@ fun TodoItemRow(
                     modifier = Modifier
                         .size(24.dp)
                         .scale(checkboxScale.value)
-                        // 勾选框保持平面设计（状态指示类元素不进新拟态）
+                        // 勾选框保持平面设计（状态指示类元素不进新拟态）；形状用小方块圆角，
+                        // 用全局 Corner 会被收敛成正圆
                         .background(
                             color = if (todo.isCompleted) MaterialTheme.colorScheme.primary else Color.Transparent,
-                            shape = RoundedCornerShape(NeumorphShapes.Corner)
+                            shape = RoundedCornerShape(NeumorphShapes.Marker)
                         )
                         .then(
                             if (todo.isCompleted) Modifier else Modifier.background(
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
-                                shape = RoundedCornerShape(NeumorphShapes.Corner)
+                                shape = RoundedCornerShape(NeumorphShapes.Marker)
                             )
                         )
                         // 先按勾选框自身的形状裁剪，再挂点击：否则水波纹是方块，
-                        // 会从圆形的勾选框四角露出来
-                        .clip(RoundedCornerShape(NeumorphShapes.Corner))
+                        // 会从方框的圆角外露出来
+                        .clip(RoundedCornerShape(NeumorphShapes.Marker))
                         .clickable { onCheckedChange(!todo.isCompleted) },
                     contentAlignment = Alignment.Center
                 ) {

@@ -77,7 +77,7 @@ fun HistoryDayCard(
                                 } else {
                                     MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)
                                 },
-                                shape = RoundedCornerShape(NeumorphShapes.Corner)
+                                shape = RoundedCornerShape(NeumorphShapes.Marker)
                             ),
                         contentAlignment = Alignment.Center
                     ) {

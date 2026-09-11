@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -274,11 +273,15 @@ fun AddTodoSheet(
                                                     Text(text = preset.content, color = primaryTextColor)
                                                     if (isMultiSelectMode) {
                                                         if (preset.id in selectedPresetIds) {
-                                                            // 与待办勾选框同款：选中 = 主题色实底 + 白勾（不再用描边圆圈）
+                                                            // 与待办勾选框同款：选中 = 主题色实底 + 白勾，
+                                                            // 形状为小方块圆角（不用正圆）
                                                             Box(
                                                                 modifier = Modifier
                                                                     .size(18.dp)
-                                                                    .background(MaterialTheme.colorScheme.primary, CircleShape),
+                                                                    .background(
+                                                                        MaterialTheme.colorScheme.primary,
+                                                                        RoundedCornerShape(NeumorphShapes.Marker)
+                                                                    ),
                                                                 contentAlignment = Alignment.Center
                                                             ) {
                                                                 Icon(
@@ -294,7 +297,7 @@ fun AddTodoSheet(
                                                                     .size(18.dp)
                                                                     .background(
                                                                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
-                                                                        shape = CircleShape
+                                                                        shape = RoundedCornerShape(NeumorphShapes.Marker)
                                                                     )
                                                             )
                                                         }

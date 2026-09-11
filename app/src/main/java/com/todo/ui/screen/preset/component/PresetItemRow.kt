@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Icon
@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import com.todo.domain.model.Preset
 import com.todo.ui.component.GlassListItem
 import com.todo.ui.theme.MotionTokens
+import com.todo.ui.theme.NeumorphShapes
 
 @Composable
 fun PresetItemRow(
@@ -78,7 +79,11 @@ fun PresetItemRow(
                     modifier = Modifier
                         .size(22.dp)
                         .scale(indicatorScale.value)
-                        .background(indicatorColor.value, CircleShape),
+                        // 多选标记用"小方块圆角"，与待办勾选框、回收站标记一致
+                        .background(
+                            color = indicatorColor.value,
+                            shape = RoundedCornerShape(NeumorphShapes.Marker)
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     if (isSelected) {

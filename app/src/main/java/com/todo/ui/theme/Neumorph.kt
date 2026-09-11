@@ -87,6 +87,15 @@ data class NeumorphElevation(
 object NeumorphShapes {
     val Corner = 18.dp
 
+    /**
+     * 勾选框、多选标记这类**小方块**的圆角（勾选/未勾选两态共用同一个形状）。
+     *
+     * 它不能沿用 [Corner]：圆角一旦达到或超过自身半边长，Compose 会把它收敛成正圆——这正是这类
+     * 标记以前看起来是圆形的原因（18dp 方块配 18dp 圆角被收敛成 9dp = 正圆）。这里取明显小于
+     * 半边的值，在 18~24dp 上仍然读作"带圆角的方形"。
+     */
+    val Marker = 6.dp
+
     val Small = Corner
     val Medium = Corner
     val Large = Corner

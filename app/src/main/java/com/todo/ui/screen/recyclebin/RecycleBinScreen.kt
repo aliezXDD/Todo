@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -281,7 +280,11 @@ private fun RecycleBinRow(
                     modifier = Modifier
                         .size(22.dp)
                         .scale(indicatorScale)
-                        .background(indicatorColor, CircleShape),
+                        // 多选标记用"小方块圆角"，与待办勾选框、预设标记一致
+                        .background(
+                            color = indicatorColor,
+                            shape = RoundedCornerShape(NeumorphShapes.Marker)
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     if (isSelected) {
