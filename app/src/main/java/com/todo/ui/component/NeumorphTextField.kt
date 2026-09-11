@@ -5,6 +5,8 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -17,6 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import com.todo.ui.theme.MotionTokens
 import com.todo.ui.theme.Neumorph
@@ -30,6 +33,9 @@ import com.todo.ui.theme.NeumorphShapes
  * 凹陷**不靠更深的底色**：这里和底部导航选中项、勾选后的待办行、面板里的预设行一样，
  * 表面色与背景完全相同，凹陷只由内阴影给出。原来给输入框单独铺了一层更暗的槽底色，
  * 在深色下那层颜色比阴影本身还抢眼，整块看起来"发黑"，和其余凹陷元素也不一致。
+ *
+ * [imeAction] + [onImeAction] 用来支持"键盘回车即确认"：配合 `singleLine = true` 时，
+ * 键盘右下键会变成该动作（如"完成"），按下即回调 [onImeAction]。
  */
 @Composable
 fun NeumorphTextField(
@@ -38,6 +44,8 @@ fun NeumorphTextField(
     modifier: Modifier = Modifier,
     placeholder: String? = null,
     singleLine: Boolean = false,
+    imeAction: ImeAction = ImeAction.Default,
+    onImeAction: (() -> Unit)? = null,
     shape: Shape = RoundedCornerShape(NeumorphShapes.Small),
     elevation: NeumorphElevation = NeumorphElevation.Medium,
     textStyle: TextStyle = MaterialTheme.typography.bodyLarge
@@ -65,6 +73,13 @@ fun NeumorphTextField(
         singleLine = singleLine,
         interactionSource = interactionSource,
         placeholder = placeholder?.let { { Text(text = it) } },
+        keyboardOptions = KeyboardOptions(imeAction = imeAction),
+        keyboardActions = KeyboardActions(
+            onDone = { onImeAction?.invoke() },
+            onGo = { onImeAction?.invoke() },
+            onSend = { onImeAction?.invoke() },
+            onSearch = { onImeAction?.invoke() }
+        ),
         colors = neumorphFieldColors()
     )
 }

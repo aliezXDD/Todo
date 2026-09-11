@@ -29,6 +29,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,7 +37,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.todo.domain.model.Preset
 import com.todo.ui.component.GlassBottomSheet
@@ -47,6 +51,7 @@ import com.todo.ui.component.neumorph
 import com.todo.ui.theme.MotionTokens
 import com.todo.ui.theme.NeumorphElevation
 import com.todo.ui.theme.NeumorphShapes
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -72,6 +77,16 @@ fun AddTodoSheet(
     val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
     val secondaryTextColor = MaterialTheme.colorScheme.secondary
     val primaryTextColor = MaterialTheme.colorScheme.onSurface
+
+    // 点 + 打开面板后直接弹出键盘（与「编辑待办」同一做法：等 sheet 的节点挂上再请求焦点）。
+    // 切回"手动输入"这一档时也会重新拉起键盘。
+    val manualInputFocus = remember { FocusRequester() }
+    LaunchedEffect(selectedTabIndex) {
+        if (selectedTabIndex == 0) {
+            delay(80)
+            manualInputFocus.requestFocus()
+        }
+    }
 
     GlassBottomSheet(
         onDismissRequest = onDismiss
@@ -160,42 +175,25 @@ fun AddTodoSheet(
                     ) {
                         when (tabIndex) {
                             0 -> {
-                                Column(
+                                // 手动输入不再有「完成/添加」按钮：面板一打开就带起键盘，
+                                // 输入不为空时按键盘上的"完成"（回车）即添加，添加后面板与键盘都留着，
+                                // 方便连着录好几条；要收起就下滑面板或点空白处
+                                NeumorphTextField(
+                                    value = manualInput,
+                                    onValueChange = { manualInput = it },
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(top = 2.dp),
-                                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                                ) {
-                                    NeumorphTextField(
-                                        value = manualInput,
-                                        onValueChange = { manualInput = it },
-                                        modifier = Modifier.fillMaxWidth(),
-                                        placeholder = "输入待办内容..."
-                                    )
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                                    ) {
-                                        GlassButton(
-                                            text = "完成",
-                                            onClick = onDismiss,
-                                            // 与「编辑待办」里的“删除”同色：玻璃面 = 次要行动
-                                            glassSurface = true,
-                                            modifier = Modifier.weight(1f)
-                                        )
-                                        GlassButton(
-                                            text = "添加",
-                                            onClick = {
-                                                if (manualInput.isNotBlank()) {
-                                                    onAddManual(manualInput)
-                                                    manualInput = ""
-                                                }
-                                            },
-                                            // 主行动用主题色，和「编辑待办」里的“保存”一致
-                                            modifier = Modifier.weight(1f)
-                                        )
+                                        .focusRequester(manualInputFocus),
+                                    placeholder = "输入待办内容...",
+                                    singleLine = true,
+                                    imeAction = ImeAction.Done,
+                                    onImeAction = {
+                                        if (manualInput.isNotBlank()) {
+                                            onAddManual(manualInput)
+                                            manualInput = ""
+                                        }
                                     }
-                                }
+                                )
                             }
 
                             1 -> {
