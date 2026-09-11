@@ -92,13 +92,16 @@ fun AddTodoSheet(
                 SecondaryTabRow(
                     selectedTabIndex = selectedTabIndex,
                     // 滑轨靠"更暗一档的底色"划定范围（颜色负责区分、光影只做辅助），避免高光抢戏
-                    modifier = Modifier.neumorph(
-                        shape = tabTrackShape,
-                        isDark = isDark,
-                        depth = 0f,
-                        surface = Neumorph.recessedSurface(isDark),
-                        elevation = NeumorphElevation.Small
-                    ),
+                    // clip 必须跟在 neumorph 之后：Tab 自带的水波纹是方块，不裁的话会从滑轨四角露出来
+                    modifier = Modifier
+                        .neumorph(
+                            shape = tabTrackShape,
+                            isDark = isDark,
+                            depth = 0f,
+                            surface = Neumorph.recessedSurface(isDark),
+                            elevation = NeumorphElevation.Small
+                        )
+                        .clip(tabTrackShape),
                     containerColor = Color.Transparent,
                     indicator = {
                         // 选中项下方的主题色指示条：凹陷滑轨 + 指示条，全程无描边
@@ -251,6 +254,8 @@ fun AddTodoSheet(
                                                             depth = 0f,
                                                             elevation = NeumorphElevation.Small
                                                         )
+                                                        // 同滑轨：先裁成条目形状，水波纹才不会从圆角外露出方块
+                                                        .clip(RoundedCornerShape(NeumorphShapes.Small))
                                                         .combinedClickable(
                                                             onClick = {
                                                                 if (isMultiSelectMode) {

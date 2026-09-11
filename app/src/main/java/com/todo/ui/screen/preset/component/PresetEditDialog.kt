@@ -142,10 +142,17 @@ fun PresetEditDialog(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.End
                     ) {
-                        TextButton(onClick = onDismiss) {
+                        // 与对话框同形（默认 TextButton 是胶囊水波纹）
+                        TextButton(
+                            onClick = onDismiss,
+                            shape = RoundedCornerShape(NeumorphShapes.Corner)
+                        ) {
                             Text(text = "取消", color = contentColor)
                         }
-                        TextButton(onClick = { if (input.isNotBlank()) onSave(input) }) {
+                        TextButton(
+                            onClick = { if (input.isNotBlank()) onSave(input) },
+                            shape = RoundedCornerShape(NeumorphShapes.Corner)
+                        ) {
                             Text(text = if (isCreateMode) "创建" else "保存", color = contentColor)
                         }
                     }

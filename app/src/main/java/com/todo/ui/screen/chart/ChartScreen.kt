@@ -62,7 +62,11 @@ fun ChartScreen(
             onNavigationClick = onBack,
             overlayBelowContent = true,
             actions = {
-                TextButton(onClick = viewModel::toggleChartType) {
+                // 与顶栏同形（默认 TextButton 是胶囊水波纹）
+                TextButton(
+                    onClick = viewModel::toggleChartType,
+                    shape = RoundedCornerShape(NeumorphShapes.Corner)
+                ) {
                     Text(if (uiState.chartType == ChartViewModel.ChartType.BAR) "折线图" else "柱状图")
                 }
             }

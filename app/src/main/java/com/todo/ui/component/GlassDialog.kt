@@ -187,7 +187,8 @@ fun DialogActionTextButton(
         label = "dialogActionColor"
     )
 
-    TextButton(onClick = onClick) {
+    // TextButton 默认是胶囊/圆角全满的水波纹，与对话框的圆角矩形不一致，显式对齐
+    TextButton(onClick = onClick, shape = RoundedCornerShape(NeumorphShapes.Corner)) {
         Text(text = text, color = fallbackColor ?: animatedColor)
     }
 }

@@ -1,35 +1,28 @@
 package com.todo.ui.screen.preset.component
 
-import androidx.compose.foundation.LocalIndication
-import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.indication
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.PressInteraction
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.foundation.layout.offset
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import com.todo.domain.model.Preset
 import com.todo.ui.component.GlassListItem
@@ -45,7 +38,6 @@ fun PresetItemRow(
     onDoubleClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val interactionSource = remember { MutableInteractionSource() }
     val indicatorScale = animateFloatAsState(
         targetValue = if (isSelected) 1f else 0.86f,
         animationSpec = spring(
@@ -62,29 +54,14 @@ fun PresetItemRow(
         },
         label = "presetSelectColor"
     )
-    val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
 
-    // 圆角/行高走 GlassListItem 的统一规格（与待办、回收站条目同规格），不在此另行指定
+    // 圆角/行高/点击反馈（含长按与双击）全部走 GlassListItem 的统一规格：
+    // 自己挂 pointerInput + indication 会让波纹落在填充之下、且不按圆角裁剪，只从四个圆角漏出方形亮块
     GlassListItem(
-        modifier = modifier
-            .fillMaxWidth()
-            .pointerInput(preset.id) {
-                detectTapGestures(
-                    onDoubleTap = { onDoubleClick() },
-                    onLongPress = { onLongClick() },
-                    onPress = { pressPosition ->
-                        val press = PressInteraction.Press(pressPosition)
-                        interactionSource.tryEmit(press)
-                        try {
-                            tryAwaitRelease()
-                        } finally {
-                            interactionSource.tryEmit(PressInteraction.Release(press))
-                        }
-                    },
-                    onTap = { onClick() }
-                )
-            }
-            .indication(interactionSource, LocalIndication.current)
+        modifier = modifier.fillMaxWidth(),
+        onClick = onClick,
+        onLongClick = onLongClick,
+        onDoubleClick = onDoubleClick
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -108,8 +85,10 @@ fun PresetItemRow(
                         Icon(
                             imageVector = Icons.Filled.Check,
                             contentDescription = null,
-                            modifier = Modifier.offset(y = with(LocalDensity.current) { (-1.dp.toPx() + 1f).toDp() }).size(16.dp),
-                            tint = androidx.compose.ui.graphics.Color.White
+                            modifier = Modifier
+                                .offset(y = with(LocalDensity.current) { (-1.dp.toPx() + 1f).toDp() })
+                                .size(16.dp),
+                            tint = Color.White
                         )
                     }
                 }

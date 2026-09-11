@@ -1,12 +1,10 @@
 package com.todo.ui.screen.recyclebin
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.Box
@@ -58,7 +56,6 @@ import com.todo.ui.theme.NeumorphShapes
 import java.time.Instant
 import java.time.ZoneId
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun RecycleBinScreen(
     onBack: () -> Unit,
@@ -101,26 +98,32 @@ fun RecycleBinScreen(
             titleAlignStart = uiState.isMultiSelectMode,
             actions = {
                 if (uiState.isMultiSelectMode) {
+                    // 顶栏动作按钮统一与顶栏同形（默认 TextButton 是胶囊水波纹）
+                    val actionShape = RoundedCornerShape(NeumorphShapes.Corner)
                     TextButton(
-                        onClick = viewModel::clearMultiSelect
+                        onClick = viewModel::clearMultiSelect,
+                        shape = actionShape
                     ) {
                         Text("取消", color = topActionColor)
                     }
                     TextButton(
-                        onClick = viewModel::selectAll
+                        onClick = viewModel::selectAll,
+                        shape = actionShape
                     ) {
                         Text("全选", color = topActionColor)
                     }
                     // 选中 0 项时只显示「取消」「全选」；有选中才显示 永久删除/还原
                     if (uiState.selectedIds.size > 0) {
                         TextButton(
-                            onClick = viewModel::requestDeleteSelected
+                            onClick = viewModel::requestDeleteSelected,
+                            shape = actionShape
                         ) {
                             Text("永久删除", color = topActionColor)
                         }
                         if (canRestore) {
                             TextButton(
-                                onClick = viewModel::restoreSelected
+                                onClick = viewModel::restoreSelected,
+                                shape = actionShape
                             ) {
                                 Text("还原", color = topActionColor)
                             }
@@ -218,7 +221,6 @@ fun RecycleBinScreen(
     )
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun RecycleBinRow(
     item: RecycleBinItem,
@@ -229,13 +231,11 @@ private fun RecycleBinRow(
 ) {
     val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
 
+    // 点击/长按交给 GlassListItem：波纹会与条目同形（自己挂在 modifier 上会被同色填充盖住）
     GlassListItem(
-        modifier = Modifier
-            .fillMaxWidth()
-            .combinedClickable(
-                onClick = onClick,
-                onLongClick = onLongClick
-            )
+        modifier = Modifier.fillMaxWidth(),
+        onClick = onClick,
+        onLongClick = onLongClick
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),

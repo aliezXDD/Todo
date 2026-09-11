@@ -52,7 +52,9 @@ fun GlassTopBar(
                 title = { Text(text = title, maxLines = 1, overflow = TextOverflow.Ellipsis) },
                 navigationIcon = {
                     if (navigationIcon != null && onNavigationClick != null) {
-                        IconButton(onClick = onNavigationClick) {
+                        // IconButton 默认是圆形水波纹（材料默认值），与本页的圆角矩形语言不一致，
+                        // 显式传形状让它和顶栏同形
+                        IconButton(onClick = onNavigationClick, shape = shape) {
                             Icon(imageVector = navigationIcon, contentDescription = title)
                         }
                     }
@@ -69,7 +71,7 @@ fun GlassTopBar(
                 title = { Text(text = title, maxLines = 1, overflow = TextOverflow.Ellipsis) },
                 navigationIcon = {
                     if (navigationIcon != null && onNavigationClick != null) {
-                        IconButton(onClick = onNavigationClick) {
+                        IconButton(onClick = onNavigationClick, shape = shape) {
                             Icon(imageVector = navigationIcon, contentDescription = title)
                         }
                     }
