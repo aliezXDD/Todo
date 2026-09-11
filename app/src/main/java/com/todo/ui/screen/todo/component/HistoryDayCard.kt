@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import com.todo.domain.model.DailyRecord
 import com.todo.ui.component.GlassCard
 import com.todo.ui.theme.NeumorphElevation
+import com.todo.ui.theme.NeumorphShapes
 import com.todo.util.DateUtils
 
 /**
@@ -76,7 +77,7 @@ fun HistoryDayCard(
                                 } else {
                                     MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)
                                 },
-                                shape = RoundedCornerShape(6.dp)
+                                shape = RoundedCornerShape(NeumorphShapes.Corner)
                             ),
                         contentAlignment = Alignment.Center
                     ) {

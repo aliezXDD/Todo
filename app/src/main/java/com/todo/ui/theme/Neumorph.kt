@@ -71,11 +71,20 @@ data class NeumorphElevation(
 }
 
 /**
- * 新拟态常用圆角：与元素尺寸成比例（原文 200px 方块用 20px，即 10%）。
+ * 全局唯一的圆角。
+ *
+ * 全站只有这一个圆角值（与「往期记录」卡片一致）：卡片、面板、顶栏、底部导航、列表条目、
+ * 按钮、输入框、勾选框、指示条都用它。小元素不必单独定小圆角——Compose 会把圆角收敛到
+ * 不超过自身半径的一半，因此同一个值会自动变成胶囊或正圆。
+ *
+ * [Small] / [Medium] / [Large] / [Pill] 是旧的分层名，现在都是同一值的别名（全站已不再分层级），
+ * 保留仅为避免逐处改名；后续可一次性更名收尾（纯改名、零视觉变化）。
  */
 object NeumorphShapes {
-    val Small = 12.dp
-    val Medium = 18.dp
-    val Large = 24.dp
-    val Pill = 999.dp
+    val Corner = 24.dp
+
+    val Small = Corner
+    val Medium = Corner
+    val Large = Corner
+    val Pill = Corner
 }

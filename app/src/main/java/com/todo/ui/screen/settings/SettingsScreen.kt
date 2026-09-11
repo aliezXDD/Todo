@@ -29,6 +29,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.todo.R
 import com.todo.ui.component.GlassCard
 import com.todo.ui.component.GlassTopBar
+import com.todo.ui.theme.NeumorphShapes
 import com.todo.util.Constants
 
 @Composable
@@ -133,7 +134,7 @@ private fun ThemeOptionRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(NeumorphShapes.Corner))
             .clickable(onClick = onClick),
         verticalAlignment = Alignment.CenterVertically
     ) {

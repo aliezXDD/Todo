@@ -108,7 +108,7 @@ fun AddTodoSheet(
                                 .padding(horizontal = 7.dp)
                                 .fillMaxWidth()
                                 .height(4.dp)
-                                .clip(RoundedCornerShape(2.dp))
+                                .clip(RoundedCornerShape(NeumorphShapes.Corner))
                                 .background(tabIndicatorColor)
                         )
                     }

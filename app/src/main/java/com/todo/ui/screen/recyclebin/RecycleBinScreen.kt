@@ -54,6 +54,7 @@ import com.todo.ui.component.neumorph
 import com.todo.ui.theme.MotionTokens
 import com.todo.ui.theme.Neumorph
 import com.todo.ui.theme.NeumorphElevation
+import com.todo.ui.theme.NeumorphShapes
 import java.time.Instant
 import java.time.ZoneId
 
@@ -162,7 +163,7 @@ fun RecycleBinScreen(
                                         .fillMaxWidth()
                                         .height(5.dp)
                                         .neumorph(
-                                            shape = RoundedCornerShape(3.dp),
+                                            shape = RoundedCornerShape(NeumorphShapes.Corner),
                                             isDark = isDark,
                                             depth = 0f,
                                             surface = Neumorph.recessedSurface(isDark),

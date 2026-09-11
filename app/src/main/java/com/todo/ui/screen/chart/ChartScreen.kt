@@ -40,6 +40,7 @@ import com.todo.domain.model.DailyStats
 import com.todo.ui.component.EmptyState
 import com.todo.ui.component.GlassCard
 import com.todo.ui.component.GlassTopBar
+import com.todo.ui.theme.NeumorphShapes
 import com.todo.ui.theme.RateHigh
 import com.todo.ui.theme.RateLow
 import com.todo.ui.theme.RateMid
@@ -232,8 +233,11 @@ private fun BarChart(
                         .fillMaxHeight((value / 100f).coerceIn(0f, 1f))
                         .background(
                             color = valueToRateColor(value / 100f),
-                            // 柱顶圆角与全局圆角体系对齐（原来 6dp 游离在体系之外）
-                            shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)
+                            // 柱顶圆角与全局唯一圆角一致（窄柱会被自动收敛为半圆顶）
+                            shape = RoundedCornerShape(
+                                topStart = NeumorphShapes.Corner,
+                                topEnd = NeumorphShapes.Corner
+                            )
                         )
                 )
             }

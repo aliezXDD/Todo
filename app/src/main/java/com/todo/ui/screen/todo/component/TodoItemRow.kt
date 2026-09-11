@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import com.todo.domain.model.Todo
 import com.todo.ui.component.GlassListItem
 import com.todo.ui.theme.MotionTokens
+import com.todo.ui.theme.NeumorphShapes
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -124,12 +125,12 @@ fun TodoItemRow(
                         // 勾选框保持平面设计（状态指示类元素不进新拟态）
                         .background(
                             color = if (todo.isCompleted) MaterialTheme.colorScheme.primary else Color.Transparent,
-                            shape = RoundedCornerShape(7.dp)
+                            shape = RoundedCornerShape(NeumorphShapes.Corner)
                         )
                         .then(
                             if (todo.isCompleted) Modifier else Modifier.background(
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
-                                shape = RoundedCornerShape(7.dp)
+                                shape = RoundedCornerShape(NeumorphShapes.Corner)
                             )
                         )
                         .clickable { onCheckedChange(!todo.isCompleted) },
