@@ -83,7 +83,9 @@ fun ChartScreen(
             GlassCard(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(320.dp)
+                    .height(320.dp),
+                // 统计页属于二级界面：卡片只留投影，不带左上高光
+                dropOnly = true
             ) {
                 if (!uiState.hasData) {
                     EmptyState(text = "暂无统计数据", modifier = Modifier.fillMaxSize())
@@ -125,7 +127,7 @@ private fun StatCard(
     value: String,
     modifier: Modifier = Modifier
 ) {
-    GlassCard(modifier = modifier) {
+    GlassCard(modifier = modifier, dropOnly = true) {
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(
                 text = title,

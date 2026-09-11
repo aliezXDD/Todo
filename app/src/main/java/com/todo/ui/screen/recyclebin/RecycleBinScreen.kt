@@ -191,11 +191,14 @@ fun RecycleBinScreen(
                                             isDark = isDark,
                                             depth = 0f,
                                             surface = Neumorph.recessedSurface(isDark),
-                                            // 细条要用更小的偏移/模糊，否则阴影比凹槽本身还大
+                                            // 细条要用更小的偏移/模糊，否则阴影比凹槽本身还大；
+                                            // 二级界面里这道凹槽再轻一档：暗影收到 0.6（叠加全局 concaveDark 后
+                                            // 只有原来的三分之一强度），高光回到常规值，免得细条被"糊成一条发亮的线"
                                             elevation = NeumorphElevation(
                                                 offset = 2.dp,
                                                 blur = 3.dp,
-                                                lightAlpha = if (isDark) 1.5f else 1f
+                                                darkAlpha = if (isDark) 0.6f else 1f,
+                                                lightAlpha = 1f
                                             )
                                         )
                                 )
@@ -239,9 +242,11 @@ private fun RecycleBinRow(
 ) {
     val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
 
-    // 点击/长按交给 GlassListItem：波纹会与条目同形（自己挂在 modifier 上会被同色填充盖住）
+    // 点击/长按交给 GlassListItem：波纹会与条目同形（自己挂在 modifier 上会被同色填充盖住）。
+    // 回收站属于二级界面：条目只留投影、不带左上高光
     GlassListItem(
         modifier = Modifier.fillMaxWidth(),
+        dropOnly = true,
         onClick = onClick,
         onLongClick = onLongClick
     ) {

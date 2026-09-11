@@ -24,6 +24,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.todo.ui.theme.NeumorphElevation
 import com.todo.ui.theme.NeumorphShapes
+import com.todo.ui.theme.dropOnly
 
 /**
  * 新拟态列表项：默认凸起；[depth] 传 0 表示"被按进去"（用于已完成/选中态）。
@@ -46,17 +47,20 @@ fun GlassListItem(
     shape: Shape = RoundedCornerShape(NeumorphShapes.Medium),
     minHeight: Int = 52,
     contentPadding: PaddingValues = PaddingValues(horizontal = 14.dp, vertical = 10.dp),
+    dropOnly: Boolean = false,
     onClick: (() -> Unit)? = null,
     onLongClick: (() -> Unit)? = null,
     onDoubleClick: (() -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
     val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
+    // 二级界面的条目只留投影（不带左上高光），见 NeumorphElevation.dropOnly
+    val effectiveElevation = if (dropOnly) elevation.dropOnly(isDark) else elevation
     val itemModifier = modifier.neumorph(
         shape = shape,
         isDark = isDark,
         depth = depth,
-        elevation = elevation
+        elevation = effectiveElevation
     )
 
     // 点击层挂在内容行上，而不是挂在 neumorph 之外的调用方 modifier 上：

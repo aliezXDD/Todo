@@ -39,10 +39,12 @@ fun HistoryDayCard(
     val total = record.todos.size
     val completed = record.todos.count { it.isCompleted }
 
-    // 用"列表项级"阴影（与其他列表项一致），而不是卡片级——一屏里多张卡片用大阴影会互相压盖
+    // 用"列表项级"阴影（与其他列表项一致），而不是卡片级——一屏里多张卡片用大阴影会互相压盖。
+    // 往日记录属于二级界面：只留投影、不带左上高光（见 dropOnly）
     GlassCard(
         modifier = modifier.fillMaxWidth(),
-        elevation = NeumorphElevation.Medium
+        elevation = NeumorphElevation.Medium,
+        dropOnly = true
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(

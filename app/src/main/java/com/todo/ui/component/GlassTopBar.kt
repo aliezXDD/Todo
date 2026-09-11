@@ -23,6 +23,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.todo.ui.theme.NeumorphElevation
 import com.todo.ui.theme.NeumorphShapes
+import com.todo.ui.theme.dropOnly
 
 /**
  * 新拟态吸顶栏：一条与背景同色的圆角浮条，靠成对阴影凸起，无描边。
@@ -43,7 +44,12 @@ fun GlassTopBar(
 ) {
     val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
     val shape: Shape = RoundedCornerShape(NeumorphShapes.Large)
-    val elevation = if (overlayBelowContent) NeumorphElevation.XLarge else NeumorphElevation.Medium
+    // 浮在内容之上的栏（二级界面）只用投影表达悬浮：深色下那圈左上亮影会读成"发光的边"
+    val elevation = if (overlayBelowContent) {
+        NeumorphElevation.XLarge.dropOnly(isDark)
+    } else {
+        NeumorphElevation.Medium
+    }
 
     val barContent: @Composable () -> Unit = {
         if (titleAlignStart) {

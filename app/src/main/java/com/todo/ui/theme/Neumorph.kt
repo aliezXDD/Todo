@@ -71,6 +71,20 @@ data class NeumorphElevation(
 }
 
 /**
+ * "只留投影"的表面样式：**不带左上高光**，深色下暗影再收一档。
+ *
+ * 用在二级界面（回收站 / 往日记录 / 完成统计）的卡片、条子和吸顶栏上。这些页面内容稀疏，
+ * 大块表面上那圈亮影在深色底里会读成"发光的边"，甚至让卡片看起来是凹进去的；
+ * 换成"一张纸落在桌面上"的投影关系（只有下方暗影）更干净。
+ *
+ * 一级页面（今日 / 预设 / 设置）仍按 [NeumorphElevation] 的成对光影表达凸凹。
+ */
+fun NeumorphElevation.dropOnly(isDark: Boolean): NeumorphElevation = copy(
+    darkAlpha = darkAlpha * if (isDark) 0.7f else 0.9f,
+    lightAlpha = 0f
+)
+
+/**
  * 全局唯一的圆角。
  *
  * 全站只有这一个圆角值：卡片、面板、顶栏、底部导航、列表条目、按钮、输入框、勾选框、
