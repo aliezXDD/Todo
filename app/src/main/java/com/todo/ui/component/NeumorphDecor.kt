@@ -127,7 +127,7 @@ fun Modifier.neumorphOverlay(): Modifier = this.zIndex(1f)
 
 /**
  * 带按压形变的版本：按下时由凸转凹（新拟态最具标志性的交互）。
- * 适用于按钮、FAB、列表项等可点元素。
+ * 适用于按钮、FAB、卡片等可点"表面"。[restDepth] 是没按下时的深度（默认完全凸起）。
  */
 @Composable
 fun Modifier.neumorphPress(
@@ -135,10 +135,11 @@ fun Modifier.neumorphPress(
     isDark: Boolean,
     pressed: Boolean,
     surface: Color = Neumorph.surface(isDark),
-    elevation: NeumorphElevation = NeumorphElevation.Medium
+    elevation: NeumorphElevation = NeumorphElevation.Medium,
+    restDepth: Float = 1f
 ): Modifier {
     val depth by animateFloatAsState(
-        targetValue = if (pressed) 0f else 1f,
+        targetValue = if (pressed) 0f else restDepth,
         animationSpec = tween(durationMillis = MotionTokens.ItemState, easing = MotionTokens.StandardEasing),
         label = "neumorphDepth"
     )
