@@ -54,8 +54,14 @@ fun Modifier.neumorph(
 
         // 高光（亮影）整体收弱：纯白亮影在浅色底上容易"过曝"，反而比暗影更抢眼。
         // 层级主要交给暗影与底色差异，亮影只做点睛；深色底上需要收得更狠。
-        val darkBase = elevation.darkAlpha * if (isDark) 0.95f else 1f
-        val lightBase = elevation.lightAlpha * if (isDark) 0.42f else 0.68f
+        //
+        // 凸起（画在形状之外）与凹陷（画在形状之内）分开给强度：
+        // 深色底本来就暗，凹陷再叠一层 0.95 的暗影会糊成一个"黑洞"（凹槽、滑轨、按进去的条目
+        // 全都发死），所以深色下的**凹陷暗影单独收弱**；浅色下两者一致，凸起的外阴影也完全不受影响。
+        val convexDark = elevation.darkAlpha * if (isDark) 0.95f else 1f
+        val convexLight = elevation.lightAlpha * if (isDark) 0.42f else 0.68f
+        val concaveDark = elevation.darkAlpha * if (isDark) 0.5f else 1f
+        val concaveLight = convexLight
 
         val darkPaint = shadowPaint(Neumorph.shadowDark(isDark).toArgb(), blurPx)
         val lightPaint = shadowPaint(Neumorph.shadowLight(isDark).toArgb(), blurPx)
@@ -75,8 +81,8 @@ fun Modifier.neumorph(
             val innerScale = 1f - clampedDepth
 
             if (outerScale > 0.01f) {
-                darkPaint.alpha = alphaOf(darkBase * outerScale)
-                lightPaint.alpha = alphaOf(lightBase * outerScale)
+                darkPaint.alpha = alphaOf(convexDark * outerScale)
+                lightPaint.alpha = alphaOf(convexLight * outerScale)
                 drawIntoCanvas { canvas ->
                     val native = canvas.nativeCanvas
                     native.save()
@@ -94,8 +100,8 @@ fun Modifier.neumorph(
             drawPath(path, surface)
 
             if (innerScale > 0.01f && inversePath != null) {
-                darkPaint.alpha = alphaOf(darkBase * innerScale)
-                lightPaint.alpha = alphaOf(lightBase * innerScale)
+                darkPaint.alpha = alphaOf(concaveDark * innerScale)
+                lightPaint.alpha = alphaOf(concaveLight * innerScale)
                 clipPath(path) {
                     drawIntoCanvas { canvas ->
                         val native = canvas.nativeCanvas
