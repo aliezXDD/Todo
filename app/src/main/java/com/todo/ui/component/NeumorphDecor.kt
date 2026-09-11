@@ -72,7 +72,8 @@ fun Modifier.neumorph(
         // 深色底本来就暗，凹陷再叠一层 0.95 的暗影会糊成一个"黑洞"（凹槽、滑轨、按进去的条目
         // 全都发死），所以深色下的**凹陷暗影单独收弱**；浅色下两者一致，凸起的外阴影也完全不受影响。
         val convexDark = elevation.darkAlpha * if (isDark) 0.95f else 1f
-        val convexLight = elevation.lightAlpha * if (isDark) 0.42f else 0.68f
+        // 浅色下不要那圈"左上的白色高光"：凸起只靠右下的暗影表达（深色照旧保留那圈亮影）
+        val convexLight = elevation.lightAlpha * if (isDark) 0.42f else 0f
         val concaveDark = innerElevation.darkAlpha * if (isDark) 0.5f else 1f
         val concaveLight = innerElevation.lightAlpha * if (isDark) 0.42f else 0.68f
 
