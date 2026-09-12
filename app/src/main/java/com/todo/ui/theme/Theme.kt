@@ -11,13 +11,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import com.todo.data.local.datastore.ThemePreferences
 import com.todo.util.Constants
+import com.todo.util.StartupGate
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
@@ -65,6 +68,7 @@ private val DarkColorScheme = darkColorScheme(
 @InstallIn(SingletonComponent::class)
 interface ThemePreferencesEntryPoint {
     fun themePreferences(): ThemePreferences
+    fun startupGate(): StartupGate
 }
 
 @Composable
@@ -77,6 +81,10 @@ fun TodoTheme(
         EntryPointAccessors.fromApplication(context, ThemePreferencesEntryPoint::class.java)
             .themePreferences()
     }
+    val startupGate = remember(context) {
+        EntryPointAccessors.fromApplication(context, ThemePreferencesEntryPoint::class.java)
+            .startupGate()
+    }
     val mode by preferences.themeModeFlow.collectAsState(initial = Constants.THEME_MODE_SYSTEM)
     val systemDark = isSystemInDarkTheme()
     val useDark = when (mode) {
@@ -85,8 +93,21 @@ fun TodoTheme(
         else -> systemDark
     }
 
+    // 偏好一读出就通知启动闸门（见 StartupGate）：启动画面的放行要等它，首帧才不会是错的主题
+    LaunchedEffect(mode) {
+        startupGate.markThemeResolved()
+    }
+
     val contentAlpha = remember { Animatable(1f) }
+    var isFirstComposition by remember { mutableStateOf(true) }
     LaunchedEffect(useDark) {
+        // 首帧直接满不透明度：冷启动时"淡入"会被看成界面闪了一下，
+        // 而主题切换（用户手动切深浅色）才需要这次过渡
+        if (isFirstComposition) {
+            isFirstComposition = false
+            contentAlpha.snapTo(1f)
+            return@LaunchedEffect
+        }
         contentAlpha.snapTo(0.72f)
         contentAlpha.animateTo(
             targetValue = 1f,

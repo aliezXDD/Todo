@@ -22,6 +22,8 @@ class RecycleBinViewModel @Inject constructor(
 
     data class UiState(
         val items: List<RecycleBinItem> = emptyList(),
+        /** 首次发射前为 true：界面据此显示"加载中"，而不是先闪一句"回收站为空"。 */
+        val isLoading: Boolean = true,
         val isMultiSelectMode: Boolean = false,
         val selectedIds: Set<Long> = emptySet(),
         val showDeleteConfirm: Boolean = false
@@ -42,6 +44,7 @@ class RecycleBinViewModel @Inject constructor(
                     val itemIds = items.asSequence().map { it.id }.toSet()
                     state.copy(
                         items = items,
+                        isLoading = false,
                         selectedIds = state.selectedIds.intersect(itemIds)
                     )
                 }

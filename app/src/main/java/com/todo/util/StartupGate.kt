@@ -26,7 +26,22 @@ class StartupGate @Inject constructor() {
     /** 今日待办完成首次发射后变为 true，此后不再变回。 */
     val todayTodosLoaded: StateFlow<Boolean> = _todayTodosLoaded.asStateFlow()
 
+    /**
+     * 深浅色偏好是否已从 DataStore 读出。
+     *
+     * 主题偏好存在 DataStore 里、首帧前读不到，所以 App 的第一帧先按系统深浅色渲染，读到偏好后
+     * 再切——用户自定义过主题（例如"系统=浅色、App=深色"）时，冷启动会先浅后深闪一下。
+     * 把它也纳入启动画面的放行条件，首帧就已是正确主题。
+     */
+    private val _themeResolved = MutableStateFlow(false)
+
+    val themeResolved: StateFlow<Boolean> = _themeResolved.asStateFlow()
+
     fun markTodayTodosLoaded() {
         _todayTodosLoaded.value = true
+    }
+
+    fun markThemeResolved() {
+        _themeResolved.value = true
     }
 }

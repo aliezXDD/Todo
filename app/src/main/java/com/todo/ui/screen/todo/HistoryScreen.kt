@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.todo.ui.component.EmptyState
+import com.todo.ui.component.LoadingState
 import com.todo.ui.component.GlassTopBar
 import com.todo.ui.component.NeumorphScrollFade
 import com.todo.ui.component.NeumorphScrollFadeHeight
@@ -66,7 +67,10 @@ fun HistoryScreen(
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
 
-            if (uiState.historyRecords.isEmpty()) {
+            if (!uiState.historyLoaded) {
+                // 首帧早于 Room 首次发射；此时渲染"暂无往日记录"是在说谎（就是那一下假空状态闪帧）
+                LoadingState(modifier = Modifier.fillMaxSize())
+            } else if (uiState.historyRecords.isEmpty()) {
                 EmptyState(
                     text = "暂无往日记录",
                     modifier = Modifier.fillMaxSize()

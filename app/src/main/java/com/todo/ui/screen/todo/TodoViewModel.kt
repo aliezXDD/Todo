@@ -45,6 +45,8 @@ class TodoViewModel @Inject constructor(
         val historyRecords: List<DailyRecord> = emptyList(),
         val todayStats: DailyStats = DailyStats("", 0, 0),
         val isLoading: Boolean = true,
+        /** 往日记录是否已完成首次发射。与 [isLoading] 分开：两个列表各自到位，谁先到都不该等谁。 */
+        val historyLoaded: Boolean = false,
         val allPresets: List<Preset> = emptyList(),
         val filteredPresets: List<Preset> = emptyList(),
         val addSheetVisible: Boolean = false,
@@ -94,7 +96,7 @@ class TodoViewModel @Inject constructor(
     private fun observeHistoryRecords() {
         viewModelScope.launch {
             getHistoryRecordsUseCase().collect { records ->
-                _uiState.update { it.copy(historyRecords = records) }
+                _uiState.update { it.copy(historyRecords = records, historyLoaded = true) }
             }
         }
     }

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -30,6 +31,8 @@ import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.dp
@@ -41,6 +44,7 @@ import com.todo.ui.theme.NeumorphElevation
 import com.todo.ui.theme.NeumorphShapes
 import com.todo.ui.component.NeumorphTextField
 import com.todo.ui.component.neumorph
+import kotlinx.coroutines.delay
 
 @Composable
 fun PresetEditDialog(
@@ -58,6 +62,15 @@ fun PresetEditDialog(
     var input by remember(editingPreset?.id) { mutableStateOf(editingPreset?.content.orEmpty()) }
     val isCreateMode = editingPreset == null
     val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
+
+    // 弹窗打开即弹出键盘（与「添加待办」「编辑待办」「备注」同一做法：等节点挂上再请求焦点）
+    val focusRequester = remember { FocusRequester() }
+    LaunchedEffect(visible) {
+        if (visible) {
+            delay(80)
+            focusRequester.requestFocus()
+        }
+    }
 
     val titleColor = MaterialTheme.colorScheme.onSurface
     val contentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.92f)
@@ -94,6 +107,8 @@ fun PresetEditDialog(
         Box(
             modifier = Modifier
                 .fillMaxSize()
+                // 键盘弹出时向上让位：弹窗是垂直居中的，不加这个内边距时键盘会盖住输入框与按钮
+                .imePadding()
                 .background(scrimColor)
                 .clickable(
                     interactionSource = noRipple,
@@ -134,7 +149,9 @@ fun PresetEditDialog(
                     NeumorphTextField(
                         value = input,
                         onValueChange = { input = it },
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .focusRequester(focusRequester),
                         placeholder = "输入预设内容...",
                         singleLine = true
                     )

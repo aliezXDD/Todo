@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import com.todo.domain.model.Todo
 import com.todo.ui.component.EmptyState
 import com.todo.ui.component.GlassCard
+import com.todo.ui.component.LoadingState
 import com.todo.ui.component.NeumorphScrollFade
 import com.todo.ui.component.NeumorphScrollFadeHeight
 import com.todo.ui.theme.Neumorph
@@ -119,18 +120,11 @@ fun TodaySection(
                 // 加载中不能显示"添加第一条待办"：此时列表为空只是因为数据还没到，
                 // 显示引导文案会谎报"你还没有待办"（+ 在今日卡片右上角，文案也按实际位置写）
                 if (isLoading) {
-                    Box(
+                    LoadingState(
                         modifier = Modifier
                             .weight(1f)
-                            .fillMaxWidth(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "加载中…",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.secondary
-                        )
-                    }
+                            .fillMaxWidth()
+                    )
                 } else {
                     EmptyState(
                         text = "点击右上角 + 添加第一条待办",

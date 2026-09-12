@@ -47,6 +47,7 @@ import com.todo.domain.model.DailyStats
 import com.todo.ui.component.EmptyState
 import com.todo.ui.component.GlassCard
 import com.todo.ui.component.GlassTopBar
+import com.todo.ui.component.LoadingState
 import com.todo.ui.component.neumorphOverlay
 import com.todo.ui.theme.NeumorphShapes
 import com.todo.ui.theme.RateHigh
@@ -92,7 +93,9 @@ fun ChartScreen(
                     .fillMaxWidth()
                     .height(320.dp)
             ) {
-                if (!uiState.hasData) {
+                if (uiState.isLoading) {
+                    LoadingState(modifier = Modifier.fillMaxSize())
+                } else if (!uiState.hasData) {
                     EmptyState(text = "暂无统计数据", modifier = Modifier.fillMaxSize())
                 } else {
                     StatsChart(

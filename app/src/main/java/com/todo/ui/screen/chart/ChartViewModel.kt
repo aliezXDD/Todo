@@ -57,7 +57,9 @@ class ChartViewModel @Inject constructor(
                     statByDate[date] ?: DailyStats(date = date, totalCount = 0, completedCount = 0)
                 }
 
-                val validStats = windowStats.filter { it.totalCount > 0 }
+                // 平均完成率同样是**全历史**口径（与两个「累计」一致）：只对"当天真有待办"的日子取平均。
+                // 图表仍只看最近 30 天，两者窗口不同是刻意的
+                val validStats = allStats.filter { it.totalCount > 0 }
                 val averageRate = if (validStats.isEmpty()) {
                     0
                 } else {

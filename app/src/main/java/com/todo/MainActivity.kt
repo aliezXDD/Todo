@@ -84,6 +84,14 @@ class MainActivity : ComponentActivity() {
      *
      * 超时**从第一次 pre-draw 起算**，不是在 onCreate 里算好：冷启动时首次 pre-draw 可能比
      * onCreate 晚好几秒，若按 onCreate 计时，第一次求值就已过期，等于完全没有保持。
+     *
+     * 放行条件同时包含"主题偏好已读出"：否则首帧会先按系统深浅色渲染一次，再切到用户的偏好，
+     * 用户自定义过主题（系统=浅色、App=深色）时就是那一下"先浅后深"的闪。
+     *
+     * 注意边界：**启动窗口那层底色的跟随系统改不了**。它是系统在 App 进程启动之前按 manifest 主题
+     * 画出来的，`SplashScreen.setSplashScreenTheme` 实测只作用于启动画面的退场视图、不影响已显示的
+     * 启动窗口（已用逐帧录屏验证）。所以"系统浅色 + App 深色"时，仍会看到浅色启动画面 →
+     * 深色界面的切换，只能靠用户在设置里选"跟随系统"来完全避免。
      */
     private fun holdSplashUntilFirstData() {
         val decorView = window.decorView
@@ -95,7 +103,8 @@ class MainActivity : ComponentActivity() {
                     if (deadline == 0L) {
                         deadline = SystemClock.uptimeMillis() + SPLASH_MAX_HOLD_MS
                     }
-                    val release = startupGate.todayTodosLoaded.value ||
+                    val release = (startupGate.todayTodosLoaded.value &&
+                        startupGate.themeResolved.value) ||
                         SystemClock.uptimeMillis() >= deadline
                     if (release) {
                         decorView.viewTreeObserver.removeOnPreDrawListener(this)

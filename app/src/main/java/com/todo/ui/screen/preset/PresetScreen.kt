@@ -25,6 +25,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.todo.ui.component.DialogButtonRole
 import com.todo.ui.component.EmptyState
+import com.todo.ui.component.LoadingState
 import com.todo.ui.component.GlassDialog
 import com.todo.ui.component.GlassToast
 import com.todo.ui.component.NeumorphScrollFade
@@ -76,7 +77,13 @@ fun PresetScreen(
                 .neumorphOverlay()
         )
 
-        if (uiState.presets.isEmpty()) {
+        if (uiState.isLoading) {
+            LoadingState(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+            )
+        } else if (uiState.presets.isEmpty()) {
             EmptyState(
                 text = "点击右上角 + 创建常用待办预设",
                 modifier = Modifier

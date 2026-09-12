@@ -46,6 +46,7 @@ import com.todo.ui.component.EmptyState
 import com.todo.ui.component.GlassDialog
 import com.todo.ui.component.GlassListItem
 import com.todo.ui.component.GlassTopBar
+import com.todo.ui.component.LoadingState
 import com.todo.ui.component.NeumorphScrollFade
 import com.todo.ui.component.NeumorphScrollFadeHeight
 import com.todo.ui.component.neumorph
@@ -137,7 +138,9 @@ fun RecycleBinScreen(
             }
         )
 
-        if (uiState.items.isEmpty()) {
+        if (uiState.isLoading) {
+            LoadingState(modifier = Modifier.fillMaxSize())
+        } else if (uiState.items.isEmpty()) {
             EmptyState(
                 text = "回收站为空",
                 modifier = Modifier.fillMaxSize()

@@ -23,6 +23,8 @@ class PresetViewModel @Inject constructor(
 
     data class PresetUiState(
         val presets: List<Preset> = emptyList(),
+        /** 首次发射前为 true：界面据此显示"加载中"，而不是先闪一句"暂无预设"。 */
+        val isLoading: Boolean = true,
         val isMultiSelectMode: Boolean = false,
         val selectedIds: Set<Long> = emptySet(),
         val searchQuery: String = ""
@@ -59,6 +61,7 @@ class PresetViewModel @Inject constructor(
                     }
                     state.copy(
                         presets = filtered,
+                        isLoading = false,
                         selectedIds = state.selectedIds.intersect(filtered.map { it.id }.toSet())
                     )
                 }
@@ -146,9 +149,15 @@ class PresetViewModel @Inject constructor(
         }
     }
 
+    /**
+     * 只关窗、**不清 editingPreset**。
+     *
+     * 弹窗有退场动画（fade+scale），若这里立刻把编辑对象置空，动画期间弹窗会以 `editingPreset == null`
+     * 重新组合——标题瞬间变回"新建预设"、输入框也被重置成空，看起来就是"取消的一瞬间闪了一下"。
+     * 打开时本来就会重新赋值（新建是显式置 null，编辑是赋目标预设），所以留着上一次的值没有副作用。
+     */
     fun dismissEditDialog() {
         _showEditDialog.value = false
-        _editingPreset.value = null
     }
 
     fun savePreset(content: String) {

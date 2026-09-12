@@ -208,12 +208,21 @@ fun AddTodoSheet(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .padding(horizontal = AddSheetGutter),
-                                        placeholder = "搜索预设..."
+                                        placeholder = "搜索预设...",
+                                        // 搜索框必须是单行：否则键盘回车会插入换行、框体随之变高，
+                                        // 而且换行符进了关键词就永远匹配不到任何预设
+                                        singleLine = true
                                     )
 
                                     if (presets.isEmpty()) {
+                                        // 这里的 presets 是**过滤后**的列表，所以要区分两种"空"：
+                                        // 关键词没匹配到 ≠ 用户没有预设，后者那句引导文案会误导人去建预设
                                         Text(
-                                            text = "暂无预设，去预设页面添加吧",
+                                            text = if (searchQuery.isBlank()) {
+                                                "暂无预设，去预设页面添加吧"
+                                            } else {
+                                                "无搜索结果"
+                                            },
                                             style = MaterialTheme.typography.bodyMedium,
                                             color = secondaryTextColor,
                                             modifier = Modifier.padding(horizontal = AddSheetGutter)

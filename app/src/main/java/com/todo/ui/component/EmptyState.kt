@@ -51,3 +51,28 @@ fun EmptyState(
         )
     }
 }
+
+/**
+ * 加载占位：位置与文字规格和 [EmptyState] 一致，但**不带图标**——加载中没有任何"空"或"完成"可言。
+ *
+ * 存在的理由：Compose 首帧一定早于数据到位（Room/DataStore 首次发射都是异步的）。
+ * 各页面若把"列表为空"直接当成空状态，用户每次进页面都会先看到一句并不成立的"暂无…"，
+ * 再跳成真实内容——也就是那一下"假空状态闪帧"。首帧应该显示这个。
+ */
+@Composable
+fun LoadingState(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(horizontal = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = "加载中…",
+            style = MaterialTheme.typography.bodyMedium,
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.secondary
+        )
+    }
+}
