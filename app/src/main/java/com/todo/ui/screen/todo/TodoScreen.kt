@@ -68,9 +68,10 @@ fun TodoScreen(
         GlassFAB(
             onClick = { viewModel.setAddSheetVisible(true) },
             modifier = Modifier
-                .align(Alignment.BottomEnd)
-                // 使 + 按钮底边到今日卡片底边缘的距离，与右边到今日卡片右边缘的距离相等，并稍微远离右下角
-                .padding(end = 26.dp, bottom = 160.dp)
+                // 从右下角挪到"今日"卡片的右上角，与卡片边缘的距离保持不变（各 10dp）：
+                // 右边 26dp = 卡片右边 16dp + 10dp；上边 22dp = 卡片上边 12dp + 10dp
+                .align(Alignment.TopEnd)
+                .padding(end = 26.dp, top = 22.dp)
         )
 
     }
