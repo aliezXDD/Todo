@@ -26,6 +26,19 @@ interface TodoDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(todo: TodoEntity): Long
 
+    /**
+     * 追加到当天末尾：取下一个序号与插入**在同一个事务里**。
+     *
+     * 分开写（先 `getNextSortOrder` 再 `insert`）时两次并发添加会读到同一个最大值
+     * → 两条 `sortOrder` 相同，而 `ORDER BY` 遇到并列时顺序由 SQLite 决定，
+     * 列表顺序就会在两次读取之间跳变。
+     */
+    @Transaction
+    suspend fun insertAtEnd(todo: TodoEntity): Long {
+        val next = getNextSortOrder(todo.date)
+        return insert(todo.copy(sortOrder = next))
+    }
+
     @Delete
     suspend fun delete(todo: TodoEntity)
 

@@ -19,15 +19,14 @@ class TodoRepository @Inject constructor(
     fun getTodosForDates(dates: List<String>): Flow<List<TodoEntity>> =
         todoDao.getTodosForDates(dates).distinctUntilChanged()
 
-    suspend fun getNextSortOrder(date: String): Int = todoDao.getNextSortOrder(date)
-
     suspend fun insert(todo: TodoEntity): Long = todoDao.insert(todo)
+
+    /** 追加到某天末尾（含取号，单事务）。新增待办走这里，不用自己先取号。 */
+    suspend fun insertAtEnd(todo: TodoEntity): Long = todoDao.insertAtEnd(todo)
 
     suspend fun delete(todo: TodoEntity) = todoDao.delete(todo)
 
     suspend fun updateCompleted(id: Long, isCompleted: Boolean) = todoDao.updateCompleted(id, isCompleted)
-
-    suspend fun updateSortOrder(id: Long, sortOrder: Int) = todoDao.updateSortOrder(id, sortOrder)
 
     /** 整组顺序一次写完（单事务），避免逐行写入导致界面闪出中间态 */
     suspend fun updateSortOrders(orderedIds: List<Long>) = todoDao.updateSortOrders(orderedIds)

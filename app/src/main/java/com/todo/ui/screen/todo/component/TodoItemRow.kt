@@ -27,9 +27,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextDecoration
@@ -81,11 +81,6 @@ fun TodoItemRow(
         animationSpec = tween(durationMillis = MotionTokens.ItemState, easing = MotionTokens.StandardEasing),
         label = "strikeProgress"
     )
-    val rowScale = animateFloatAsState(
-        targetValue = 1f,
-        animationSpec = tween(durationMillis = MotionTokens.Fast, easing = MotionTokens.StandardEasing),
-        label = "rowScale"
-    )
 
     val strikeColor = MaterialTheme.colorScheme.onBackground.copy(alpha = alpha.value)
 
@@ -101,9 +96,7 @@ fun TodoItemRow(
     // 单击整行 = 进编辑：勾选框有自己的点击区（只切换完成状态），拖拽把手有自己的拖拽手势，
     // 所以点条目本体不会误触这两者。
     GlassListItem(
-        modifier = modifier
-            .fillMaxWidth()
-            .scale(rowScale.value),
+        modifier = modifier.fillMaxWidth(),
         depth = rowDepth,
         innerElevation = CompletedRowInnerElevation,
         onClick = onEdit

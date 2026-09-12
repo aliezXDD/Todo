@@ -1,6 +1,8 @@
 package com.todo.ui.screen.todo.component
 
+import android.os.Build
 import android.view.HapticFeedbackConstants
+import android.view.View
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -37,6 +39,33 @@ import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 
 /**
+ * 拖动开始/结束的触感反馈。
+ *
+ * `DRAG_START` 与 `GESTURE_END` 都是 **API 34** 才加入的常量，而本项目 minSdk 31：
+ * 它们是编译期常量、会被内联进字节码，所以能编过，但在 31–33 上这个值并非系统认得的触感类型
+ * （轻则无声无感，重则在部分机型上抛异常）。因此在低版本回退到语义最接近的旧常量。
+ */
+private fun View.hapticDragStart() {
+    performHapticFeedback(
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            HapticFeedbackConstants.DRAG_START
+        } else {
+            HapticFeedbackConstants.LONG_PRESS
+        }
+    )
+}
+
+private fun View.hapticDragEnd() {
+    performHapticFeedback(
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            HapticFeedbackConstants.GESTURE_END
+        } else {
+            HapticFeedbackConstants.CLOCK_TICK
+        }
+    )
+}
+
+/**
  * 「今日」卡片：标题、日期，以及可拖动排序的待办列表。
  *
  * 列表用**懒加载版**的拖动排序（`ReorderableItem` + 真正的 `key`）：
@@ -51,6 +80,7 @@ import sh.calvin.reorderable.rememberReorderableLazyListState
 @Composable
 fun TodaySection(
     todos: List<Todo>,
+    date: String,
     isLoading: Boolean,
     onToggleTodo: (Todo, Boolean) -> Unit,
     onEditTodo: (Todo) -> Unit,
@@ -110,7 +140,7 @@ fun TodaySection(
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
-                    text = DateUtils.formatDisplayDate(DateUtils.today()),
+                    text = DateUtils.formatDisplayDate(date),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.secondary
                 )
@@ -165,11 +195,9 @@ fun TodaySection(
                                     onCheckedChange = { checked -> onToggleTodo(todo, checked) },
                                     onEdit = { onEditTodo(todo) },
                                     dragHandleModifier = Modifier.draggableHandle(
-                                        onDragStarted = {
-                                            view.performHapticFeedback(HapticFeedbackConstants.DRAG_START)
-                                        },
+                                        onDragStarted = { view.hapticDragStart() },
                                         onDragStopped = {
-                                            view.performHapticFeedback(HapticFeedbackConstants.GESTURE_END)
+                                            view.hapticDragEnd()
                                             // 松手时把最终顺序写库（单事务，不会产生中间态）
                                             onReorderFinished(localTodos)
                                         }

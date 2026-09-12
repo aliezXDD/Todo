@@ -26,8 +26,7 @@ class PresetViewModel @Inject constructor(
         /** 首次发射前为 true：界面据此显示"加载中"，而不是先闪一句"暂无预设"。 */
         val isLoading: Boolean = true,
         val isMultiSelectMode: Boolean = false,
-        val selectedIds: Set<Long> = emptySet(),
-        val searchQuery: String = ""
+        val selectedIds: Set<Long> = emptySet()
     )
 
     private val _uiState = MutableStateFlow(PresetUiState())
@@ -54,15 +53,10 @@ class PresetViewModel @Inject constructor(
         viewModelScope.launch {
             presetUseCases.getPresets().collect { presets ->
                 _uiState.update { state ->
-                    val filtered = if (state.searchQuery.isBlank()) {
-                        presets
-                    } else {
-                        presets.filter { it.content.contains(state.searchQuery, ignoreCase = true) }
-                    }
                     state.copy(
-                        presets = filtered,
+                        presets = presets,
                         isLoading = false,
-                        selectedIds = state.selectedIds.intersect(filtered.map { it.id }.toSet())
+                        selectedIds = state.selectedIds.intersect(presets.map { it.id }.toSet())
                     )
                 }
             }
@@ -108,10 +102,6 @@ class PresetViewModel @Inject constructor(
             addTodoUseCase(preset.content)
             _addedToTodayMessage.tryEmit("已添加到今日待办")
         }
-    }
-
-    fun onSearchQueryChange(query: String) {
-        _uiState.update { it.copy(searchQuery = query) }
     }
 
     fun toggleSelected(id: Long) {

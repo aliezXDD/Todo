@@ -18,6 +18,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.todo.ui.component.GlassButton
 import com.todo.ui.component.GlassFAB
@@ -35,6 +37,10 @@ fun TodoScreen(
     viewModel: TodoViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    // 回到前台时校正"当前逻辑日"：进程可能在后台被冻结过，跨过凌晨 4 点也不会自己醒
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        viewModel.refreshDay()
+    }
     // 「往日记录」按钮：与卡片同一套圆角语言
     val historyButtonShape = RoundedCornerShape(NeumorphShapes.Small)
 
@@ -71,6 +77,7 @@ fun TodoScreen(
             ) {
                 TodaySection(
                     todos = uiState.todayTodos,
+                    date = uiState.today,
                     isLoading = uiState.isLoading,
                     onToggleTodo = viewModel::toggleTodo,
                     onEditTodo = viewModel::startEdit,

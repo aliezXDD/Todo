@@ -56,7 +56,7 @@ class TodoApp : Application(), Configuration.Provider {
             .build()
 
         val dailyRequest = PeriodicWorkRequestBuilder<DailyArchiveWorker>(1, TimeUnit.DAYS)
-            .setInitialDelay(DateUtils.calculateDelayUntilMidnight(), TimeUnit.MILLISECONDS)
+            .setInitialDelay(DateUtils.millisUntilNextDayStart(), TimeUnit.MILLISECONDS)
             .setConstraints(constraints)
             .build()
 

@@ -64,8 +64,14 @@ fun NavGraph(
             }
         ) {
             TodoScreen(
-                onNavigateToChart = { navController.navigate(Screen.Chart.route) },
-                onNavigateToHistory = { navController.navigate(Screen.History.route) }
+                // launchSingleTop：详情页只保留一份。不加的话连点两次"完成统计"会叠两层，
+                // 用户按一次返回看起来"没反应"（其实只是回到了同一个界面）
+                onNavigateToChart = {
+                    navController.navigate(Screen.Chart.route) { launchSingleTop = true }
+                },
+                onNavigateToHistory = {
+                    navController.navigate(Screen.History.route) { launchSingleTop = true }
+                }
             )
         }
 
@@ -109,7 +115,9 @@ fun NavGraph(
             popExitTransition = { tabExit(isTabForward(initialState, targetState)) }
         ) {
             SettingsScreen(
-                onNavigateToRecycleBin = { navController.navigate(Screen.RecycleBin.route) }
+                onNavigateToRecycleBin = {
+                    navController.navigate(Screen.RecycleBin.route) { launchSingleTop = true }
+                }
             )
         }
 

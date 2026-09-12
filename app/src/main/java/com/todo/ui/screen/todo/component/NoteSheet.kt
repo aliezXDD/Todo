@@ -16,7 +16,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
@@ -61,8 +62,12 @@ fun NoteSheet(
         focusRequester.requestFocus()
     }
 
-    // 按屏幕高度取，而不是写死 dp：小屏上不顶到状态栏，大屏上也不会只占一小条
-    val fieldHeight = LocalConfiguration.current.screenHeightDp.dp * 0.19f
+    // 高度按**实际容器高度**取，不写死 dp、也不用 Configuration.screenHeightDp：后者在多窗口/折叠屏下
+    // 不保证随 Compose 容器变化（lint 的 ConfigurationScreenWidthHeight）。
+    // 0.19 ≈ 输入的七八行；再长就靠框内上下拖动查看（见类注释）。
+    val density = LocalDensity.current
+    val containerHeightDp = with(density) { LocalWindowInfo.current.containerSize.height.toDp() }
+    val fieldHeight = containerHeightDp * 0.19f
 
     GlassBottomSheet(
         onDismissRequest = onDismiss,

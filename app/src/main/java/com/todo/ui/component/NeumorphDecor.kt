@@ -77,17 +77,17 @@ fun Modifier.neumorph(
         val concaveDark = innerElevation.darkAlpha * if (isDark) 0.5f else 1f
         val concaveLight = innerElevation.lightAlpha * if (isDark) 0.42f else 0.68f
 
-        val darkPaint = shadowPaint(Neumorph.shadowDark(isDark).toArgb(), blurPx)
+        val darkPaint = cachedShadowPaint(Neumorph.shadowDark(isDark).toArgb(), blurPx)
         // 凸起的外高光用收窄后的模糊半径（BlurMaskFilter 建在画笔上，所以必须单独一支）
-        val lightPaint = shadowPaint(Neumorph.shadowLight(isDark).toArgb(), highlightBlurPx)
+        val lightPaint = cachedShadowPaint(Neumorph.shadowLight(isDark).toArgb(), highlightBlurPx)
         // 凹陷用自己的一套画笔（模糊半径不同，而 BlurMaskFilter 是建在画笔上的）
         val innerDarkPaint = if (clampedDepth < 1f) {
-            shadowPaint(Neumorph.shadowDark(isDark).toArgb(), innerBlurPx)
+            cachedShadowPaint(Neumorph.shadowDark(isDark).toArgb(), innerBlurPx)
         } else {
             darkPaint
         }
         val innerLightPaint = if (clampedDepth < 1f) {
-            shadowPaint(Neumorph.shadowLight(isDark).toArgb(), innerBlurPx)
+            cachedShadowPaint(Neumorph.shadowLight(isDark).toArgb(), innerBlurPx)
         } else {
             lightPaint
         }
@@ -191,5 +191,20 @@ private fun shadowPaint(color: Int, blurPx: Float) = android.graphics.Paint().ap
     alpha = 255
     maskFilter = BlurMaskFilter(blurPx, BlurMaskFilter.Blur.NORMAL)
 }
+
+/**
+ * 阴影画笔缓存。
+ *
+ * 为什么必须要这一层：`drawWithCache` 的构建块在 modifier 参数变化时会重跑，而 [neumorphPress] 的
+ * 按压动画每帧都在改 depth → 每帧都是一个新 modifier → 构建块每帧重跑，于是每次按压都会以 60fps
+ * 持续新建 4 支 Paint 与 4 个 BlurMaskFilter（后者是较重的原生对象），带来明显的分配与 GC 抖动。
+ *
+ * 缓存键是（颜色, 模糊半径）：模糊半径只由 elevation 决定、是常数，颜色只有深浅两套，
+ * 所以条目数天然有界。绘制只在主线程发生，且每处绘制前都会显式设置 alpha，无需加锁。
+ */
+private val shadowPaintCache = HashMap<Pair<Int, Float>, android.graphics.Paint>()
+
+private fun cachedShadowPaint(color: Int, blurPx: Float): android.graphics.Paint =
+    shadowPaintCache.getOrPut(color to blurPx) { shadowPaint(color, blurPx) }
 
 private fun alphaOf(value: Float): Int = (255f * value).coerceIn(0f, 255f).toInt()

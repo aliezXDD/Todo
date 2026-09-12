@@ -31,13 +31,14 @@ class RestoreRecycleBinUseCase @Inject constructor(
         database.withTransaction {
             orderedItems.forEach { item ->
                 val restoreDate = if (item.originalDate < cutoff) today else item.originalDate
-                val sortOrder = todoRepository.getNextSortOrder(restoreDate)
-                todoRepository.insert(
+                // 取号与插入同一个事务（嵌套在外层事务内）：按还原顺序追加到该日末尾。
+                // sortOrder 传 0 只是占位，真值由 DAO 在事务里算出来覆盖
+                todoRepository.insertAtEnd(
                     TodoEntity(
                         content = item.content,
                         isCompleted = item.wasCompleted,
                         date = restoreDate,
-                        sortOrder = sortOrder
+                        sortOrder = 0
                     )
                 )
             }

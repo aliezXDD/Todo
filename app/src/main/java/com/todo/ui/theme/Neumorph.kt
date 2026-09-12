@@ -69,7 +69,6 @@ data class NeumorphElevation(
         val None = NeumorphElevation(offset = 0.dp, blur = 0.dp)
 
         /** 小元素：勾选框、小圆点、chip */
-        val Small = NeumorphElevation(offset = 4.dp, blur = 7.dp)
 
         /** 列表项、按钮、开关、凹陷滑轨 */
         val Medium = NeumorphElevation(offset = 7.dp, blur = 11.dp)

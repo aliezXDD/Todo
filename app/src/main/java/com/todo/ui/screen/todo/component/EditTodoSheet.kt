@@ -40,7 +40,6 @@ fun EditTodoSheet(
 
     val focusRequester = remember { FocusRequester() }
     var input by remember(todo.id) { mutableStateOf(TextFieldValue(todo.content, TextRange(todo.content.length))) }
-    val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
 
     LaunchedEffect(todo.id) {
         // Delay to let the bottom-sheet popup attach its node before requesting focus.

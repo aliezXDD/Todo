@@ -19,13 +19,19 @@ import com.todo.util.DateUtils
 import com.todo.util.StartupGate
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class TodoViewModel @Inject constructor(
     private val addTodoUseCase: AddTodoUseCase,
@@ -41,6 +47,8 @@ class TodoViewModel @Inject constructor(
 ) : ViewModel() {
 
     data class UiState(
+        /** 当前逻辑日（凌晨 4 点分界）：界面标题与数据窗口共用它，避免"标题已是新的一天、列表还是昨天"。 */
+        val today: String = DateUtils.today(),
         val todayTodos: List<Todo> = emptyList(),
         val historyRecords: List<DailyRecord> = emptyList(),
         val todayStats: DailyStats = DailyStats("", 0, 0),
@@ -63,6 +71,14 @@ class TodoViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(UiState())
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
+    /**
+     * 当前"逻辑日"（凌晨 4 点为分界，见 [DateUtils.DAY_START_HOUR]）。
+     *
+     * 列表、统计、往日记录窗口全部以它为基准；日期一变就整体重新换绑。
+     * 这是修掉"跨零点不刷新"的关键：以前日期是在各个用例内部取值、随流一起固化的。
+     */
+    private val currentDay = MutableStateFlow(DateUtils.today())
+
     /** 本次打开笔记面板后用户是否已经改过文本（只有主线程读写，无需额外同步）。 */
     private var noteEdited = false
 
@@ -71,16 +87,41 @@ class TodoViewModel @Inject constructor(
         observeHistoryRecords()
         observePresets()
         observeNote()
+        startDayTicker()
+    }
+
+    /**
+     * 跨过凌晨 4 点自动换绑到新的一天。
+     *
+     * 界面在 ON_RESUME 时也会调用 [refreshDay]，两者互补：定时器负责"界面一直开着"的情况，
+     * ON_RESUME 负责"进程在后台被冻结、定时器没醒"的情况（[currentDay] 是 StateFlow，
+     * 相同的值不会重复发射，所以重复调用没有代价）。
+     */
+    private fun startDayTicker() {
+        viewModelScope.launch {
+            while (isActive) {
+                delay(DateUtils.millisUntilNextDayStart() + 1_000L)
+                refreshDay()
+            }
+        }
+    }
+
+    /** 把"当前逻辑日"校正为此刻的日期；日期真的变了才会触发重新查询。 */
+    fun refreshDay() {
+        currentDay.value = DateUtils.today()
     }
 
     private fun observeTodayTodos() {
         viewModelScope.launch {
-            getTodayTodosUseCase().collect { todos ->
+            currentDay.flatMapLatest { day ->
+                getTodayTodosUseCase(day).map { todos -> day to todos }
+            }.collect { (day, todos) ->
                 _uiState.update { state ->
                     state.copy(
+                        today = day,
                         todayTodos = todos,
                         todayStats = DailyStats(
-                            date = DateUtils.today(),
+                            date = day,
                             totalCount = todos.size,
                             completedCount = todos.count { it.isCompleted }
                         ),
@@ -95,7 +136,9 @@ class TodoViewModel @Inject constructor(
 
     private fun observeHistoryRecords() {
         viewModelScope.launch {
-            getHistoryRecordsUseCase().collect { records ->
+            currentDay.flatMapLatest { day ->
+                getHistoryRecordsUseCase(day)
+            }.collect { records ->
                 _uiState.update { it.copy(historyRecords = records, historyLoaded = true) }
             }
         }

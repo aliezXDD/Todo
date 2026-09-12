@@ -12,13 +12,11 @@ class AddTodoUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(content: String): Long {
         val today = DateUtils.today()
-        val sortOrder = todoRepository.getNextSortOrder(today)
-        val entity = TodoEntity(
-            content = content,
-            date = today,
-            sortOrder = sortOrder
+        // 取号与插入在 DAO 里同一个事务完成：分开写会在并发添加时产生重复 sortOrder。
+        // 这里传 0 只是占位，真正的 sortOrder 由 insertAtEnd 在事务里算出来覆盖掉
+        val id = todoRepository.insertAtEnd(
+            TodoEntity(content = content, date = today, sortOrder = 0)
         )
-        val id = todoRepository.insert(entity)
         refreshDailyStats(today)
         return id
     }
