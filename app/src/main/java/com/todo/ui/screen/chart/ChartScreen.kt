@@ -5,7 +5,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -96,27 +100,49 @@ fun ChartScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(StatGridGutter))
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                StatCard("平均完成率", "${uiState.averageRate}%", Modifier.weight(1f))
-                StatCard("累计完成", "${uiState.totalCompleted}", Modifier.weight(1f))
-            }
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                StatCard("连续全部完成", "${uiState.consecutiveDays} 天", Modifier.weight(1f))
-                StatCard("累计全部完成", "${uiState.fullCompletionDays} 天", Modifier.weight(1f))
+            StatGrid {
+                StatRow {
+                    StatCard("平均完成率", "${uiState.averageRate}%", Modifier.weight(1f))
+                    StatCard("累计完成数", "${uiState.totalCompleted}", Modifier.weight(1f))
+                }
+                StatRow {
+                    StatCard("连续全部完成", "${uiState.consecutiveDays} 天", Modifier.weight(1f))
+                    StatCard("累计全部完成", "${uiState.fullCompletionDays} 天", Modifier.weight(1f))
+                }
             }
         }
     }
+}
+
+/** 四宫格的唯一间距来源：列间距、行间距、与上方图表的间距都用它，排版节奏才是一致的。 */
+private val StatGridGutter = 12.dp
+
+/**
+ * 2×2 统计网格。
+ *
+ * 两行用同一套间距，且每行高度取内部卡片的较大者（[IntrinsicSize.Min] + `fillMaxHeight`），
+ * 因此四张卡等宽等高——即使系统字体放大到某个标签换行，两行也不会出现参差不齐的错位。
+ */
+@Composable
+private fun StatGrid(content: @Composable ColumnScope.() -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(StatGridGutter),
+        content = content
+    )
+}
+
+@Composable
+private fun StatRow(content: @Composable RowScope.() -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(IntrinsicSize.Min),
+        horizontalArrangement = Arrangement.spacedBy(StatGridGutter),
+        content = content
+    )
 }
 
 @Composable
@@ -125,13 +151,23 @@ private fun StatCard(
     value: String,
     modifier: Modifier = Modifier
 ) {
-    GlassCard(modifier = modifier) {
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    GlassCard(
+        // 卡片比默认紧凑一档（纵向 16→12、内部间距 8→6）；横向内边距保持 16，
+        // 让卡内文字的左边缘与上方图表卡片的内容左边缘对齐。
+        modifier = modifier.fillMaxHeight(),
+        fillMaxHeight = true,
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxHeight(),
+            verticalArrangement = Arrangement.Center
+        ) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.secondary
             )
+            Spacer(modifier = Modifier.height(6.dp))
             Text(
                 text = value,
                 style = MaterialTheme.typography.titleLarge,
