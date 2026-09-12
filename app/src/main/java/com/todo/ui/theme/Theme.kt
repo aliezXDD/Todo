@@ -86,7 +86,11 @@ fun TodoTheme(
         EntryPointAccessors.fromApplication(context, ThemePreferencesEntryPoint::class.java)
             .startupGate()
     }
-    val mode by preferences.themeModeFlow.collectAsState(initial = Constants.THEME_MODE_SYSTEM)
+    // 初值刻意用 null 表示"**还没读盘**"：如果用 THEME_MODE_SYSTEM 当占位初值，首次组合就会带着
+    // 它触发下面的 LaunchedEffect，于是主题闸门在 DataStore 真正读出来之前就被放行了
+    // ——那个"等主题就绪"的条件等于没写（正确主题只是碰巧抢在数据之前读完）。
+    val storedMode by preferences.themeModeFlow.collectAsState(initial = null)
+    val mode = storedMode ?: Constants.THEME_MODE_SYSTEM
     val systemDark = isSystemInDarkTheme()
     val useDark = when (mode) {
         Constants.THEME_MODE_LIGHT -> false
@@ -94,9 +98,11 @@ fun TodoTheme(
         else -> systemDark
     }
 
-    // 偏好一读出就通知启动闸门（见 StartupGate）：启动画面的放行要等它，首帧才不会是错的主题
-    LaunchedEffect(mode) {
-        startupGate.markThemeResolved()
+    // 真正读到偏好后才通知启动闸门（见 StartupGate）
+    LaunchedEffect(storedMode) {
+        if (storedMode != null) {
+            startupGate.markThemeResolved()
+        }
     }
 
     val contentAlpha = remember { Animatable(1f) }

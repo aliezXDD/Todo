@@ -55,6 +55,17 @@ fun NoteSheet(
         mutableStateOf(TextFieldValue(content, selection = TextRange(content.length)))
     }
 
+    // 存储层的值可能在面板打开**之后**才到（冷启动时 DataStore 首次读盘是异步的）。
+    // 只在用户还没敲过字时回灌：既让迟到的内容显示出来，又不会覆盖正在输入的内容。
+    // 没有这道回灌时，界面会一直渲染空框；用户一旦输入，ViewModel 的 noteEdited 就被置位、
+    // 存储值再也不会回灌，关闭时只写回新输入的那点字——**已存备注被静默覆盖**。
+    var userTyped by remember { mutableStateOf(false) }
+    LaunchedEffect(content) {
+        if (!userTyped) {
+            fieldValue = TextFieldValue(content, selection = TextRange(content.length))
+        }
+    }
+
     // 点按钮后直接弹出键盘（与「编辑待办」「添加待办」同一做法：等 sheet 的节点挂上再请求焦点）
     val focusRequester = remember { FocusRequester() }
     LaunchedEffect(Unit) {
@@ -93,6 +104,7 @@ fun NoteSheet(
             NeumorphTextField(
                 value = fieldValue,
                 onValueChange = { updated ->
+                    userTyped = true
                     fieldValue = updated
                     // 文本本身仍由调用方持有：它只关心字符串，光标/选区留在本组件内
                     onContentChange(updated.text)

@@ -19,8 +19,6 @@ class TodoRepository @Inject constructor(
     fun getTodosForDates(dates: List<String>): Flow<List<TodoEntity>> =
         todoDao.getTodosForDates(dates).distinctUntilChanged()
 
-    suspend fun insert(todo: TodoEntity): Long = todoDao.insert(todo)
-
     /** 追加到某天末尾（含取号，单事务）。新增待办走这里，不用自己先取号。 */
     suspend fun insertAtEnd(todo: TodoEntity): Long = todoDao.insertAtEnd(todo)
 

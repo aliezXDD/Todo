@@ -6,7 +6,6 @@ import androidx.compose.animation.core.Spring
 object MotionTokens {
     val StandardEasing = CubicBezierEasing(0.22f, 1f, 0.36f, 1f)
 
-    const val Fast = 120
     const val Medium = 220
     const val Standard = 260
 
