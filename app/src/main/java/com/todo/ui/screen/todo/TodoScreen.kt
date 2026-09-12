@@ -56,23 +56,30 @@ fun TodoScreen(
                     .height(48.dp)
             )
 
-            TodaySection(
-                todos = uiState.todayTodos,
-                onToggleTodo = viewModel::toggleTodo,
-                onEditTodo = viewModel::startEdit,
-                onReorderFinished = viewModel::commitReorder,
-                modifier = Modifier.weight(1f)
-            )
-        }
+            // 「今日」卡片（标题 + 日期 + 待办列表）自己撑满这个 Box，
+            // 所以 Box 的范围就等于卡片的范围，+ 按钮贴着它的右上角放即可
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+            ) {
+                TodaySection(
+                    todos = uiState.todayTodos,
+                    onToggleTodo = viewModel::toggleTodo,
+                    onEditTodo = viewModel::startEdit,
+                    onReorderFinished = viewModel::commitReorder,
+                    modifier = Modifier.fillMaxSize()
+                )
 
-        GlassFAB(
-            onClick = { viewModel.setAddSheetVisible(true) },
-            modifier = Modifier
-                // 从右下角挪到"今日"卡片的右上角，与卡片边缘的距离保持不变（各 10dp）：
-                // 右边 26dp = 卡片右边 16dp + 10dp；上边 22dp = 卡片上边 12dp + 10dp
-                .align(Alignment.TopEnd)
-                .padding(end = 26.dp, top = 22.dp)
-        )
+                GlassFAB(
+                    onClick = { viewModel.setAddSheetVisible(true) },
+                    // 贴在「今日」卡片的右上角：与卡片上边缘、右边缘各留 10dp
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(top = 10.dp, end = 10.dp)
+                )
+            }
+        }
 
     }
 
