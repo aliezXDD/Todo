@@ -43,19 +43,20 @@ fun TodaySection(
 ) {
     val view = LocalView.current
     var isDragging by remember { mutableStateOf(false) }
-    var holdExternalSync by remember { mutableStateOf(false) }
     var localTodos by remember { mutableStateOf(todos) }
-    LaunchedEffect(todos, isDragging, holdExternalSync) {
+    // 外部（数据库）来的列表只用来**刷新内容**，绝不用来重排：顺序始终以本地为准。
+    //
+    // 拖动排序是"本地先改 + 数据库异步写"，数据库那一次次回调可能暂时还是旧顺序；无论它是
+    // 早到、晚到还是与本地一致，只要不去动顺序，界面就不可能闪出另一种排列。
+    // 新出现的条目（例如刚添加的）按数据库顺序追加到末尾，消失的（删除/归档）自然被丢掉。
+    LaunchedEffect(todos, isDragging) {
         if (isDragging) return@LaunchedEffect
-
-        if (holdExternalSync) {
-            val sameOrder = todos.size == localTodos.size &&
-                todos.indices.all { index -> todos[index].id == localTodos[index].id }
-            if (!sameOrder) return@LaunchedEffect
-            holdExternalSync = false
+        val fresh = todos.associateBy { it.id }
+        val merged = buildList {
+            localTodos.forEach { local -> fresh[local.id]?.let { add(it) } }
+            todos.forEach { todo -> if (none { it.id == todo.id }) add(todo) }
         }
-
-        localTodos = todos
+        if (merged != localTodos) localTodos = merged
     }
     val scrollState = rememberScrollState()
     val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
@@ -140,7 +141,6 @@ fun TodaySection(
                                 dragHandleModifier = with(this) {
                                     Modifier.draggableHandle(
                                         onDragStarted = {
-                                            holdExternalSync = true
                                             isDragging = true
                                             view.performHapticFeedback(HapticFeedbackConstants.DRAG_START)
                                         },
