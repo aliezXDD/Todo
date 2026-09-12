@@ -15,12 +15,12 @@ import com.todo.domain.usecase.PresetUseCases
 import com.todo.domain.usecase.ReorderTodosUseCase
 import com.todo.domain.usecase.ToggleTodoUseCase
 import com.todo.domain.usecase.UpdateTodoUseCase
+import com.todo.util.CurrentDay
 import com.todo.util.DateUtils
 import com.todo.util.StartupGate
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -28,7 +28,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -43,7 +42,8 @@ class TodoViewModel @Inject constructor(
     private val getHistoryRecordsUseCase: GetHistoryRecordsUseCase,
     private val presetUseCases: PresetUseCases,
     private val notePreferences: NotePreferences,
-    private val startupGate: StartupGate
+    private val startupGate: StartupGate,
+    private val currentDay: CurrentDay
 ) : ViewModel() {
 
     data class UiState(
@@ -74,10 +74,11 @@ class TodoViewModel @Inject constructor(
     /**
      * 当前"逻辑日"（凌晨 4 点为分界，见 [DateUtils.DAY_START_HOUR]）。
      *
-     * 列表、统计、往日记录窗口全部以它为基准；日期一变就整体重新换绑。
+     * 列表、统计、往日记录窗口全部 [flatMapLatest] 到它；日期一变就整体重新换绑。
      * 这是修掉"跨零点不刷新"的关键：以前日期是在各个用例内部取值、随流一起固化的。
+     * 它由 [CurrentDay] 单例提供，因此统计页看到的是**同一天**，不会再各持一份。
      */
-    private val currentDay = MutableStateFlow(DateUtils.today())
+    private val dayFlow = currentDay.day
 
     /** 本次打开笔记面板后用户是否已经改过文本（只有主线程读写，无需额外同步）。 */
     private var noteEdited = false
@@ -87,33 +88,16 @@ class TodoViewModel @Inject constructor(
         observeHistoryRecords()
         observePresets()
         observeNote()
-        startDayTicker()
     }
 
-    /**
-     * 跨过凌晨 4 点自动换绑到新的一天。
-     *
-     * 界面在 ON_RESUME 时也会调用 [refreshDay]，两者互补：定时器负责"界面一直开着"的情况，
-     * ON_RESUME 负责"进程在后台被冻结、定时器没醒"的情况（[currentDay] 是 StateFlow，
-     * 相同的值不会重复发射，所以重复调用没有代价）。
-     */
-    private fun startDayTicker() {
-        viewModelScope.launch {
-            while (isActive) {
-                delay(DateUtils.millisUntilNextDayStart() + 1_000L)
-                refreshDay()
-            }
-        }
-    }
-
-    /** 把"当前逻辑日"校正为此刻的日期；日期真的变了才会触发重新查询。 */
+    /** 回到前台时对时（定时器在进程被冻结时不会推进）。日期真的变了才会触发重新查询。 */
     fun refreshDay() {
-        currentDay.value = DateUtils.today()
+        currentDay.refresh()
     }
 
     private fun observeTodayTodos() {
         viewModelScope.launch {
-            currentDay.flatMapLatest { day ->
+            dayFlow.flatMapLatest { day ->
                 getTodayTodosUseCase(day).map { todos -> day to todos }
             }.collect { (day, todos) ->
                 _uiState.update { state ->
@@ -136,7 +120,7 @@ class TodoViewModel @Inject constructor(
 
     private fun observeHistoryRecords() {
         viewModelScope.launch {
-            currentDay.flatMapLatest { day ->
+            dayFlow.flatMapLatest { day ->
                 getHistoryRecordsUseCase(day)
             }.collect { records ->
                 _uiState.update { it.copy(historyRecords = records, historyLoaded = true) }

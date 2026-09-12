@@ -4,18 +4,21 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.todo.domain.model.DailyStats
 import com.todo.domain.usecase.GetStatsUseCase
+import com.todo.util.CurrentDay
 import com.todo.util.DateUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 @HiltViewModel
 class ChartViewModel @Inject constructor(
-    private val getStatsUseCase: GetStatsUseCase
+    private val getStatsUseCase: GetStatsUseCase,
+    private val currentDay: CurrentDay
 ) : ViewModel() {
 
     enum class ChartType {
@@ -48,42 +51,50 @@ class ChartViewModel @Inject constructor(
 
     private fun observeStats() {
         viewModelScope.launch {
-            getStatsUseCase().collect { allStats ->
-                val statByDate = allStats.associateBy { it.date }
+            // 与「当前逻辑日」合并：跨过凌晨 4 点时窗口与连续天数都要跟着重算。
+            // 原先只在统计表发射时才算，于是统计页会一直画着昨天（待办页早已换到新的一天）。
+            combine(getStatsUseCase(), currentDay.day) { allStats, day -> allStats to day }
+                .collect { (allStats, day) ->
+                    val statByDate = allStats.associateBy { it.date }
 
-                // 图表与平均完成率仍然只看最近 30 天（补空白天，柱子/折线才有连续横轴）
-                val windowDates = (CHART_WINDOW_DAYS - 1 downTo 0).map { DateUtils.daysAgo(it) }
-                val windowStats = windowDates.map { date ->
-                    statByDate[date] ?: DailyStats(date = date, totalCount = 0, completedCount = 0)
+                    // 图表与平均完成率仍然只看最近 30 天（补空白天，柱子/折线才有连续横轴）
+                    val windowDates = (CHART_WINDOW_DAYS - 1 downTo 0).map { DateUtils.daysBefore(day, it) }
+                    val windowStats = windowDates.map { date ->
+                        statByDate[date] ?: DailyStats(date = date, totalCount = 0, completedCount = 0)
+                    }
+
+                    // 平均完成率同样是**全历史**口径（与两个「累计」一致）：只对"当天真有待办"的日子取平均。
+                    // 图表仍只看最近 30 天，两者窗口不同是刻意的
+                    val validStats = allStats.filter { it.totalCount > 0 }
+                    val averageRate = if (validStats.isEmpty()) {
+                        0
+                    } else {
+                        (validStats.map { it.completionRate }.average() * 100).toInt()
+                    }
+
+                    // 两个「累计」是历史总量，不受 30 天窗口限制
+                    val totalCompleted = allStats.sumOf { it.completedCount }
+                    val fullCompletionDays = allStats.count { it.isFullyCompleted }
+                    val consecutiveDays = calculateConsecutiveFullCompletionDays(allStats, day)
+
+                    _uiState.update {
+                        it.copy(
+                            stats = windowStats,
+                            hasData = windowDates.any { date -> date in statByDate },
+                            averageRate = averageRate.coerceIn(0, 100),
+                            totalCompleted = totalCompleted,
+                            consecutiveDays = consecutiveDays,
+                            fullCompletionDays = fullCompletionDays,
+                            isLoading = false
+                        )
+                    }
                 }
-
-                // 平均完成率同样是**全历史**口径（与两个「累计」一致）：只对"当天真有待办"的日子取平均。
-                // 图表仍只看最近 30 天，两者窗口不同是刻意的
-                val validStats = allStats.filter { it.totalCount > 0 }
-                val averageRate = if (validStats.isEmpty()) {
-                    0
-                } else {
-                    (validStats.map { it.completionRate }.average() * 100).toInt()
-                }
-
-                // 两个「累计」是历史总量，不受 30 天窗口限制
-                val totalCompleted = allStats.sumOf { it.completedCount }
-                val fullCompletionDays = allStats.count { it.isFullyCompleted }
-                val consecutiveDays = calculateConsecutiveFullCompletionDays(allStats)
-
-                _uiState.update {
-                    it.copy(
-                        stats = windowStats,
-                        hasData = windowDates.any { date -> date in statByDate },
-                        averageRate = averageRate.coerceIn(0, 100),
-                        totalCompleted = totalCompleted,
-                        consecutiveDays = consecutiveDays,
-                        fullCompletionDays = fullCompletionDays,
-                        isLoading = false
-                    )
-                }
-            }
         }
+    }
+
+    /** 回到前台时对时（定时器在进程被冻结时不会推进）。 */
+    fun refreshDay() {
+        currentDay.refresh()
     }
 
     fun toggleChartType() {
@@ -94,13 +105,13 @@ class ChartViewModel @Inject constructor(
         }
     }
 
-    private fun calculateConsecutiveFullCompletionDays(stats: List<DailyStats>): Int {
+    private fun calculateConsecutiveFullCompletionDays(stats: List<DailyStats>, today: String): Int {
         if (stats.isEmpty()) return 0
         val byDate = stats.associateBy { it.date }
         var count = 0
         var offset = 0
         while (true) {
-            val date = DateUtils.daysAgo(offset)
+            val date = DateUtils.daysBefore(today, offset)
             val day = byDate[date] ?: break
             if (!day.isFullyCompleted) break
             count++

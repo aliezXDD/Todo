@@ -42,6 +42,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.todo.domain.model.DailyStats
 import com.todo.ui.component.EmptyState
@@ -60,6 +62,10 @@ fun ChartScreen(
     viewModel: ChartViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    // 回到前台时对时：跨过凌晨 4 点后窗口与连续天数要跟着换绑（进程被冻结时定时器不会走）
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        viewModel.refreshDay()
+    }
 
     Column(
         modifier = Modifier

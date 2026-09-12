@@ -16,6 +16,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.todo.ui.component.EmptyState
 import com.todo.ui.component.LoadingState
@@ -38,6 +40,10 @@ fun HistoryScreen(
     viewModel: TodoViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    // 往日记录的 7 天窗口同样以逻辑日为基准：回到前台时对时，避免锁屏过夜后仍锚在旧的一天
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        viewModel.refreshDay()
+    }
 
     Column(
         modifier = Modifier
