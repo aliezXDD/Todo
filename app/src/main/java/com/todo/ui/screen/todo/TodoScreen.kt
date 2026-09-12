@@ -89,7 +89,7 @@ fun TodoScreen(
                     GlassFAB(
                         onClick = { viewModel.setNoteSheetVisible(true) },
                         icon = Icons.Filled.Edit,
-                        contentDescription = "笔记",
+                        contentDescription = "备注",
                         accent = false
                     )
                     GlassFAB(
