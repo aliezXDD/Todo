@@ -73,10 +73,11 @@ fun TodoScreen(
 
                 GlassFAB(
                     onClick = { viewModel.setAddSheetVisible(true) },
-                    // 贴在「今日」卡片的右上角：与卡片上边缘、右边缘各留 10dp
+                    // 贴在「今日」卡片的右上角：上边距卡片 10dp；
+                    // 右边取 16dp —— 卡片里待办条目正是内缩 16dp，所以 + 的右边界与条目右边界对齐
                     modifier = Modifier
                         .align(Alignment.TopEnd)
-                        .padding(top = 10.dp, end = 10.dp)
+                        .padding(top = 10.dp, end = 16.dp)
                 )
             }
         }
