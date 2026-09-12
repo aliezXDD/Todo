@@ -5,6 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import com.todo.data.local.entity.TodoEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -33,6 +34,19 @@ interface TodoDao {
 
     @Query("UPDATE todos SET sortOrder = :sortOrder WHERE id = :id")
     suspend fun updateSortOrder(id: Long, sortOrder: Int)
+
+    /**
+     * 一次事务写完整组顺序。
+     *
+     * 拖动排序后如果逐行 [updateSortOrder]，每一行都是一次独立写入：Room 的观察者会收到
+     * **多次**回调，而中间那些时刻 sortOrder 存在重复值（ORDER BY 遇到并列时顺序由 SQLite 决定），
+     * 于是列表会先闪出一个"半更新"的乱序，再被最后一帧纠正。放到一个事务里，
+     * 失效通知在事务提交后才统一发出，界面只会看到最终顺序。
+     */
+    @Transaction
+    suspend fun updateSortOrders(orderedIds: List<Long>) {
+        orderedIds.forEachIndexed { index, id -> updateSortOrder(id, index) }
+    }
 
     @Query("UPDATE todos SET content = :content WHERE id = :id")
     suspend fun updateContent(id: Long, content: String)

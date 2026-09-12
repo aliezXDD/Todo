@@ -29,6 +29,9 @@ class TodoRepository @Inject constructor(
 
     suspend fun updateSortOrder(id: Long, sortOrder: Int) = todoDao.updateSortOrder(id, sortOrder)
 
+    /** 整组顺序一次写完（单事务），避免逐行写入导致界面闪出中间态 */
+    suspend fun updateSortOrders(orderedIds: List<Long>) = todoDao.updateSortOrders(orderedIds)
+
     suspend fun updateContent(id: Long, content: String) = todoDao.updateContent(id, content)
 
     suspend fun getHistoryDates(today: String): List<String> = todoDao.getHistoryDates(today)
