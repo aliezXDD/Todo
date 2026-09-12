@@ -137,7 +137,7 @@ fun TodaySection(
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         items(localTodos, key = { it.id }) { todo ->
-                            ReorderableItem(reorderableLazyListState = reorderState, key = todo.id) { isDragging ->
+                            ReorderableItem(state = reorderState, key = todo.id) { isDragging ->
                                 TodoItemRow(
                                     todo = todo,
                                     isDragging = isDragging,
