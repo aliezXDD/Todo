@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
@@ -43,20 +44,27 @@ fun TodaySection(
 ) {
     val view = LocalView.current
     var isDragging by remember { mutableStateOf(false) }
-    var localTodos by remember { mutableStateOf(todos) }
-    // 外部（数据库）来的列表只用来**刷新内容**，绝不用来重排：顺序始终以本地为准。
-    //
-    // 拖动排序是"本地先改 + 数据库异步写"，数据库那一次次回调可能暂时还是旧顺序；无论它是
-    // 早到、晚到还是与本地一致，只要不去动顺序，界面就不可能闪出另一种排列。
-    // 新出现的条目（例如刚添加的）按数据库顺序追加到末尾，消失的（删除/归档）自然被丢掉。
+    // 用**同一个列表实例**（SnapshotStateList）承载本地顺序：
+    // 1) 数据库回调只就地改元素（内容/勾选），顺序与列表实例都不变；
+    // 2) 列表实例一换，`ReorderableColumn` 内部的拖拽/落位动画状态就可能被重置，
+    //    正在做落位动画时正好点一下勾选框就会"跳一下再回去"。
+    val localTodos = remember { mutableStateListOf<Todo>() }
     LaunchedEffect(todos, isDragging) {
         if (isDragging) return@LaunchedEffect
         val fresh = todos.associateBy { it.id }
-        val merged = buildList {
-            localTodos.forEach { local -> fresh[local.id]?.let { add(it) } }
-            todos.forEach { todo -> if (none { it.id == todo.id }) add(todo) }
+        // 就地刷新：消失的移除、内容变了的替换（都不改变顺序，也不换列表实例）
+        for (index in localTodos.indices.reversed()) {
+            val current = localTodos[index]
+            val updated = fresh[current.id]
+            when {
+                updated == null -> localTodos.removeAt(index)
+                updated != current -> localTodos[index] = updated
+            }
         }
-        if (merged != localTodos) localTodos = merged
+        // 新出现的（例如刚添加的）按数据库顺序追加到末尾
+        todos.forEach { todo ->
+            if (localTodos.none { it.id == todo.id }) localTodos.add(todo)
+        }
     }
     val scrollState = rememberScrollState()
     val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
@@ -121,11 +129,9 @@ fun TodaySection(
                             if (fromIndex !in localTodos.indices || toIndex !in localTodos.indices || fromIndex == toIndex) {
                                 return@ReorderableColumn
                             }
-                            val reordered = localTodos.toMutableList().apply {
-                                add(toIndex, removeAt(fromIndex))
-                            }
-                            localTodos = reordered
-                            onReorderFinished(reordered)
+                            // 就地搬移：顺序变了，但列表实例不变
+                            localTodos.add(toIndex, localTodos.removeAt(fromIndex))
+                            onReorderFinished(localTodos.toList())
                         }
                     ) {
                         _, todo, rowDragging ->
