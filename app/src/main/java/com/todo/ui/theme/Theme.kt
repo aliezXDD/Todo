@@ -28,7 +28,8 @@ import dagger.hilt.components.SingletonComponent
 
 private val LightColorScheme = lightColorScheme(
     primary = LightAccent,
-    onPrimary = Color.White,
+    // 主题色表面上的白色（按钮图标/文字、勾选标记）：不用纯白，见 LightOnAccent 的说明
+    onPrimary = LightOnAccent,
     primaryContainer = LightPrimaryContainer,
     onPrimaryContainer = LightPrimaryText,
     // 只有"最底层页面底色"用 background，其余一切仍用 surface

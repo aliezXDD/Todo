@@ -14,6 +14,15 @@ val DarkSecondaryText = Color(0xFF9AA1B0)
 val LightAccent = Color(0xFF7B86DE)
 val DarkAccent = Color(0xFFF1AA6E)
 
+/**
+ * 主题色表面上的内容色（浅色模式）：`+` 图标、主要按钮文字、勾选标记的 `√` 都用它。
+ *
+ * 不用纯白 `#FFFFFF`：压在已经调浅的靛蓝上，纯白会显得偏"跳"、边缘发刺眼；略暗约 5%
+ * 更贴合整体的柔和调子。**代价是对比度从约 3.3:1 降到约 3.0:1**（本来就在及格线附近），
+ * 若以后要继续压缩这个白，建议同时把 `LightAccent` 调深一点来补回对比。
+ */
+val LightOnAccent = Color(0xFFF1F3F8)
+
 // ---- 语义色 ----
 val LightDanger = Color(0xFFD95B5B)
 val DarkDanger = Color(0xFFF08A8A)
