@@ -9,8 +9,8 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface DailyStatsDao {
-    @Query("SELECT * FROM daily_stats WHERE date BETWEEN :startDate AND :endDate ORDER BY date ASC")
-    fun getStatsBetween(startDate: String, endDate: String): Flow<List<DailyStatsEntity>>
+    @Query("SELECT * FROM daily_stats ORDER BY date ASC")
+    fun getAllStats(): Flow<List<DailyStatsEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(stats: DailyStatsEntity)

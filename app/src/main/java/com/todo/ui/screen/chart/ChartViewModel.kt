@@ -23,6 +23,11 @@ class ChartViewModel @Inject constructor(
         LINE
     }
 
+    /**
+     * [stats] 是**最近 30 天**的窗口（图表画它）；
+     * [totalCompleted] 与 [fullCompletionDays] 则是**全部历史**的累计值，
+     * 两者口径不同，改动时别把它们混到同一个列表上算。
+     */
     data class UiState(
         val stats: List<DailyStats> = emptyList(),
         val hasData: Boolean = false,
@@ -43,27 +48,31 @@ class ChartViewModel @Inject constructor(
 
     private fun observeStats() {
         viewModelScope.launch {
-            getStatsUseCase(30).collect { rawStats ->
-                val statByDate = rawStats.associateBy { it.date }
-                val filledStats = (29 downTo 0).map { daysAgo ->
-                    val date = DateUtils.daysAgo(daysAgo)
+            getStatsUseCase().collect { allStats ->
+                val statByDate = allStats.associateBy { it.date }
+
+                // 图表与平均完成率仍然只看最近 30 天（补空白天，柱子/折线才有连续横轴）
+                val windowDates = (CHART_WINDOW_DAYS - 1 downTo 0).map { DateUtils.daysAgo(it) }
+                val windowStats = windowDates.map { date ->
                     statByDate[date] ?: DailyStats(date = date, totalCount = 0, completedCount = 0)
                 }
 
-                val validStats = filledStats.filter { it.totalCount > 0 }
+                val validStats = windowStats.filter { it.totalCount > 0 }
                 val averageRate = if (validStats.isEmpty()) {
                     0
                 } else {
                     (validStats.map { it.completionRate }.average() * 100).toInt()
                 }
-                val totalCompleted = filledStats.sumOf { it.completedCount }
-                val fullCompletionDays = filledStats.count { it.isFullyCompleted }
-                val consecutiveDays = calculateConsecutiveFullCompletionDays(filledStats)
+
+                // 两个「累计」是历史总量，不受 30 天窗口限制
+                val totalCompleted = allStats.sumOf { it.completedCount }
+                val fullCompletionDays = allStats.count { it.isFullyCompleted }
+                val consecutiveDays = calculateConsecutiveFullCompletionDays(allStats)
 
                 _uiState.update {
                     it.copy(
-                        stats = filledStats,
-                        hasData = rawStats.isNotEmpty(),
+                        stats = windowStats,
+                        hasData = windowDates.any { date -> date in statByDate },
                         averageRate = averageRate.coerceIn(0, 100),
                         totalCompleted = totalCompleted,
                         consecutiveDays = consecutiveDays,
@@ -96,5 +105,10 @@ class ChartViewModel @Inject constructor(
             offset++
         }
         return count
+    }
+
+    private companion object {
+        /** 图表只画最近 30 天；两个「累计」不走这个窗口。 */
+        const val CHART_WINDOW_DAYS = 30
     }
 }

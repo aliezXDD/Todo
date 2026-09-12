@@ -11,8 +11,9 @@ import javax.inject.Singleton
 class StatsRepository @Inject constructor(
     private val dailyStatsDao: DailyStatsDao
 ) {
-    fun getStatsBetween(startDate: String, endDate: String): Flow<List<DailyStatsEntity>> =
-        dailyStatsDao.getStatsBetween(startDate, endDate).distinctUntilChanged()
+    /** 全部历史快照。需要时间窗时由调用方裁剪（见 GetStatsUseCase 的说明）。 */
+    fun getAllStats(): Flow<List<DailyStatsEntity>> =
+        dailyStatsDao.getAllStats().distinctUntilChanged()
 
     suspend fun insert(stats: DailyStatsEntity) = dailyStatsDao.insert(stats)
 
