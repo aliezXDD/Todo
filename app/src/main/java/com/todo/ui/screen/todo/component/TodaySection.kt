@@ -2,23 +2,23 @@ package com.todo.ui.screen.todo.component
 
 import android.view.HapticFeedbackConstants
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalView
@@ -30,8 +30,20 @@ import com.todo.ui.component.NeumorphScrollFade
 import com.todo.ui.component.NeumorphScrollFadeHeight
 import com.todo.ui.theme.Neumorph
 import com.todo.util.DateUtils
-import sh.calvin.reorderable.ReorderableColumn
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyColumnState
 
+/**
+ * 「今日」卡片：标题、日期，以及可拖动排序的待办列表。
+ *
+ * 列表用**懒加载版**的拖动排序（`ReorderableItem` + 真正的 `key`）：
+ * - 条目按 id 做 key，框架按"条目身份"跟踪它们，交换时行**整体移动**，
+ *   不会出现"原地换内容 + 状态从旧条目形变到新条目"的闪动；
+ * - 位移动画交给 `Modifier.animateItem()`，拖动中是实时回调 `onMove`，
+ *   松手后再把顺序写库（一次事务），所以中间态根本不会进入画面。
+ *
+ * 本地列表仍然只把数据库当"内容来源"：回调只就地刷新内容，绝不改变顺序。
+ */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TodaySection(
@@ -42,15 +54,19 @@ fun TodaySection(
     modifier: Modifier = Modifier
 ) {
     val view = LocalView.current
-    var isDragging by remember { mutableStateOf(false) }
     var localTodos by remember { mutableStateOf(todos) }
-    // 外部（数据库）来的列表只用来**刷新内容**，绝不用来重排：顺序始终以本地为准。
-    //
-    // 拖动排序是"本地先改 + 数据库异步写"，数据库那一次次回调可能暂时还是旧顺序；无论它是
-    // 早到、晚到还是与本地一致，只要不去动顺序，界面就不可能闪出另一种排列。
-    // 新出现的条目（例如刚添加的）按数据库顺序追加到末尾，消失的（删除/归档）自然被丢掉。
-    LaunchedEffect(todos, isDragging) {
-        if (isDragging) return@LaunchedEffect
+    val listState = rememberLazyListState()
+
+    // 拖动过程中实时重排本地列表（库的懒加载版本就是这么用的：镜头里始终是新顺序）
+    val reorderState = rememberReorderableLazyColumnState(listState) { from, to ->
+        if (from.index in localTodos.indices && to.index in localTodos.indices && from.index != to.index) {
+            localTodos = localTodos.toMutableList().apply { add(to.index, removeAt(from.index)) }
+        }
+    }
+
+    // 数据库回调只刷内容、不重排（拖动进行中整段跳过）
+    LaunchedEffect(todos, reorderState.isAnyItemDragging) {
+        if (reorderState.isAnyItemDragging) return@LaunchedEffect
         val fresh = todos.associateBy { it.id }
         val merged = buildList {
             localTodos.forEach { local -> fresh[local.id]?.let { add(it) } }
@@ -58,7 +74,7 @@ fun TodaySection(
         }
         if (merged != localTodos) localTodos = merged
     }
-    val scrollState = rememberScrollState()
+
     val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
 
     GlassCard(
@@ -107,51 +123,39 @@ fun TodaySection(
                         .fillMaxWidth(),
                     fadeColor = Neumorph.surface(isDark)
                 ) {
-                    ReorderableColumn(
-                        list = localTodos,
-                        // 内衬：纵向与渐隐带同高（静止时首尾条目的光影完整，只有滚过边界的才被淡化）；
-                        // 横向 16dp 让条目与卡片内边距对齐，同时给溢出的光影留出不被裁掉的空间。
-                        // padding 必须挂在 verticalScroll 之后（滚动内容内部），才会随内容一起滚动
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .verticalScroll(scrollState)
-                            .padding(horizontal = 16.dp, vertical = NeumorphScrollFadeHeight),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                        onSettle = { fromIndex, toIndex ->
-                            if (fromIndex !in localTodos.indices || toIndex !in localTodos.indices || fromIndex == toIndex) {
-                                return@ReorderableColumn
-                            }
-                            val reordered = localTodos.toMutableList().apply {
-                                add(toIndex, removeAt(fromIndex))
-                            }
-                            localTodos = reordered
-                            onReorderFinished(reordered)
-                        }
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier.fillMaxSize(),
+                        // 上下内衬与渐隐带同高（静止时首尾条目的光影完整）；
+                        // 横向 16dp 让条目与卡片内边距对齐，同时给溢出的光影留出不被裁掉的空间
+                        contentPadding = PaddingValues(
+                            start = 16.dp,
+                            end = 16.dp,
+                            top = NeumorphScrollFadeHeight,
+                            bottom = NeumorphScrollFadeHeight
+                        ),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        _, todo, rowDragging ->
-                        // 用 todo.id 作为 key：条目重排时"状态"跟着**条目**走，而不是留在原位置再动画到
-                        // 新条目的状态。否则已完成（凹、划线、变淡）与未完成（凸）互换时，两行会各自
-                        // 从旧状态形变到新状态，看起来就是闪一下。
-                        key(todo.id) {
-                            TodoItemRow(
-                                todo = todo,
-                                isDragging = rowDragging,
-                                onCheckedChange = { checked -> onToggleTodo(todo, checked) },
-                                onEdit = { onEditTodo(todo) },
-                                dragHandleModifier = with(this) {
-                                    Modifier.draggableHandle(
+                        items(localTodos, key = { it.id }) { todo ->
+                            ReorderableItem(reorderableLazyListState = reorderState, key = todo.id) { isDragging ->
+                                TodoItemRow(
+                                    todo = todo,
+                                    isDragging = isDragging,
+                                    onCheckedChange = { checked -> onToggleTodo(todo, checked) },
+                                    onEdit = { onEditTodo(todo) },
+                                    dragHandleModifier = Modifier.draggableHandle(
                                         onDragStarted = {
-                                            isDragging = true
                                             view.performHapticFeedback(HapticFeedbackConstants.DRAG_START)
                                         },
                                         onDragStopped = {
                                             view.performHapticFeedback(HapticFeedbackConstants.GESTURE_END)
-                                            isDragging = false
+                                            // 松手时把最终顺序写库（单事务，不会产生中间态）
+                                            onReorderFinished(localTodos)
                                         }
-                                    )
-                                },
-                                modifier = Modifier
-                            )
+                                    ),
+                                    modifier = Modifier.animateItem()
+                                )
+                            }
                         }
                     }
                 }
@@ -159,4 +163,3 @@ fun TodaySection(
         }
     }
 }
-
