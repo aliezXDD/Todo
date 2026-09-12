@@ -4,6 +4,8 @@ import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.os.Bundle
+import android.os.SystemClock
+import android.view.ViewTreeObserver
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
@@ -40,12 +42,21 @@ import com.todo.ui.navigation.Screen
 import com.todo.ui.theme.MotionTokens
 import com.todo.ui.theme.Neumorph
 import com.todo.ui.theme.TodoTheme
+import com.todo.util.StartupGate
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var startupGate: StartupGate
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        holdSplashUntilFirstData()
+
         enableEdgeToEdge()
         setContent {
             TodoTheme {
@@ -53,6 +64,57 @@ class MainActivity : ComponentActivity() {
                 TodoRoot()
             }
         }
+    }
+
+    /**
+     * 让系统启动画面保持到首屏数据真正到位。
+     *
+     * 不这样做的话，首帧一定早于数据库首次发射，界面会先渲染一帧"0/0 已完成 + 添加第一条待办"
+     * 的假空状态再跳回真实数据——即冷启动时那一下闪。
+     *
+     * 实现说明：平台 API（`android.window.SplashScreen`）**没有** keep-on-screen 能力，
+     * 它只提供退出动画监听与主题设置；那套能力是 androidx.core:core-splashscreen 在 API 31+
+     * 用「拦截第一帧」模拟出来的。这里采用同一机制：条件不满足就让 pre-draw 返回 false，
+     * App 便不会提交第一帧，系统的那张启动窗口（启动画面）自然继续留在屏幕上，
+     * 因此无需引入额外依赖。
+     *
+     * 必须带超时兜底：该条件在每帧绘制前被轮询，一旦数据源出问题（例如开库失败）就永远为真，
+     * 启动画面会把界面彻底挡死。最多多留 [SPLASH_MAX_HOLD_MS] 就无条件放行，
+     * 之后交给界面自己的加载态显示"加载中…"。
+     *
+     * 超时**从第一次 pre-draw 起算**，不是在 onCreate 里算好：冷启动时首次 pre-draw 可能比
+     * onCreate 晚好几秒，若按 onCreate 计时，第一次求值就已过期，等于完全没有保持。
+     */
+    private fun holdSplashUntilFirstData() {
+        val decorView = window.decorView
+        decorView.viewTreeObserver.addOnPreDrawListener(
+            object : ViewTreeObserver.OnPreDrawListener {
+                private var deadline = 0L
+
+                override fun onPreDraw(): Boolean {
+                    if (deadline == 0L) {
+                        deadline = SystemClock.uptimeMillis() + SPLASH_MAX_HOLD_MS
+                    }
+                    val release = startupGate.todayTodosLoaded.value ||
+                        SystemClock.uptimeMillis() >= deadline
+                    if (release) {
+                        decorView.viewTreeObserver.removeOnPreDrawListener(this)
+                    }
+                    return release
+                }
+            }
+        )
+    }
+
+    private companion object {
+        /**
+         * 启动画面在数据未就绪时最多多停留的时间（从它本可以收起的那一刻起算）。
+         *
+         * 取值权衡：设小了，慢设备/慢构建上数据还没到就被放行，用户仍会看到一次"加载中…"切换；
+         * 设大了，万一数据源真的卡住，用户就要多盯着启动图标。Room 首次读一张小表正常在几十毫秒级，
+         * 2.5s 足够覆盖冷启动最慢的情况，同时把最坏等待限制在一个可接受的长度内。
+         */
+        const val SPLASH_MAX_HOLD_MS = 2500L
     }
 }
 

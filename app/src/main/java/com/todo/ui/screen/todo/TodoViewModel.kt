@@ -15,6 +15,7 @@ import com.todo.domain.usecase.ReorderTodosUseCase
 import com.todo.domain.usecase.ToggleTodoUseCase
 import com.todo.domain.usecase.UpdateTodoUseCase
 import com.todo.util.DateUtils
+import com.todo.util.StartupGate
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,7 +34,8 @@ class TodoViewModel @Inject constructor(
     private val toggleTodoUseCase: ToggleTodoUseCase,
     private val getTodayTodosUseCase: GetTodayTodosUseCase,
     private val getHistoryRecordsUseCase: GetHistoryRecordsUseCase,
-    private val presetUseCases: PresetUseCases
+    private val presetUseCases: PresetUseCases,
+    private val startupGate: StartupGate
 ) : ViewModel() {
 
     data class UiState(
@@ -74,6 +76,8 @@ class TodoViewModel @Inject constructor(
                         isLoading = false
                     )
                 }
+                // 首屏数据到位：允许启动画面收起（见 StartupGate 的说明）
+                startupGate.markTodayTodosLoaded()
             }
         }
     }

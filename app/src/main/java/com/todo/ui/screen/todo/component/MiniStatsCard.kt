@@ -25,11 +25,15 @@ import com.todo.ui.theme.MotionTokens
  *
  * 进度环属于**状态指示类**小元素，按要求保持平面设计：不做凹槽/凸起，
  * 立体语言只用于卡片、面板、按钮这类"表面"。
+ *
+ * [isLoading] 为 true 时显示不定态转圈与"加载中…"，而不是 `0/0 已完成`：
+ * 首帧早于数据库首次发射，若直接渲染就会报出一个并不成立的空进度。
  */
 @Composable
 fun MiniStatsCard(
     completedCount: Int,
     totalCount: Int,
+    isLoading: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -55,14 +59,18 @@ fun MiniStatsCard(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            CircularProgressIndicator(
-                progress = { animatedProgress },
-                modifier = Modifier.padding(4.dp),
-                trackColor = progressTrackColor
-            )
+            if (isLoading) {
+                CircularProgressIndicator(modifier = Modifier.padding(4.dp))
+            } else {
+                CircularProgressIndicator(
+                    progress = { animatedProgress },
+                    modifier = Modifier.padding(4.dp),
+                    trackColor = progressTrackColor
+                )
+            }
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
-                    text = "${completedCount}/${totalCount} 已完成",
+                    text = if (isLoading) "加载中…" else "$completedCount/$totalCount 已完成",
                     style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.onSurface
                 )

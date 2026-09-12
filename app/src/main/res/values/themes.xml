@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!--
+      启动窗口主题（浅色）。
 
-    <style name="Theme.Todo" parent="android:Theme.Material.Light.NoActionBar" />
+      windowBackground 决定「系统启动画面」与「首帧之前的窗口」的底色：
+      不设置时它跟随父主题，而父主题是浅色 → 深色模式下冷启动会先闪一块纯白。
+      这里显式指定为页面最底层底色，并与 windowSplashScreenBackground 保持一致
+      （后者不设时虽会回退到 windowBackground，但显式写出来更不容易被误改）。
+    -->
+    <style name="Theme.Todo" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/window_background</item>
+        <item name="android:windowSplashScreenBackground">@color/window_background</item>
+    </style>
 </resources>

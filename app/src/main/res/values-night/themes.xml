@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      启动窗口主题（深色）。父主题换成深色版本：窗口本身、启动画面的默认前景
+      （图标/文字对比）都按深色处理；背景色取 @color/window_background（night 版本）。
+    -->
+    <style name="Theme.Todo" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/window_background</item>
+        <item name="android:windowSplashScreenBackground">@color/window_background</item>
+    </style>
+</resources>

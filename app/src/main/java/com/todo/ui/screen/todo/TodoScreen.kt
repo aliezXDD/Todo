@@ -43,6 +43,7 @@ fun TodoScreen(
             MiniStatsCard(
                 completedCount = uiState.todayStats.completedCount,
                 totalCount = uiState.todayStats.totalCount,
+                isLoading = uiState.isLoading,
                 onClick = onNavigateToChart
             )
 
@@ -65,6 +66,7 @@ fun TodoScreen(
             ) {
                 TodaySection(
                     todos = uiState.todayTodos,
+                    isLoading = uiState.isLoading,
                     onToggleTodo = viewModel::toggleTodo,
                     onEditTodo = viewModel::startEdit,
                     onReorderFinished = viewModel::commitReorder,

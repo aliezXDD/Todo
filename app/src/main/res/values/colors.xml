@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      仅用于「启动窗口 / 系统启动画面」的底色（浅色）。
+
+      App 内部一切颜色仍然只由 Compose 侧定义（见 ui/theme/Neumorph.kt 与 Color.kt），
+      这里之所以必须再写一份字面量：启动画面由系统在 App 进程画出第一帧之前绘制，
+      读不到 Compose 的配色。**改动页面最底层底色时，这两处要一起改**，
+      否则启动画面会与首帧的页面底色不是一个颜色。
+    -->
+    <color name="window_background">#D9DEE2</color>
+</resources>

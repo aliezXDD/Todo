@@ -3,6 +3,7 @@ package com.todo.ui.screen.todo.component
 import android.view.HapticFeedbackConstants
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,6 +20,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalView
@@ -48,6 +50,7 @@ import sh.calvin.reorderable.rememberReorderableLazyListState
 @Composable
 fun TodaySection(
     todos: List<Todo>,
+    isLoading: Boolean,
     onToggleTodo: (Todo, Boolean) -> Unit,
     onEditTodo: (Todo) -> Unit,
     onReorderFinished: (List<Todo>) -> Unit,
@@ -64,9 +67,16 @@ fun TodaySection(
         }
     }
 
-    // 数据库回调只刷内容、不重排（拖动进行中整段跳过）
-    LaunchedEffect(todos, reorderState.isAnyItemDragging) {
-        if (reorderState.isAnyItemDragging) return@LaunchedEffect
+    // 数据库是"内容来源"，顺序永远以本地为准：回调只就地刷新内容、增删条目，
+    // 绝不改变本地顺序（拖动排序的权威在 localTodos 上）。
+    //
+    // 同步必须在**组合期**完成，不能放进 LaunchedEffect：LaunchedEffect 要等这一帧画完才跑，
+    // 于是启动时会出现"统计卡已显示 7/10、列表还停在'添加第一条待办'"的一帧错位
+    // （启动卡顿期这一帧能被拉长到几百毫秒，肉眼可见）。这里用输入引用做闸门，
+    // 只在入参真的换了新列表时同步一次，拖动进行中整段跳过。
+    var syncedInput by remember { mutableStateOf(todos) }
+    if (syncedInput !== todos && !reorderState.isAnyItemDragging) {
+        syncedInput = todos
         val fresh = todos.associateBy { it.id }
         val merged = buildList {
             localTodos.forEach { local -> fresh[local.id]?.let { add(it) } }
@@ -106,14 +116,31 @@ fun TodaySection(
             }
 
             if (localTodos.isEmpty()) {
-                EmptyState(
-                    text = "点击右下角 + 添加第一条待办",
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                        .padding(vertical = 24.dp)
-                )
+                // 加载中不能显示"添加第一条待办"：此时列表为空只是因为数据还没到，
+                // 显示引导文案会谎报"你还没有待办"（+ 在今日卡片右上角，文案也按实际位置写）
+                if (isLoading) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "加载中…",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                    }
+                } else {
+                    EmptyState(
+                        text = "点击右上角 + 添加第一条待办",
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
+                            .padding(vertical = 24.dp)
+                    )
+                }
             } else {
                 // 列表上下缘各一条常驻渐隐：条目滚出列表边界时，溢出的光影会被容器硬切。
                 // 这条列表在**卡片内部**，所以渐隐色要用表面色（不是页面底色）
