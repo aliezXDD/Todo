@@ -36,7 +36,10 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -177,6 +180,12 @@ private fun StatCard(
     }
 }
 
+/** 纵轴刻度文字。纵轴宽度由它们中最宽的一个实测决定，见 [StatsChart]。 */
+private val YAxisLabelTexts = listOf("100%", "75%", "50%", "25%", "0%")
+
+/** 纵轴刻度与绘图区之间的固定间隔。 */
+private val AxisLabelGap = 8.dp
+
 @Composable
 private fun StatsChart(
     stats: List<DailyStats>,
@@ -200,14 +209,29 @@ private fun StatsChart(
         }
     }
 
+    // 纵轴宽度按最宽刻度的**实际排版宽度**量出来，不再写死 32dp：
+    // 写死的宽度在系统字体放大后会放不下 "100%"，把它折成两行。
+    // 横轴标签行的起始内边距由同一个宽度推出（而不是另一个手写常数），
+    // 所以横轴标签的左边缘永远贴着绘图区左边缘——两者不可能再对不上。
+    val density = LocalDensity.current
+    val textMeasurer = rememberTextMeasurer()
+    val axisLabelStyle = MaterialTheme.typography.labelSmall
+    val axisWidth = remember(textMeasurer, axisLabelStyle, density) {
+        with(density) {
+            YAxisLabelTexts.maxOf { label ->
+                textMeasurer.measure(text = label, style = axisLabelStyle).size.width
+            }.toDp()
+        }
+    }
+
     Column(modifier = modifier) {
         Row(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
         ) {
-            YAxisLabels()
-            Spacer(modifier = Modifier.width(8.dp))
+            YAxisLabels(width = axisWidth)
+            Spacer(modifier = Modifier.width(AxisLabelGap))
             when (chartType) {
                 ChartViewModel.ChartType.BAR -> BarChart(values = values, modifier = Modifier.weight(1f))
                 ChartViewModel.ChartType.LINE -> LineChart(values = values, modifier = Modifier.weight(1f))
@@ -219,7 +243,7 @@ private fun StatsChart(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 40.dp),
+                .padding(start = axisWidth + AxisLabelGap),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             xLabels.forEach { label ->
@@ -235,15 +259,15 @@ private fun StatsChart(
 }
 
 @Composable
-private fun YAxisLabels() {
+private fun YAxisLabels(width: Dp) {
     Column(
         modifier = Modifier
-            .width(32.dp)
+            .width(width)
             .fillMaxHeight(),
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.End
     ) {
-        listOf("100%", "75%", "50%", "25%", "0%").forEach { label ->
+        YAxisLabelTexts.forEach { label ->
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelSmall,
