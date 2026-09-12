@@ -11,7 +11,7 @@ val DarkSecondaryText = Color(0xFF9AA1B0)
 
 // ---- 主色：新拟态里唯一的强调色，其余层级全部交给光影。
 // 浅色沿用原来的靛蓝（白字/白勾压得住）；深色用偏浅的橙（配深色字）。两者都再淡一档 ----
-val LightAccent = Color(0xFF6C77DB)
+val LightAccent = Color(0xFF7B86DE)
 val DarkAccent = Color(0xFFF1AA6E)
 
 // ---- 语义色 ----
@@ -32,5 +32,5 @@ val LightSurfaceVariant = Color(0xFFE2E7EC)
 val DarkSurfaceVariant = Color(0xFF2B2F36)
 val LightOutline = Color(0xFFC6CEDA)
 val DarkOutline = Color(0xFF3C4149)
-val LightPrimaryContainer = Color(0xFFE4E8FB)
+val LightPrimaryContainer = Color(0xFFEAEDFC)
 val DarkPrimaryContainer = Color(0xFF563A22)
