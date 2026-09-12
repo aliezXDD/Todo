@@ -27,9 +27,9 @@ class ChartViewModel @Inject constructor(
         val stats: List<DailyStats> = emptyList(),
         val hasData: Boolean = false,
         val averageRate: Int = 0,
-        val maxRate: Int = 0,
         val totalCompleted: Int = 0,
         val consecutiveDays: Int = 0,
+        val fullCompletionDays: Int = 0,
         val chartType: ChartType = ChartType.BAR,
         val isLoading: Boolean = true
     )
@@ -56,8 +56,8 @@ class ChartViewModel @Inject constructor(
                 } else {
                     (validStats.map { it.completionRate }.average() * 100).toInt()
                 }
-                val maxRate = ((validStats.maxOfOrNull { it.completionRate } ?: 0f) * 100).toInt()
                 val totalCompleted = filledStats.sumOf { it.completedCount }
+                val fullCompletionDays = filledStats.count { it.isFullyCompleted }
                 val consecutiveDays = calculateConsecutiveFullCompletionDays(filledStats)
 
                 _uiState.update {
@@ -65,9 +65,9 @@ class ChartViewModel @Inject constructor(
                         stats = filledStats,
                         hasData = rawStats.isNotEmpty(),
                         averageRate = averageRate.coerceIn(0, 100),
-                        maxRate = maxRate.coerceIn(0, 100),
                         totalCompleted = totalCompleted,
                         consecutiveDays = consecutiveDays,
+                        fullCompletionDays = fullCompletionDays,
                         isLoading = false
                     )
                 }
@@ -91,7 +91,7 @@ class ChartViewModel @Inject constructor(
         while (true) {
             val date = DateUtils.daysAgo(offset)
             val day = byDate[date] ?: break
-            if (day.totalCount == 0 || day.completedCount != day.totalCount) break
+            if (!day.isFullyCompleted) break
             count++
             offset++
         }

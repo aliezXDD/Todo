@@ -31,7 +31,7 @@ import com.todo.ui.component.NeumorphScrollFadeHeight
 import com.todo.ui.theme.Neumorph
 import com.todo.util.DateUtils
 import sh.calvin.reorderable.ReorderableItem
-import sh.calvin.reorderable.rememberReorderableLazyColumnState
+import sh.calvin.reorderable.rememberReorderableLazyListState
 
 /**
  * 「今日」卡片：标题、日期，以及可拖动排序的待办列表。
@@ -58,7 +58,7 @@ fun TodaySection(
     val listState = rememberLazyListState()
 
     // 拖动过程中实时重排本地列表（库的懒加载版本就是这么用的：镜头里始终是新顺序）
-    val reorderState = rememberReorderableLazyColumnState(listState) { from, to ->
+    val reorderState = rememberReorderableLazyListState(listState) { from, to ->
         if (from.index in localTodos.indices && to.index in localTodos.indices && from.index != to.index) {
             localTodos = localTodos.toMutableList().apply { add(to.index, removeAt(from.index)) }
         }

@@ -103,7 +103,7 @@ fun ChartScreen(
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 StatCard("平均完成率", "${uiState.averageRate}%", Modifier.weight(1f))
-                StatCard("最高完成率", "${uiState.maxRate}%", Modifier.weight(1f))
+                StatCard("累计完成", "${uiState.totalCompleted}", Modifier.weight(1f))
             }
 
             Spacer(modifier = Modifier.height(10.dp))
@@ -112,8 +112,8 @@ fun ChartScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                StatCard("累计完成", "${uiState.totalCompleted}", Modifier.weight(1f))
                 StatCard("连续全部完成", "${uiState.consecutiveDays} 天", Modifier.weight(1f))
+                StatCard("累计全部完成", "${uiState.fullCompletionDays} 天", Modifier.weight(1f))
             }
         }
     }
