@@ -1,4 +1,4 @@
-﻿package com.todo.util
+package com.todo.util
 
 object Constants {
     const val DATABASE_NAME = "todo_database"
@@ -8,6 +8,8 @@ object Constants {
     const val THEME_MODE_DARK = "dark"
     const val ARCHIVE_PREFERENCES_NAME = "archive_preferences"
     const val LAST_ARCHIVE_DATE_KEY = "last_archive_date"
+    const val NOTE_PREFERENCES_NAME = "note_preferences"
+    const val NOTE_CONTENT_KEY = "note_content"
 
     const val DATE_PATTERN = "yyyy-MM-dd"
     const val DAILY_ARCHIVE_WORK_NAME = "daily_archive"

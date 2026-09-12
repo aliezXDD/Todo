@@ -7,8 +7,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
@@ -20,24 +18,39 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.todo.ui.theme.MotionTokens
+import com.todo.ui.theme.Neumorph
 import com.todo.ui.theme.NeumorphElevation
 import com.todo.ui.theme.NeumorphShapes
 
 /**
  * 新拟态悬浮按钮：边长 52dp 的大圆角矩形，按下时凹入。
  * 表面对比度高（主题色），所以按下除了凹入只做很轻微的缩放，避免"又缩又凹"过度。
+ *
+ * [accent] = true 是主操作（主题色表面，如「+」）；
+ * false 得到与卡片同色的次级按钮（内容色用 onSurface），用于「+」旁边的笔记入口。
  */
 @Composable
 fun GlassFAB(
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    icon: ImageVector,
+    contentDescription: String,
+    modifier: Modifier = Modifier,
+    accent: Boolean = true
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed = interactionSource.collectIsPressedAsState().value
     val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
     val shape = RoundedCornerShape(NeumorphShapes.Medium)
+
+    val surfaceColor = if (accent) MaterialTheme.colorScheme.primary else Neumorph.surface(isDark)
+    val contentColor = if (accent) {
+        MaterialTheme.colorScheme.onPrimary
+    } else {
+        MaterialTheme.colorScheme.onSurface
+    }
 
     val fabScale by animateFloatAsState(
         targetValue = if (isPressed) 0.96f else 1f,
@@ -57,12 +70,12 @@ fun GlassFAB(
                 shape = shape,
                 isDark = isDark,
                 pressed = isPressed,
-                surface = MaterialTheme.colorScheme.primary,
+                surface = surfaceColor,
                 elevation = NeumorphElevation.Medium
             ),
         shape = shape,
         containerColor = Color.Transparent,
-        contentColor = MaterialTheme.colorScheme.onPrimary,
+        contentColor = contentColor,
         interactionSource = interactionSource,
         elevation = FloatingActionButtonDefaults.elevation(
             defaultElevation = 0.dp,
@@ -72,9 +85,9 @@ fun GlassFAB(
         )
     ) {
         Icon(
-            imageVector = Icons.Filled.Add,
-            contentDescription = "添加",
-            tint = MaterialTheme.colorScheme.onPrimary
+            imageVector = icon,
+            contentDescription = contentDescription,
+            tint = contentColor
         )
     }
 }

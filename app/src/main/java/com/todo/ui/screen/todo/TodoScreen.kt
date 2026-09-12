@@ -3,11 +3,15 @@ package com.todo.ui.screen.todo
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -20,6 +24,7 @@ import com.todo.ui.component.GlassFAB
 import com.todo.ui.screen.todo.component.AddTodoSheet
 import com.todo.ui.screen.todo.component.EditTodoSheet
 import com.todo.ui.screen.todo.component.MiniStatsCard
+import com.todo.ui.screen.todo.component.NoteSheet
 import com.todo.ui.screen.todo.component.TodaySection
 import com.todo.ui.theme.NeumorphShapes
 
@@ -73,14 +78,26 @@ fun TodoScreen(
                     modifier = Modifier.fillMaxSize()
                 )
 
-                GlassFAB(
-                    onClick = { viewModel.setAddSheetVisible(true) },
-                    // 贴在「今日」卡片的右上角：上边距卡片 10dp；
-                    // 右边取 16dp —— 卡片里待办条目正是内缩 16dp，所以 + 的右边界与条目右边界对齐
+                // 两个入口并排贴在「今日」卡片的右上角：笔记在左、添加在右。
+                // 「+」的右边界仍与待办条目右边界对齐（条目内缩 16dp），位置与之前完全一致。
+                Row(
                     modifier = Modifier
                         .align(Alignment.TopEnd)
-                        .padding(top = 10.dp, end = 16.dp)
-                )
+                        .padding(top = 10.dp, end = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    GlassFAB(
+                        onClick = { viewModel.setNoteSheetVisible(true) },
+                        icon = Icons.Filled.Edit,
+                        contentDescription = "笔记",
+                        accent = false
+                    )
+                    GlassFAB(
+                        onClick = { viewModel.setAddSheetVisible(true) },
+                        icon = Icons.Filled.Add,
+                        contentDescription = "添加"
+                    )
+                }
             }
         }
 
@@ -108,5 +125,12 @@ fun TodoScreen(
         onDismiss = { viewModel.setEditSheetVisible(false) },
         onSave = viewModel::saveEditedTodo,
         onDelete = viewModel::deleteTodoNow
+    )
+
+    NoteSheet(
+        visible = uiState.noteSheetVisible,
+        content = uiState.noteContent,
+        onContentChange = viewModel::onNoteContentChange,
+        onDismiss = { viewModel.setNoteSheetVisible(false) }
     )
 }

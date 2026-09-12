@@ -2,6 +2,7 @@ package com.todo.ui.screen.todo
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.todo.data.local.datastore.NotePreferences
 import com.todo.domain.model.DailyRecord
 import com.todo.domain.model.DailyStats
 import com.todo.domain.model.Preset
@@ -35,6 +36,7 @@ class TodoViewModel @Inject constructor(
     private val getTodayTodosUseCase: GetTodayTodosUseCase,
     private val getHistoryRecordsUseCase: GetHistoryRecordsUseCase,
     private val presetUseCases: PresetUseCases,
+    private val notePreferences: NotePreferences,
     private val startupGate: StartupGate
 ) : ViewModel() {
 
@@ -50,16 +52,23 @@ class TodoViewModel @Inject constructor(
         val editingTodo: Todo? = null,
         val presetSearchQuery: String = "",
         val presetMultiSelectMode: Boolean = false,
-        val selectedPresetIds: Set<Long> = emptySet()
+        val selectedPresetIds: Set<Long> = emptySet(),
+        /** 笔记面板里的当前文本。面板打开期间它是唯一草稿，关闭时才写回存储。 */
+        val noteContent: String = "",
+        val noteSheetVisible: Boolean = false
     )
 
     private val _uiState = MutableStateFlow(UiState())
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
+    /** 本次打开笔记面板后用户是否已经改过文本（只有主线程读写，无需额外同步）。 */
+    private var noteEdited = false
+
     init {
         observeTodayTodos()
         observeHistoryRecords()
         observePresets()
+        observeNote()
     }
 
     private fun observeTodayTodos() {
@@ -108,6 +117,43 @@ class TodoViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    /**
+     * 笔记：全 App 一份草稿。
+     *
+     * 编辑期间只改内存里的草稿（不落盘），**关闭时一次性写回**——因此关闭动作必须收敛到
+     * [setNoteSheetVisible] 这一个入口（拖动面板、点遮罩、返回键最终都会走它）。
+     *
+     * 外部（存储层）的值只在"用户还没动过本次草稿"时回灌：[noteEdited] 而不是"面板是否打开"。
+     * 冷启动时 DataStore 的首次发射是异步的，若用"面板开着就不回灌"，用户手快先打开面板，
+     * 就会看到一个空面板，哪怕磁盘上有内容——而一关闭又把空文本写回去，等于把笔记删了。
+     * 用 [noteEdited] 判断则只有用户真的敲了字才停止回灌。
+     */
+    private fun observeNote() {
+        viewModelScope.launch {
+            notePreferences.contentFlow.collect { saved ->
+                if (noteEdited) return@collect
+                _uiState.update { it.copy(noteContent = saved) }
+            }
+        }
+    }
+
+    fun onNoteContentChange(content: String) {
+        noteEdited = true
+        _uiState.update { it.copy(noteContent = content) }
+    }
+
+    fun setNoteSheetVisible(visible: Boolean) {
+        if (_uiState.value.noteSheetVisible == visible) return
+        if (visible) {
+            noteEdited = false
+        } else {
+            val draft = _uiState.value.noteContent
+            viewModelScope.launch { notePreferences.setContent(draft) }
+            noteEdited = false
+        }
+        _uiState.update { it.copy(noteSheetVisible = visible) }
     }
 
     fun setAddSheetVisible(visible: Boolean) {
