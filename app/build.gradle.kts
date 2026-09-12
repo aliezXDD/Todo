@@ -29,8 +29,8 @@ android {
         applicationId = "com.todo"
         minSdk = 31
         targetSdk = 36
-        versionCode = 4
-        versionName = "1.3"
+        versionCode = 5
+        versionName = "1.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -67,6 +67,9 @@ android {
 
     buildFeatures {
         compose = true
+        // 打开后可用 BuildConfig.VERSION_NAME：设置页「关于」直接读它，
+        // 不再手写版本字符串（原来两处各写一份，改版本时容易漏掉一处）
+        buildConfig = true
     }
 }
 

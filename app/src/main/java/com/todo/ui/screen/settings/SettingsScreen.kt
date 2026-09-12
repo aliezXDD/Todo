@@ -26,6 +26,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.todo.BuildConfig
 import com.todo.R
 import com.todo.ui.component.GlassCard
 import com.todo.ui.component.GlassTopBar
@@ -102,7 +103,7 @@ fun SettingsScreen(
                     ) {
                         Column(horizontalAlignment = Alignment.End) {
                             Text(
-                                text = "Todo v1.3",
+                                text = "Todo v${BuildConfig.VERSION_NAME}",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.secondary
                             )

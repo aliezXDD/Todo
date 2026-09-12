@@ -55,6 +55,10 @@ fun PresetScreen(
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
+    // 底栏占据的真实高度（系统导航栏 + 底栏自身）：列表与提示气泡都用它，不再各写一个数。
+    // 原来气泡那处写死 140dp，手势导航或导航栏高度不同的机型上间距就对不上。
+    val bottomBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
+        BottomNavBarHeight
     Column(
         // 不再叠加纵向间距：列表自己带 16dp 顶部内衬（与渐隐带同高），间距由它提供
         modifier = Modifier
@@ -95,8 +99,6 @@ fun PresetScreen(
             // 列表止于底栏上沿：用真实内边距算（系统导航栏 + 底栏自身高度），而不是写死 140dp——
             // 写死会让列表在底栏上方留出一截空白，条目离底栏还有一段距离就在"半空中"淡没了。
             // 底栏不透明且画在最上层，条目到达这条线时正好被栏的阴影区接住，不会露在栏的两侧。
-            val bottomBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
-                BottomNavBarHeight
             // 上下缘各一条常驻渐隐（旧写法是"还能滚才出现"的 56dp 底隐，滚到端点时会突然出现/消失，
             // 那本身也是一种硬切；常驻的两条带子静止时只覆盖与背景同色的内衬区，看不见）
             NeumorphScrollFade(
@@ -158,7 +160,8 @@ fun PresetScreen(
         modifier = Modifier
             .align(Alignment.BottomCenter)
             .padding(horizontal = 20.dp)
-            .padding(bottom = 140.dp)
+            // 底栏高度 + 12dp：气泡浮在底栏之上，间距随导航栏模式自动适配
+            .padding(bottom = bottomBarInset + 12.dp)
     )
     }
 }
