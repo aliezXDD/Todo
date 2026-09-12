@@ -15,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
@@ -127,26 +128,31 @@ fun TodaySection(
                         }
                     ) {
                         _, todo, rowDragging ->
-                        TodoItemRow(
-                            todo = todo,
-                            isDragging = rowDragging,
-                            onCheckedChange = { checked -> onToggleTodo(todo, checked) },
-                            onEdit = { onEditTodo(todo) },
-                            dragHandleModifier = with(this) {
-                                Modifier.draggableHandle(
-                                    onDragStarted = {
-                                        holdExternalSync = true
-                                        isDragging = true
-                                        view.performHapticFeedback(HapticFeedbackConstants.DRAG_START)
-                                    },
-                                    onDragStopped = {
-                                        view.performHapticFeedback(HapticFeedbackConstants.GESTURE_END)
-                                        isDragging = false
-                                    }
-                                )
-                            },
-                            modifier = Modifier
-                        )
+                        // 用 todo.id 作为 key：条目重排时"状态"跟着**条目**走，而不是留在原位置再动画到
+                        // 新条目的状态。否则已完成（凹、划线、变淡）与未完成（凸）互换时，两行会各自
+                        // 从旧状态形变到新状态，看起来就是闪一下。
+                        key(todo.id) {
+                            TodoItemRow(
+                                todo = todo,
+                                isDragging = rowDragging,
+                                onCheckedChange = { checked -> onToggleTodo(todo, checked) },
+                                onEdit = { onEditTodo(todo) },
+                                dragHandleModifier = with(this) {
+                                    Modifier.draggableHandle(
+                                        onDragStarted = {
+                                            holdExternalSync = true
+                                            isDragging = true
+                                            view.performHapticFeedback(HapticFeedbackConstants.DRAG_START)
+                                        },
+                                        onDragStopped = {
+                                            view.performHapticFeedback(HapticFeedbackConstants.GESTURE_END)
+                                            isDragging = false
+                                        }
+                                    )
+                                },
+                                modifier = Modifier
+                            )
+                        }
                     }
                 }
             }
