@@ -2,7 +2,7 @@
 
 # Todo
 
-**拟态风格（Neumorphism）的 Android 每日待办清单**
+**新拟态风格（Neumorphism）的 Android 每日待办清单**
 
 Kotlin 2.2 · Jetpack Compose · Room · 纯本地存储 · 无网络权限
 
