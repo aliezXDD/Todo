@@ -28,27 +28,27 @@ Kotlin 2.2 · Jetpack Compose · Room · 纯本地存储 · 无网络权限
 
 **今日待办**：进度环 + 当天清单 + 底部导航
 
-![今日待办](docs/screenshots/home-light-dark.jpg)
+<img src="docs/screenshots/home-light-dark.jpg" width="415" alt="今日待办">
 
 **完成统计**：柱状图 / 折线图可切换，下方四张历史统计卡片
 
-![完成统计](docs/screenshots/stats-light-dark.jpg)
+<img src="docs/screenshots/stats-light-dark.jpg" width="415" alt="完成统计">
 
 **预设**：把常用待办存下来，随取随用
 
-![预设](docs/screenshots/presets-light-dark.jpg)
+<img src="docs/screenshots/presets-light-dark.jpg" width="415" alt="预设">
 
 **回收站**：删除的待办可还原，按原日期分组
 
-![回收站](docs/screenshots/recyclebin-light-dark.jpg)
+<img src="docs/screenshots/recyclebin-light-dark.jpg" width="415" alt="回收站">
 
 **备注**：全局一条，关闭窗口自动保存
 
-![备注](docs/screenshots/note-light.jpg)
+<img src="docs/screenshots/note-light.jpg" width="415" alt="备注">
 
 **设置**：主题切换、回收站入口、版本信息
 
-![设置](docs/screenshots/settings-light.jpg)
+<img src="docs/screenshots/settings-light.jpg" width="415" alt="设置">
 
 ## 操作说明
 
@@ -216,7 +216,6 @@ v1.0 – v1.3：拟态组件体系、每日统计与图表、预设、回收站�
 - 仅支持竖屏，界面按竖屏排版。
 - 数据只在本机：没有云同步，也没有导出/导入。
 - release 构建未开启代码压缩（`isMinifyEnabled = false`）。
-- 部分触摸目标偏小（拖动把手约 20dp、勾选框约 24dp），后续版本会补足。
 
 ## 许可证
 
