@@ -47,6 +47,17 @@ import kotlinx.coroutines.delay
 /** 面板内容的左右留白：滚动列表用"视口占满整宽 + 条目自己内缩这个值"的方式，其余内容也按它对齐 */
 private val AddSheetGutter = 16.dp
 
+/**
+ * 两颗分段按钮（手动输入 / 从预设选择）的内边距。
+ *
+ * 纵向取 14dp，而 [com.todo.ui.component.GlassButton] 的默认值是 12dp：labelLarge 的行高是 20dp，
+ * 14dp × 2 + 20dp 正好等于 48dp（系统的最小触摸目标），M3 的 Button 因此不会再拿透明留白把内容补到
+ * 48dp。那块留白落在 neumorph 形状之内、按钮自身裁剪之外，会让点击波纹比按钮本体小一圈——
+ * 点击后凹下去的那圈高光就与边框错开了。垫满之后波纹与按钮形状重合，
+ * 而按钮本体的尺寸与文字位置**完全不变**（内容高度本来就是被补到 48dp 的）。
+ */
+private val AddSheetTabButtonPadding = PaddingValues(horizontal = 20.dp, vertical = 14.dp)
+
 @Composable
 fun AddTodoSheet(
     visible: Boolean,
@@ -69,6 +80,15 @@ fun AddTodoSheet(
     var manualInput by remember { mutableStateOf("") }
     val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
     val secondaryTextColor = MaterialTheme.colorScheme.secondary
+
+    // 提交手动输入：键盘上的"完成"（回车）与再次点击「手动输入」按钮走同一条路径——
+    // 添加后输入框清空、面板与键盘都留着，方便连着录好几条
+    val submitManualInput: () -> Unit = {
+        if (manualInput.isNotBlank()) {
+            onAddManual(manualInput)
+            manualInput = ""
+        }
+    }
 
     // 点 + 打开面板后直接弹出键盘（与「编辑待办」同一做法：等 sheet 的节点挂上再请求焦点）。
     // 切回"手动输入"这一档时也会重新拉起键盘。
@@ -112,17 +132,27 @@ fun AddTodoSheet(
                 ) {
                     GlassButton(
                         text = "手动输入",
-                        onClick = { selectedTabIndex = 0 },
+                        // 这一档已经选中时，这次点击就是"提交"：把输入框里的内容添加为待办
+                        //（与键盘上的"完成"完全同一行为）；否则只是切回手动输入这一档
+                        onClick = {
+                            if (selectedTabIndex == 0) {
+                                submitManualInput()
+                            } else {
+                                selectedTabIndex = 0
+                            }
+                        },
                         glassSurface = true,
                         recessed = selectedTabIndex == 0,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
+                        contentPadding = AddSheetTabButtonPadding
                     )
                     GlassButton(
                         text = "从预设选择",
                         onClick = { selectedTabIndex = 1 },
                         glassSurface = true,
                         recessed = selectedTabIndex == 1,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
+                        contentPadding = AddSheetTabButtonPadding
                     )
                 }
 
@@ -186,12 +216,7 @@ fun AddTodoSheet(
                                     placeholder = "输入待办内容...",
                                     singleLine = true,
                                     imeAction = ImeAction.Done,
-                                    onImeAction = {
-                                        if (manualInput.isNotBlank()) {
-                                            onAddManual(manualInput)
-                                            manualInput = ""
-                                        }
-                                    }
+                                    onImeAction = submitManualInput
                                 )
                             }
 

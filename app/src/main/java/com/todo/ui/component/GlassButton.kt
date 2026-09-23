@@ -28,6 +28,12 @@ import com.todo.ui.theme.NeumorphShapes
  *
  * [recessed] = true 表示"这一颗是当前选中项"：静止时就凹着（凹陷 = 已选中），
  * 与底部导航选中项、列表里的选中条目同一种语义。二选一的分段按钮因此不必另造组件。
+ *
+ * [contentPadding] 直接交给 M3 的 `Button`，但**纵向值会决定点击波纹能不能和按钮形状重合**：
+ * M3 的 Button 会把不足最小触摸目标（48dp）的内容用**透明留白**补到 48dp，而那块留白落在这颗按钮的
+ * neumorph 形状**之内**、按钮自身裁剪**之外**——波纹画在裁剪之内，于是比按钮本体小一圈，
+ * 凹下去时那一圈高光就会与边框错开。把纵向内边距垫到内容正好 48dp（labelLarge 行高 20dp，
+ * 纵向 14dp × 2）即可让两者严丝合缝：按钮本体尺寸与文字位置都不变，只有波纹对齐到边缘。
  */
 @Composable
 fun GlassButton(
@@ -37,7 +43,8 @@ fun GlassButton(
     enabled: Boolean = true,
     glassSurface: Boolean = false,
     recessed: Boolean = false,
-    shape: Shape = RoundedCornerShape(NeumorphShapes.Small)
+    shape: Shape = RoundedCornerShape(NeumorphShapes.Small),
+    contentPadding: PaddingValues = PaddingValues(horizontal = 20.dp, vertical = 12.dp)
 ) {
     val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
     val interactionSource = remember { MutableInteractionSource() }
@@ -65,7 +72,7 @@ fun GlassButton(
             disabledContainerColor = Color.Transparent,
             disabledContentColor = contentColor.copy(alpha = 0.45f)
         ),
-        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp),
+        contentPadding = contentPadding,
         interactionSource = interactionSource,
         elevation = ButtonDefaults.buttonElevation(
             defaultElevation = 0.dp,
