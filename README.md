@@ -12,7 +12,7 @@ Kotlin 2.2 · Jetpack Compose · Room · 纯本地存储 · 无网络权限
 ![Room](https://img.shields.io/badge/Room-2.7.2-3DDC84?logo=android&logoColor=white)
 ![minSdk](https://img.shields.io/badge/minSdk-31-blue)
 
-[**下载 v1.4 APK**](https://github.com/aliezXDD/Todo/releases/latest)
+[**下载 v1.4.1 APK**](https://github.com/aliezXDD/Todo/releases/latest)
 
 </div>
 
@@ -197,6 +197,11 @@ RELEASE_KEY_PASSWORD=******
 后续版本与旧版本使用同一签名，**可以直接覆盖安装并保留数据**。
 
 ## 更新日志
+
+### v1.4.1（2026-09-23）
+
+- 新增：手动输入框里有内容时，再点一次「手动输入」按钮即可把内容添加为待办（与键盘「完成」完全同一行为，添加后面板与键盘都留着，可连续录入）
+- 修复：添加待办面板中「手动输入 / 从预设选择」两颗按钮，点击后的高亮区域与按钮边框不重合（高光比按钮本体小一圈、四个角错开）
 
 ### v1.4（2026-09-12）
 
