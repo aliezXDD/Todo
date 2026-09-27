@@ -7,6 +7,7 @@ import com.todo.domain.model.DailyRecord
 import com.todo.domain.model.DailyStats
 import com.todo.domain.model.Preset
 import com.todo.domain.model.Todo
+import com.todo.domain.model.isDeferred
 import com.todo.domain.usecase.AddTodoUseCase
 import com.todo.domain.usecase.DeleteTodoUseCase
 import com.todo.domain.usecase.GetHistoryRecordsUseCase
@@ -49,9 +50,18 @@ class TodoViewModel @Inject constructor(
     data class UiState(
         /** 当前逻辑日（凌晨 4 点分界）：界面标题与数据窗口共用它，避免"标题已是新的一天、列表还是昨天"。 */
         val today: String = DateUtils.today(),
+        /**
+         * 今日清单：那天自己的待办 + **还在期限内的预留待办**（设了截止日期、未完成、期限没到，
+         * 见 [com.todo.domain.model.isDeferred]）。后者排在今天那些之后、可以随时提前勾掉。
+         */
         val todayTodos: List<Todo> = emptyList(),
         val historyRecords: List<DailyRecord> = emptyList(),
         val todayStats: DailyStats = DailyStats("", 0, 0),
+        /**
+         * 今日清单里**还没到期**的预留待办条数（见 [isDeferred]）。它们不计入 [todayStats]，
+         * 界面因此要单独说明一句「另有 N 条预留」，免得看起来像计数漏了。
+         */
+        val todayReservedCount: Int = 0,
         val isLoading: Boolean = true,
         /** 往日记录是否已完成首次发射。与 [isLoading] 分开：两个列表各自到位，谁先到都不该等谁。 */
         val historyLoaded: Boolean = false,
@@ -101,14 +111,19 @@ class TodoViewModel @Inject constructor(
                 getTodayTodosUseCase(day).map { todos -> day to todos }
             }.collect { (day, todos) ->
                 _uiState.update { state ->
+                    // 今日进度只数"今天该算账的"：预留中的待办未到期限前不计入（见 isDeferred），
+                    // 与统计页、图表用的是同一条口径
+                    val counted = todos.filterNot { it.isDeferred(day) }
                     state.copy(
                         today = day,
                         todayTodos = todos,
                         todayStats = DailyStats(
                             date = day,
-                            totalCount = todos.size,
-                            completedCount = todos.count { it.isCompleted }
+                            totalCount = counted.size,
+                            completedCount = counted.count { it.isCompleted }
                         ),
+                        // 清单里有、但还没到期的那些：只用来在进度卡上说明一句，不进统计
+                        todayReservedCount = todos.size - counted.size,
                         isLoading = false
                     )
                 }
@@ -269,11 +284,17 @@ class TodoViewModel @Inject constructor(
         }
     }
 
-    fun saveEditedTodo(content: String) {
+    /**
+     * 保存编辑：内容 + 截止日期（[dueDate] 为 null = 不设/清除截止日期）。
+     *
+     * 归属日与统计的联动都在 [UpdateTodoUseCase] 里：这里传下去的 [editing] 必须是**编辑前**的那条，
+     * 用例要靠它的旧归属日才知道该重算哪一天的统计。
+     */
+    fun saveEditedTodo(content: String, dueDate: String?) {
         val editing = _uiState.value.editingTodo ?: return
         if (content.isBlank()) return
         viewModelScope.launch {
-            updateTodoUseCase(editing.copy(content = content.trim()))
+            updateTodoUseCase(editing, content.trim(), dueDate)
             _uiState.update { it.copy(editSheetVisible = false, editingTodo = null) }
         }
     }

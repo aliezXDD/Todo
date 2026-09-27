@@ -29,6 +29,10 @@ import com.todo.ui.theme.NeumorphShapes
  * [recessed] = true 表示"这一颗是当前选中项"：静止时就凹着（凹陷 = 已选中），
  * 与底部导航选中项、列表里的选中条目同一种语义。二选一的分段按钮因此不必另造组件。
  *
+ * [elevation] 是"凸起"那层暗影的档位，默认 [NeumorphElevation.Medium] —— 参数化之前它就是写死的唯一取值，
+ * 所以别处调用完全不受影响。又小又次要的按钮可以传更淡的一档：新拟态里按钮的"颜色"其实就是这层暗影
+ * （表面色与背景同色、浅色下还没有左上高光），把暗影收淡就等于把这颗按钮调淡。
+ *
  * [contentPadding] 直接交给 M3 的 `Button`，但**纵向值会决定点击波纹能不能和按钮形状重合**：
  * M3 的 Button 会把不足最小触摸目标（48dp）的内容用**透明留白**补到 48dp，而那块留白落在这颗按钮的
  * neumorph 形状**之内**、按钮自身裁剪**之外**——波纹画在裁剪之内，于是比按钮本体小一圈，
@@ -44,7 +48,9 @@ fun GlassButton(
     glassSurface: Boolean = false,
     recessed: Boolean = false,
     shape: Shape = RoundedCornerShape(NeumorphShapes.Small),
-    contentPadding: PaddingValues = PaddingValues(horizontal = 20.dp, vertical = 12.dp)
+    contentPadding: PaddingValues = PaddingValues(horizontal = 20.dp, vertical = 12.dp),
+    // 新参数一律加在**最后**：已有的具名/位置调用都不会因此错位
+    elevation: NeumorphElevation = NeumorphElevation.Medium
 ) {
     val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
     val interactionSource = remember { MutableInteractionSource() }
@@ -61,7 +67,7 @@ fun GlassButton(
             isDark = isDark,
             pressed = pressed && enabled && !recessed,
             surface = if (enabled) surfaceColor else surfaceColor.copy(alpha = 0.45f),
-            elevation = NeumorphElevation.Medium,
+            elevation = elevation,
             restDepth = if (recessed) 0f else 1f
         ),
         enabled = enabled,

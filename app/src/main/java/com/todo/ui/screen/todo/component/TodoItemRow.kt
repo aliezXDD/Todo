@@ -9,6 +9,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -33,12 +34,14 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.todo.domain.model.Todo
 import com.todo.ui.component.GlassListItem
 import com.todo.ui.theme.MotionTokens
 import com.todo.ui.theme.NeumorphElevation
 import com.todo.ui.theme.NeumorphShapes
+import com.todo.util.DateUtils
 
 /**
  * 勾选后"按进去"那套内阴影的几何：比列表项默认档位（偏移 7 + 模糊 11）略收一点，
@@ -145,26 +148,44 @@ fun TodoItemRow(
                     }
                 }
 
-                Text(
-                    text = todo.content,
-                    modifier = Modifier
-                        .width((contentWidth - 34.dp).coerceAtLeast(0.dp))
-                        .drawWithContent {
-                            drawContent()
-                            if (strikeProgress.value > 0f) {
-                                val lineY = size.height * 0.56f
-                                drawLine(
-                                    color = strikeColor,
-                                    start = Offset(0f, lineY),
-                                    end = Offset(size.width * strikeProgress.value, lineY),
-                                    strokeWidth = 2.dp.toPx()
-                                )
-                            }
-                        },
-                    style = MaterialTheme.typography.bodyLarge,
-                    textDecoration = TextDecoration.None,
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = alpha.value)
-                )
+                // 内容与截止日期两行：
+                // - 删除线画在**文本自身**上（size.width 就是这一行的宽度），所以它仍然只划内容那一行；
+                // - 只有设了截止日期的条目才多出第二行小字，行高随之长一点，其余条目高度不变。
+                Column(
+                    modifier = Modifier.width((contentWidth - 34.dp).coerceAtLeast(0.dp))
+                ) {
+                    Text(
+                        text = todo.content,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .drawWithContent {
+                                drawContent()
+                                if (strikeProgress.value > 0f) {
+                                    val lineY = size.height * 0.56f
+                                    drawLine(
+                                        color = strikeColor,
+                                        start = Offset(0f, lineY),
+                                        end = Offset(size.width * strikeProgress.value, lineY),
+                                        strokeWidth = 2.dp.toPx()
+                                    )
+                                }
+                            },
+                        style = MaterialTheme.typography.bodyLarge,
+                        textDecoration = TextDecoration.None,
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = alpha.value)
+                    )
+                    val dueDate = todo.dueDate
+                    if (dueDate != null) {
+                        // 顺手把"为什么这条不算进今天的完成率"写在条目上：它到这一天为止都只是预留
+                        Text(
+                            text = "截止 ${DateUtils.formatShortDate(dueDate)}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.secondary.copy(alpha = alpha.value),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
             }
 
             // 拖拽把手用真实图标（原来是文本字形 "≡"，字宽与基线会随字体漂移，不够专业）

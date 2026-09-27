@@ -28,11 +28,16 @@ import com.todo.ui.theme.MotionTokens
  *
  * [isLoading] 为 true 时显示不定态转圈与"加载中…"，而不是 `0/0 已完成`：
  * 首帧早于数据库首次发射，若直接渲染就会报出一个并不成立的空进度。
+ *
+ * [reservedCount] > 0 时多一行「另有 N 条预留」：设了截止日期、还没到期的待办照旧列在今日清单里，
+ * 但按统一口径**不计入**这里的完成数 —— 不写这一行的话，列表里明明有东西、计数却是 `0/0`，
+ * 看起来像数据丢了。
  */
 @Composable
 fun MiniStatsCard(
     completedCount: Int,
     totalCount: Int,
+    reservedCount: Int,
     isLoading: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -79,6 +84,13 @@ fun MiniStatsCard(
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.secondary
                 )
+                if (!isLoading && reservedCount > 0) {
+                    Text(
+                        text = "另有 $reservedCount 条预留",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                }
             }
         }
     }

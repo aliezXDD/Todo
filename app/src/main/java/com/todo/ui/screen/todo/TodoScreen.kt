@@ -54,6 +54,7 @@ fun TodoScreen(
             MiniStatsCard(
                 completedCount = uiState.todayStats.completedCount,
                 totalCount = uiState.todayStats.totalCount,
+                reservedCount = uiState.todayReservedCount,
                 isLoading = uiState.isLoading,
                 onClick = onNavigateToChart
             )
@@ -129,6 +130,8 @@ fun TodoScreen(
     EditTodoSheet(
         visible = uiState.editSheetVisible,
         todo = uiState.editingTodo,
+        // 截止日期的日历以当前逻辑日为最早可选的一天（今天之前的日期没有意义）
+        today = uiState.today,
         onDismiss = { viewModel.setEditSheetVisible(false) },
         onSave = viewModel::saveEditedTodo,
         onDelete = viewModel::deleteTodoNow

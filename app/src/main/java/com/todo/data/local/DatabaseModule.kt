@@ -25,7 +25,10 @@ object DatabaseModule {
             context,
             AppDatabase::class.java,
             Constants.DATABASE_NAME
-        ).build()
+        )
+            // 结构升级一律走显式迁移：绝不 fallbackToDestructiveMigration（那会清空用户数据）
+            .addMigrations(AppDatabase.MIGRATION_1_2)
+            .build()
     }
 
     @Provides

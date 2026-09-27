@@ -17,8 +17,9 @@ import kotlinx.coroutines.sync.withLock
  *
  * 两处并发保护，缺一不可：
  *
- * 1. **互斥锁**：本用例的触发点有两个——App 启动路径（`TodoApp.runStartupArchiveIfNeeded`）
- *    与每日定时任务（`DailyArchiveWorker`）。午夜时系统会拉起进程跑定时任务，两者可能同时在跑。
+ * 1. **互斥锁**：本用例的触发点有三个——App 启动路径（`TodoApp.runStartupArchiveIfNeeded`）、
+ *    每日定时任务（`DailyArchiveWorker`）、以及进程内逻辑日翻页（`TodoApp.settleOnDayChange`）。
+ *    午夜时系统会拉起进程跑定时任务，三者可能同时在跑。
  *    锁要求实例是同一个，所以本类必须是 [Singleton]（否则 Hilt 每次注入都会给一把新锁，
  *    等于没锁）。因此这里也**刻意不放任何可变状态**。
  * 2. **读也放进事务**：原先"先把 7 天前的待办读出来（事务外）"再开事务写入。分开写时，

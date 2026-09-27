@@ -24,14 +24,21 @@ class TodoRepository @Inject constructor(
 
     suspend fun delete(todo: TodoEntity) = todoDao.delete(todo)
 
-    suspend fun updateCompleted(id: Long, isCompleted: Boolean) = todoDao.updateCompleted(id, isCompleted)
+    /** 勾选/取消完成，并（可选）把这条待办改到另一天的末尾（单事务，避免中间态）。 */
+    suspend fun setCompleted(id: Long, isCompleted: Boolean, refileTo: String? = null) =
+        todoDao.setCompleted(id, isCompleted, refileTo)
 
     /** 整组顺序一次写完（单事务），避免逐行写入导致界面闪出中间态 */
     suspend fun updateSortOrders(orderedIds: List<Long>) = todoDao.updateSortOrders(orderedIds)
 
-    suspend fun updateContent(id: Long, content: String) = todoDao.updateContent(id, content)
+    /** 保存编辑：内容 + 截止日期，并（可选）把这条待办改到另一天的末尾（单事务）。 */
+    suspend fun applyEdit(id: Long, content: String, dueDate: String?, refileTo: String? = null) =
+        todoDao.applyEdit(id, content, dueDate, refileTo)
 
     suspend fun getHistoryDates(today: String): List<String> = todoDao.getHistoryDates(today)
+
+    /** 截止日已过、仍未完成的待办分别落在哪几天（跨天时要覆盖重算那几天的统计）。 */
+    suspend fun getExpiredDeadlineDates(today: String): List<String> = todoDao.getExpiredDeadlineDates(today)
 
     suspend fun getTodosBeforeDate(cutoffDate: String): List<TodoEntity> = todoDao.getTodosBeforeDate(cutoffDate)
 
