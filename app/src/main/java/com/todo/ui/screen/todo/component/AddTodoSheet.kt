@@ -48,7 +48,7 @@ import kotlinx.coroutines.delay
 private val AddSheetGutter = 16.dp
 
 /**
- * 两颗分段按钮（手动输入 / 从预设选择）的内边距。
+ * 两颗分段按钮（预设选择 / 手动输入）的内边距。
  *
  * 纵向取 14dp，而 [com.todo.ui.component.GlassButton] 的默认值是 12dp：labelLarge 的行高是 20dp，
  * 14dp × 2 + 20dp 正好等于 48dp（系统的最小触摸目标），M3 的 Button 因此不会再拿透明留白把内容补到
@@ -81,7 +81,7 @@ fun AddTodoSheet(
     val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
     val secondaryTextColor = MaterialTheme.colorScheme.secondary
 
-    // 提交手动输入：键盘上的"完成"（回车）与再次点击「手动输入」按钮走同一条路径——
+    // 提交手动输入：键盘上的"完成"（回车）与再次点击那颗按钮（有内容时它是「添加待办」）走同一条路径——
     // 添加后输入框清空、面板与键盘都留着，方便连着录好几条
     val submitManualInput: () -> Unit = {
         if (manualInput.isNotBlank()) {
@@ -123,7 +123,9 @@ fun AddTodoSheet(
                     modifier = Modifier.padding(horizontal = AddSheetGutter)
                 )
                 // 二选一 = 两颗普通 GlassButton（与下面「完成/添加」完全同一套样式），
-                // 只用深度区分状态：当前选中的那颗凹着（凹陷 = 已选中），另一颗凸起
+                // 只用深度区分状态：当前选中的那颗凹着（凹陷 = 已选中），另一颗凸起。
+                // 顺序是"预设选择在左、手动输入在右"：手动输入框一有内容，右边这颗就变成「添加待办」这个
+                // **主动作**——与其它面板里「取消 / 添加选中项」一样，主动作放右边。
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -131,9 +133,21 @@ fun AddTodoSheet(
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     GlassButton(
-                        text = "手动输入",
-                        // 这一档已经选中时，这次点击就是"提交"：把输入框里的内容添加为待办
-                        //（与键盘上的"完成"完全同一行为）；否则只是切回手动输入这一档
+                        text = "预设选择",
+                        onClick = { selectedTabIndex = 1 },
+                        glassSurface = true,
+                        recessed = selectedTabIndex == 1,
+                        modifier = Modifier.weight(1f),
+                        contentPadding = AddSheetTabButtonPadding
+                    )
+                    // 手动输入这一档里，输入框一有内容，这颗按钮就从"分段选项"变成"提交动作"：
+                    // 文案换成「添加待办」、由凹陷变回凸起、并改为主色填充——"现在点这里就能加进去"一眼可见。
+                    // 只在**这一档**里变：切到预设选择时输入框本就不可见，那颗按钮还叫「手动输入」（点它切回来）
+                    val canSubmit = selectedTabIndex == 0 && manualInput.isNotBlank()
+                    GlassButton(
+                        text = if (canSubmit) "添加待办" else "手动输入",
+                        // 这一档已选中且输入还是空的时，这次点击只是"再点一次"；有内容时才是提交
+                        //（与键盘上的"完成"完全同一行为）；不在这一档时则是切回手动输入这一档
                         onClick = {
                             if (selectedTabIndex == 0) {
                                 submitManualInput()
@@ -141,16 +155,10 @@ fun AddTodoSheet(
                                 selectedTabIndex = 0
                             }
                         },
-                        glassSurface = true,
-                        recessed = selectedTabIndex == 0,
-                        modifier = Modifier.weight(1f),
-                        contentPadding = AddSheetTabButtonPadding
-                    )
-                    GlassButton(
-                        text = "从预设选择",
-                        onClick = { selectedTabIndex = 1 },
-                        glassSurface = true,
-                        recessed = selectedTabIndex == 1,
+                        // 有内容可提交时它不再是"选中的那一档"，而是一颗凸起的**主色填充**按钮
+                        //（就是「添加选中项」那套主动作外观：浅色靛蓝、深色橙）；没内容时仍是与背景同色的玻璃面
+                        glassSurface = !canSubmit,
+                        recessed = selectedTabIndex == 0 && !canSubmit,
                         modifier = Modifier.weight(1f),
                         contentPadding = AddSheetTabButtonPadding
                     )
@@ -203,9 +211,9 @@ fun AddTodoSheet(
                     ) {
                         when (tabIndex) {
                             0 -> {
-                                // 手动输入不再有「完成/添加」按钮：面板一打开就带起键盘，
-                                // 输入不为空时按键盘上的"完成"（回车）即添加，添加后面板与键盘都留着，
-                                // 方便连着录好几条；要收起就下滑面板或点空白处
+                                // 手动输入这一档没有额外的「完成/添加」按钮：面板一打开就带起键盘，
+                                // 输入不为空时按键盘上的"完成"（回车）、或点上面那颗变成「添加待办」的按钮即可添加，
+                                // 添加后面板与键盘都留着，方便连着录好几条；要收起就下滑面板或点空白处
                                 NeumorphTextField(
                                     value = manualInput,
                                     onValueChange = { manualInput = it },

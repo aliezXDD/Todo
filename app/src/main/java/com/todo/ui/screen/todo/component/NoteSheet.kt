@@ -2,10 +2,8 @@ package com.todo.ui.screen.todo.component
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -19,7 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.layout.layout
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
@@ -30,19 +27,23 @@ import com.todo.ui.theme.NeumorphShapes
 import kotlinx.coroutines.delay
 
 /**
- * 面板自身上下要占掉的高度：拖拽把手、标题与提示、面板内外边距，外加系统导航栏那一条。
+ * 面板顶部（距窗口上沿）要留出的那一段。
  *
- * 取 220dp 是**上界**（三键导航比手势导航宽，再叠上放大的字体更是如此），这里故意留了余量：
- * 面板内容一旦高过可用高度，M3 会把超出的部分从**顶部**裁掉 —— 第一个被切掉的正好是那块拖拽把手。
+ * 面板高度 = **可用高度 − 这一段**，而"可用高度"直接取父级在**这次测量**里给出的约束
+ * （M3 面板外层那层 `.imePadding()` 已经把键盘扣掉了，而且和我们在同一次测量流程里拿到的约束是同一份）。
+ * 于是：键盘抬起多少，面板就矮多少，上边界始终钉在同一个位置。
+ *
+ * 这里刻意**不读窗口高度、也不单独读键盘高度**：那两条都是"面板之外"的数值，一旦与面板这一帧拿到的约束
+ * 不一致（时机差一帧、或窗口尺寸口径不同），上边界就会抖一下、或者在键盘停稳后突然跳一格。
+ * 只用一个固定量做减法，就没有这类风险。
+ *
+ * 取 56dp：比状态栏 + 面板内边距再高一点点，面板几乎占满整屏；想更高/更矮只改这一个数。
  */
-private val NoteSheetChromeHeight = 220.dp
+private val NoteSheetTopOffset = 56.dp
 
 /**
- * 输入区的最小高度。
- *
- * 取小一点是有意的：输入区的高度里已经减掉了键盘那一段（见 [noteFieldHeight] 的说明），
- * 若这里的地板留得太大，矮屏 + 超高键盘时面板会比可用高度还高、上边界又被顶上去 —— 那正是要避免的事。
- * 80dp 约三行，只有极端的"矮屏 + 超高键盘"才碰得到它。
+ * 兜底高度：只有父级给的约束量不出有界高度时才会用到（正常路径走不到）。
+ * 80dp 约三行。
  */
 private val NoteFieldMinHeight = 80.dp
 
@@ -56,8 +57,8 @@ private val NoteFieldMinHeight = 80.dp
  * 上方与「添加待办」一样有拖拽把手、也可以下滑关闭：输入区已经高到能装下一整屏草稿，
  * 框内滚动只在极长文本时才用得上；而关闭即保存，误拖也不会丢内容。
  *
- * 键盘弹起 / 收起时面板的**上边界不动**：底边被键盘顶上来的那一段，正好由输入区让出同样多的高度抵消
- * （推导见 [noteFieldHeight]）。
+ * 键盘弹起 / 收起时面板的**上边界不动**：底边被键盘顶上来的那一段，正好由面板自己让出同样多的高度抵消
+ * （推导见 [noteSheetHeight]）。
  */
 @Composable
 fun NoteSheet(
@@ -99,23 +100,13 @@ fun NoteSheet(
         // 面板很高：跳过"半展开"那一档，一打开就给全高度（否则会先停在屏幕一半，还要再往上拖一次）
         skipPartiallyExpanded = true
     ) {
-        // 高度必须在**面板自己的窗口**里算。ModalBottomSheet 是一个独立 Dialog（M3 用子组合把它挂到自己的
-        // ComposeView 上），而下面这段正是在那个子组合里展开的：这里读到的是"面板这个窗口"的 WindowInsets，
-        // 与 M3 那层 .imePadding() 同一个 WindowInsetsHolder —— 同一个键盘、同一帧更新。
-        // 若把它们写在 [NoteSheet] 的函数体里（也就是 Activity 的组合里），读到的就是 **Activity 窗口**的那一份：
-        // 同一个键盘，却不是同一份数据在同一帧更新 —— 面板已经按新的键盘高度抬起来了，输入区却还按旧值撑着，
-        // 结果就是"先升高一点再回落"。
-        //
-        // 基准取 LocalWindowInfo 的容器高度：它是窗口的 MATCH_PARENT 尺寸、**不扣任何 insets**
-        //（平台文档原话：The WindowInsets are not deducted from the bounds），所以键盘弹起/收起都不影响它。
-        // 也正因如此，不能换成 Configuration.screenHeightDp 之类"看起来更稳"的值：那些在多窗口/折叠屏下
-        // 不保证等于本窗口的可用高度（lint 的 ConfigurationScreenWidthHeight 说的就是这件事）。
-        val containerHeightPx = LocalWindowInfo.current.containerSize.height
-        // 组合阶段只拿这个 WindowInsets **对象**（`WindowInsets.ime` 是 @Composable 的，只有组合阶段取得到），
-        // 键盘高度本身留到测量阶段再读 —— 这是"上边界不再先升高一点再回落"的另一半关键（见 [noteFieldHeight]）。
-        val imeInsets = WindowInsets.ime
-
-        Column(modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                // 面板高度 = 这次测量拿到的可用高度（里面已经扣掉了键盘）− 顶部要留出的那一段。
+                // 不读窗口高度、也不单独读键盘高度，推导见 [noteSheetHeight]。
+                .noteSheetHeight()
+        ) {
             Text(
                 text = "备注",
                 style = MaterialTheme.typography.titleMedium,
@@ -140,7 +131,8 @@ fun NoteSheet(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .noteFieldHeight(containerHeightPx, imeInsets)
+                    // 输入区吃掉面板剩下的全部高度：面板矮多少（键盘抬起多少），它就矮多少
+                    .weight(1f)
                     .focusRequester(focusRequester),
                 placeholder = "写点什么…",
                 shape = RoundedCornerShape(NeumorphShapes.Corner),
@@ -151,35 +143,32 @@ fun NoteSheet(
 }
 
 /**
- * 把输入区的高度钉成"容器高度 − 键盘高度 − 面板自身占用"。
+ * 把面板高度钉成"这次测量拿到的可用高度 − [NoteSheetTopOffset]"。
  *
- * **为什么要减掉键盘**：M3 的 ModalBottomSheet 会给整个面板加一层 `.imePadding()`，键盘一弹出，面板底边就被
- * 整块抬到键盘上沿。面板高度若不变，"上边界"就会跟着往上跑（面板越高跑得越狠，高到一定程度还会顶出屏幕、
- * 连拖拽把手都被切掉）。把键盘那一段从输入区里减掉后，面板总高度就少掉同样多：底边被抬高多少、高度就少
- * 多少，两者正好抵消 —— 上边界纹丝不动，而输入区仍然完整地待在键盘上方（不会被键盘盖住半截）。
+ * **为什么这样上边界就不动**：M3 的 ModalBottomSheet 会给整个面板加一层 `.imePadding()`，键盘一弹出，
+ * 面板底边就被整块抬到键盘上沿 —— 也就是说，父级在**同一次测量**里给我们的可用高度，当帧就少掉了键盘那一段。
+ * 我们只在这段可用高度里再减掉一个固定量：
  *
- * **为什么键盘高度必须在这里（测量阶段）读**：M3 那层 `.imePadding()` 读的是**同一个** [WindowInsets]
- * 实例，而且是在 measure 里读的：键盘动画每推进一帧，它当帧就生效（`ime` 是动画插值出来的当前值，见 Compose
- * 源码 `imeAnimationSource` / `imeAnimationTarget` 的说明）。而组合阶段读到的值要等**下一帧**重组才落实到
- * 布局。两者错开一帧，键盘上升期间就会出现"面板的可用高度已经少了一截、输入区却还按上一帧的高度撑着"，
- * 面板被多顶高一截，等键盘停稳、重组追上来才落回原位 —— 也就是"打开备注页时窗口先升高一点再回落"。
- * 放进 measure 后两者同处一次测量流程、看到的永远是同一个值，上边界才真正不动（前提是调用点就在**面板自己的
- * 窗口**里，见 [NoteSheet] 中 GlassBottomSheet 的 content）。
+ *     面板底边 = 可用高度的下沿 = 键盘上沿（由 M3 保证）
+ *     面板高度 = 可用高度 − 固定量
+ *     ⇒ 面板上沿 = 固定量（与键盘高低无关）
  *
- * 所以 [NoteSheet] 的组合阶段只把 [WindowInsets] **对象**（而不是它的值）交给这里，真正的值在这里读。
+ * 并且"可用高度"是从父级约束里取来的，与 M3 那层 `.imePadding()` 读的是同一帧的同一个键盘高度，
+ * 不存在"面板已经按新键盘高度抬起来了、输入区还按上一帧撑着"这种错位；
+ * 也不再有"窗口高度"和"键盘高度"这两个来自面板外部的数值需要互相对齐 —— 那两个正是抖动的来源。
  *
- * 高度照 `Modifier.height(...)` 的老规矩收进父级给的约束里（这里上方套了 `fillMaxWidth()`，宽度原样透传），
- * 绝不越界把面板撑破；只有"矮屏 + 超高键盘"这种极端情况才会被父级上限压到 [NoteFieldMinHeight] 地板以下。
+ * 于是整段键盘动画里只有底边跟着键盘走（这一层交给 M3），上边界是一个常数：键盘升起不追帧、收起不弹跳。
+ *
+ * 高度照 `Modifier.height(...)` 的老规矩收进父级给的约束里（上方套了 `fillMaxWidth()`，宽度原样透传），
+ * 绝不越界把面板撑破。正常路径上父级约束一定有界（理由见 [NoteSheetTopOffset]），
+ * 只有拿不到有界高度时才退回 [NoteFieldMinHeight]。
  */
-private fun Modifier.noteFieldHeight(
-    containerHeightPx: Int,
-    imeInsets: WindowInsets
-): Modifier = layout { measurable, constraints ->
-    val imePx = imeInsets.getBottom(this)
-    val heightPx = (containerHeightPx - imePx - NoteSheetChromeHeight.roundToPx())
-        .coerceAtLeast(NoteFieldMinHeight.roundToPx())
-        .coerceAtLeast(constraints.minHeight)
-        .coerceAtMost(constraints.maxHeight)
+private fun Modifier.noteSheetHeight(): Modifier = layout { measurable, constraints ->
+    val heightPx = if (constraints.hasBoundedHeight) {
+        (constraints.maxHeight - NoteSheetTopOffset.roundToPx()).coerceAtLeast(0)
+    } else {
+        NoteFieldMinHeight.roundToPx()
+    }
     val placeable = measurable.measure(
         constraints.copy(minHeight = heightPx, maxHeight = heightPx)
     )
