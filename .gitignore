@@ -17,5 +17,7 @@
 local.properties
 /.gh
 .gh
+/.check
+.check
 *.jks
 *.keystore
