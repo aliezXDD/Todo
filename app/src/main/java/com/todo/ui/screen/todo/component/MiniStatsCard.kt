@@ -6,6 +6,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
@@ -15,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.dp
 import com.todo.ui.component.GlassCard
@@ -32,6 +34,10 @@ import com.todo.ui.theme.MotionTokens
  * [reservedCount] > 0 时多一行「另有 N 条预留」：设了截止日期、还没到期的待办照旧列在今日清单里，
  * 但按统一口径**不计入**这里的完成数 —— 不写这一行的话，列表里明明有东西、计数却是 `0/0`，
  * 看起来像数据丢了。
+ *
+ * 右侧的 [avatar] 是用户头像（见 [AvatarSlot]）：卡片右半边本来空着一大片，把头像放在这里，
+ * 既填上了这块空白，又让"今天"有了个每天都会看到的落点。它自带点击，**不会**触发卡片本身的
+ * [onClick]（卡片那层点击铺在内容之下，见 [GlassCard]）。
  */
 @Composable
 fun MiniStatsCard(
@@ -39,6 +45,8 @@ fun MiniStatsCard(
     totalCount: Int,
     reservedCount: Int,
     isLoading: Boolean,
+    avatar: ImageBitmap?,
+    onAvatarClick: () -> Unit,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -92,6 +100,9 @@ fun MiniStatsCard(
                     )
                 }
             }
+            // 吃掉右侧剩余空间，把头像顶到卡片最右边（与其它卡片的内边距对齐）
+            Spacer(modifier = Modifier.weight(1f))
+            AvatarSlot(avatar = avatar, onClick = onAvatarClick)
         }
     }
 }

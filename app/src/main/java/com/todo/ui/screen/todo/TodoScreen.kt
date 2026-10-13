@@ -1,5 +1,8 @@
 package com.todo.ui.screen.todo
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,8 +17,14 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -24,11 +33,17 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.todo.ui.component.GlassButton
 import com.todo.ui.component.GlassFAB
 import com.todo.ui.screen.todo.component.AddTodoSheet
+import com.todo.ui.screen.todo.component.AvatarActionDialog
+import com.todo.ui.screen.todo.component.AvatarCropDialog
 import com.todo.ui.screen.todo.component.EditTodoSheet
 import com.todo.ui.screen.todo.component.MiniStatsCard
 import com.todo.ui.screen.todo.component.NoteSheet
 import com.todo.ui.screen.todo.component.TodaySection
+import com.todo.ui.screen.todo.component.decodePickedImage
 import com.todo.ui.theme.NeumorphShapes
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Composable
 fun TodoScreen(
@@ -44,6 +59,33 @@ fun TodoScreen(
     // 「往日记录」按钮：与卡片同一套圆角语言
     val historyButtonShape = RoundedCornerShape(NeumorphShapes.Small)
 
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    // 选好图、还没裁剪的原始图片。只活在界面里：对话框一关就该释放，没必要进 ViewModel。
+    var pendingCropSource by remember { mutableStateOf<ImageBitmap?>(null) }
+
+    // 相册选图。用 PickVisualMedia（系统相册选择器）而不是 GetContent：
+    // 它不需要任何权限，因此"零权限"这条不变；API 31/32 上没有系统选择器时，
+    // androidx 会自动回落到 ACTION_OPEN_DOCUMENT，同样不申请权限。
+    val pickImage = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        coroutineScope.launch {
+            // 解码（含 EXIF 旋转、降采样）在 IO 线程做，主线程不卡
+            val decoded = withContext(Dispatchers.IO) { decodePickedImage(context, uri) }
+            if (decoded != null) pendingCropSource = decoded
+        }
+    }
+
+    // 弹出的系统相册选择器只认"只要图片"，不申请任何读取权限
+    val launchImagePicker = {
+        pickImage.launch(
+            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+        )
+        Unit
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
@@ -56,6 +98,8 @@ fun TodoScreen(
                 totalCount = uiState.todayStats.totalCount,
                 reservedCount = uiState.todayReservedCount,
                 isLoading = uiState.isLoading,
+                avatar = uiState.avatar,
+                onAvatarClick = { viewModel.setAvatarDialogVisible(true) },
                 onClick = onNavigateToChart
             )
 
@@ -143,4 +187,27 @@ fun TodoScreen(
         onContentChange = viewModel::onNoteContentChange,
         onDismiss = { viewModel.setNoteSheetVisible(false) }
     )
+
+    AvatarActionDialog(
+        visible = uiState.avatarDialogVisible,
+        hasCustomAvatar = uiState.avatar != null,
+        onPickImage = {
+            viewModel.setAvatarDialogVisible(false)
+            launchImagePicker()
+        },
+        onResetToDefault = viewModel::resetAvatar,
+        onDismiss = { viewModel.setAvatarDialogVisible(false) }
+    )
+
+    // 选好图之后接一层裁剪：用户确认的才是最终头像（自动居中裁常会把主体切掉）
+    pendingCropSource?.let { source ->
+        AvatarCropDialog(
+            source = source,
+            onDismiss = { pendingCropSource = null },
+            onConfirm = { cropped ->
+                pendingCropSource = null
+                viewModel.saveAvatar(cropped)
+            }
+        )
+    }
 }

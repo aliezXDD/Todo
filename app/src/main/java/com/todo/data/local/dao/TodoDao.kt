@@ -12,11 +12,16 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface TodoDao {
     /**
-     * 某一天的清单 = 那天自己的待办 + **所有还在期限内的预留待办**。
+     * 某一天的清单 = 那天自己的待办 + **所有尚未到期的预留待办**。
      *
      * 预留待办的 `date` 是它的截止日（在将来），靠 `date = :date` 是取不到的：第二条判断把它们显式
-     * 带进来（判定与 `com.todo.domain.model.isDeferred` 同一条：设了截止日期、未完成、今天仍在期限内），
+     * 带进来（判定与 `com.todo.domain.model.isDeferred` 同一条：设了截止日期、未完成、截止日还没到），
      * 它们才会在期限内的每一天都出现在今日清单里。
+     *
+     * 第二条用 `dueDate > :date` 而不是 `>=`：**截止日当天的条目由第一条 `date = :date` 取到**，
+     * 于是两条判断合起来与 `isDeferred` 逐字对应。这不是"顺手简化"——未完成且有截止日期的待办，
+     * 它的 `date` 恒等于 `dueDate`（`applyEdit` 与 `setCompleted` 两条写入路径都保证这一点），
+     * 所以 `dueDate = :date` 的那些必然已经满足 `date = :date`，换成 `>` 取到的行**完全一样**。
      *
      * 排序是"两档 + 档内顺序"：
      * 1. **归属日（`date`）升序**：今天那一档在前，预留档在后。今天到期的预留待办归属日就是今天，
@@ -29,7 +34,7 @@ interface TodoDao {
         """
         SELECT * FROM todos
         WHERE date = :date
-           OR (dueDate IS NOT NULL AND isCompleted = 0 AND dueDate >= :date)
+           OR (dueDate IS NOT NULL AND isCompleted = 0 AND dueDate > :date)
         ORDER BY date ASC, sortOrder ASC
         """
     )
@@ -123,14 +128,25 @@ interface TodoDao {
     }
 
     /**
-     * 截止日已过、仍未完成的待办都落在哪几天。
+     * 截止日**已到或已过**、仍未完成的待办分别落在哪几天。
      *
-     * 那些天的统计需要在跨天时**覆盖重算**一次：当天算统计时它们还是预留（被排除在外），
-     * 过了期限就该按"未完成"补进去。这里取的是 `date`（= 它们的截止日，见 `applyEdit` 的说明），
-     * 因此只会拿到今天以前的日期，不会给未来写出统计行。
+     * 那几天的统计需要在跨天时**覆盖重算**一次，理由分两种：
+     * - 截止日已过（`date < :today`）：当天算统计时它们还是预留（被排除在外），过了期限就该按
+     *   "未完成"补进去；
+     * - 截止日**就是今天**（`date = :today`）：从今天起它不再是预留（见 `isDeferred`），要立刻计入
+     *   当天的统计。而"跨天"唯一可靠的触发点就是本趟归档（启动 / 每日定时任务 / 进程内翻页），
+     *   所以当天那一行得由这里补出来 —— 否则今日进度卡已经把它算进 M 了，统计页那根柱子却还是 0。
+     *   这一趟在一天里只跑一次（见 `ArchiveUseCase` 的门控），重复触发也会被挡掉。
+     *
+     * 这里取的是 `date`（= 它们的截止日，见 `applyEdit` 的说明），因此只会拿到今天及以前的日期，
+     * 不会给未来写出统计行。
+     *
+     * 覆盖重算是安全的：返回的日期上必然还留着这条待办本身，所以重算出来的行至少包含它，
+     * 不可能把某一天清成 0（另见 `RefreshDailyStatsUseCase` 关于"只补缺、不覆盖"的说明 ——
+     * 那条规则针对的是历史补齐，这里针对的是当天口径的变化）。
      */
-    @Query("SELECT DISTINCT date FROM todos WHERE date < :today AND dueDate IS NOT NULL AND isCompleted = 0")
-    suspend fun getExpiredDeadlineDates(today: String): List<String>
+    @Query("SELECT DISTINCT date FROM todos WHERE date <= :today AND dueDate IS NOT NULL AND isCompleted = 0")
+    suspend fun getDeadlineDatesToSettle(today: String): List<String>
 
     @Query("SELECT DISTINCT date FROM todos WHERE date < :today ORDER BY date DESC")
     suspend fun getHistoryDates(today: String): List<String>

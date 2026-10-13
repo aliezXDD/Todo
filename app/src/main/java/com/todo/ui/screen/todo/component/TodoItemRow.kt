@@ -53,6 +53,14 @@ private val CompletedRowInnerElevation = NeumorphElevation(offset = 6.dp, blur =
 fun TodoItemRow(
     todo: Todo,
     isDragging: Boolean,
+    /**
+     * 是否显示第二行的「截止 …」。
+     *
+     * 由调用方按"截止日是否还没到"算好传进来（见 `isDeadlinePending`）：**到了截止日当天就不再显示** ——
+     * 那时它已经和今天新建的待办一样计入了完成率，再挂一句日期只会让人以为它还没到期。
+     * 这里刻意不自己取当天日期：那一天由 `CurrentDay` 统一持有，行内再取一次会跨天不刷新。
+     */
+    showDeadline: Boolean,
     onCheckedChange: (Boolean) -> Unit,
     onEdit: () -> Unit,
     modifier: Modifier = Modifier,
@@ -150,7 +158,9 @@ fun TodoItemRow(
 
                 // 内容与截止日期两行：
                 // - 删除线画在**文本自身**上（size.width 就是这一行的宽度），所以它仍然只划内容那一行；
-                // - 只有设了截止日期的条目才多出第二行小字，行高随之长一点，其余条目高度不变。
+                // - 只有**还在预留期**（截止日尚未到）的条目才多出第二行小字：顺手把"为什么这条不算进
+                //   今天的完成率"写在条目上。到了截止日当天它已经计入了今天的统计，这一行就撤掉。
+                //   行高随之长一点，其余条目高度不变。
                 Column(
                     modifier = Modifier.width((contentWidth - 34.dp).coerceAtLeast(0.dp))
                 ) {
@@ -175,8 +185,7 @@ fun TodoItemRow(
                         color = MaterialTheme.colorScheme.onBackground.copy(alpha = alpha.value)
                     )
                     val dueDate = todo.dueDate
-                    if (dueDate != null) {
-                        // 顺手把"为什么这条不算进今天的完成率"写在条目上：它到这一天为止都只是预留
+                    if (showDeadline && dueDate != null) {
                         Text(
                             text = "截止 ${DateUtils.formatShortDate(dueDate)}",
                             style = MaterialTheme.typography.bodySmall,

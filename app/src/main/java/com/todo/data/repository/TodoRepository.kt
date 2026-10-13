@@ -37,8 +37,13 @@ class TodoRepository @Inject constructor(
 
     suspend fun getHistoryDates(today: String): List<String> = todoDao.getHistoryDates(today)
 
-    /** 截止日已过、仍未完成的待办分别落在哪几天（跨天时要覆盖重算那几天的统计）。 */
-    suspend fun getExpiredDeadlineDates(today: String): List<String> = todoDao.getExpiredDeadlineDates(today)
+    /**
+     * 截止日已到或已过、仍未完成的待办分别落在哪几天（跨天时要覆盖重算那几天的统计）。
+     *
+     * 含**今天**：截止日当天起这条待办不再算预留，当天那一行统计要立刻跟上。
+     */
+    suspend fun getDeadlineDatesToSettle(today: String): List<String> =
+        todoDao.getDeadlineDatesToSettle(today)
 
     suspend fun getTodosBeforeDate(cutoffDate: String): List<TodoEntity> = todoDao.getTodosBeforeDate(cutoffDate)
 

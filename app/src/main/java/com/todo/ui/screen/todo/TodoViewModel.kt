@@ -1,7 +1,10 @@
 package com.todo.ui.screen.todo
 
+import android.graphics.Bitmap
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.todo.data.local.datastore.AvatarPreferences
 import com.todo.data.local.datastore.NotePreferences
 import com.todo.domain.model.DailyRecord
 import com.todo.domain.model.DailyStats
@@ -43,6 +46,7 @@ class TodoViewModel @Inject constructor(
     private val getHistoryRecordsUseCase: GetHistoryRecordsUseCase,
     private val presetUseCases: PresetUseCases,
     private val notePreferences: NotePreferences,
+    private val avatarPreferences: AvatarPreferences,
     private val startupGate: StartupGate,
     private val currentDay: CurrentDay
 ) : ViewModel() {
@@ -75,7 +79,11 @@ class TodoViewModel @Inject constructor(
         val selectedPresetIds: Set<Long> = emptySet(),
         /** 笔记面板里的当前文本。面板打开期间它是唯一草稿，关闭时才写回存储。 */
         val noteContent: String = "",
-        val noteSheetVisible: Boolean = false
+        val noteSheetVisible: Boolean = false,
+        /** 用户自定义的头像；为 null 表示还没设置过，界面回落到内置默认头像。 */
+        val avatar: ImageBitmap? = null,
+        /** 点头像后弹出的"更换 / 恢复默认"选择面板是否可见。 */
+        val avatarDialogVisible: Boolean = false
     )
 
     private val _uiState = MutableStateFlow(UiState())
@@ -98,6 +106,7 @@ class TodoViewModel @Inject constructor(
         observeHistoryRecords()
         observePresets()
         observeNote()
+        observeAvatar()
     }
 
     /** 回到前台时对时（定时器在进程被冻结时不会推进）。日期真的变了才会触发重新查询。 */
@@ -186,6 +195,40 @@ class TodoViewModel @Inject constructor(
     fun onNoteContentChange(content: String) {
         noteEdited = true
         _uiState.update { it.copy(noteContent = content) }
+    }
+
+    /**
+     * 头像：存储层每次发射都直接覆盖内存里的值。
+     *
+     * 不需要像笔记那样的"用户改过就不回灌"保护 —— 头像没有可编辑的中间态：裁剪对话框里的草稿
+     * 留在界面自己的状态里，这里只在用户按下"确定"、图片真的落盘之后才会收到新值。
+     */
+    private fun observeAvatar() {
+        viewModelScope.launch {
+            avatarPreferences.avatarFlow.collect { loaded ->
+                _uiState.update { it.copy(avatar = loaded) }
+            }
+        }
+    }
+
+    fun setAvatarDialogVisible(visible: Boolean) {
+        _uiState.update { it.copy(avatarDialogVisible = visible) }
+    }
+
+    /** 保存用户在裁剪框里确认的正方形头像，并收起选择面板。 */
+    fun saveAvatar(bitmap: Bitmap) {
+        viewModelScope.launch {
+            avatarPreferences.save(bitmap)
+            _uiState.update { it.copy(avatarDialogVisible = false) }
+        }
+    }
+
+    /** 恢复默认头像（删掉自定义图片）。 */
+    fun resetAvatar() {
+        viewModelScope.launch {
+            avatarPreferences.clear()
+            _uiState.update { it.copy(avatarDialogVisible = false) }
+        }
     }
 
     fun setNoteSheetVisible(visible: Boolean) {

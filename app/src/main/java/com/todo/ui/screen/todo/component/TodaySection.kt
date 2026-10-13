@@ -30,6 +30,7 @@ import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import com.todo.domain.model.Todo
+import com.todo.domain.model.isDeadlinePending
 import com.todo.ui.component.EmptyState
 import com.todo.ui.component.GlassCard
 import com.todo.ui.component.LoadingState
@@ -183,6 +184,8 @@ fun TodaySection(
             TodoItemRow(
                 todo = todo,
                 isDragging = isDragging,
+                // 到了截止日当天就不再显示「截止 …」：那时它已经算进今天的完成率了（见 isDeadlinePending）
+                showDeadline = isDeadlinePending(todo.dueDate, date),
                 onCheckedChange = { checked -> onToggleTodo(todo, checked) },
                 onEdit = { onEditTodo(todo) },
                 dragHandleModifier = Modifier.draggableHandle(
