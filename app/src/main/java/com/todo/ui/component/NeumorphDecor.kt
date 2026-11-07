@@ -35,6 +35,11 @@ import com.todo.ui.theme.NeumorphElevation
  *
  * [innerElevation] 只影响**凹陷**（内阴影）那套几何与强度：像"勾选后按进去的待办条目"这类元素，
  * 需要内阴影的扩散比列表项的默认档位再收一点，而凸起时的外阴影保持不变。
+ *
+ * [innerShadowDark] / [innerShadowLight] 只换**凹陷**那两张影子的颜色（几何、强度都不动）。
+ * 默认仍是页面那对灰影子 —— 适用于"与背景同色"的表面。**有颜色的表面**（主色填充的按钮、FAB）
+ * 必须换掉：深灰压在橙色上会糊成一块黑，按下去像脏了一块，跟同色表面那几颗"轻轻沉下去"完全不是
+ * 一回事。见 [Neumorph.tonalShadowDark]。
  */
 fun Modifier.neumorph(
     shape: Shape,
@@ -42,7 +47,9 @@ fun Modifier.neumorph(
     depth: Float = 1f,
     surface: Color = Neumorph.surface(isDark),
     elevation: NeumorphElevation = NeumorphElevation.Medium,
-    innerElevation: NeumorphElevation = elevation
+    innerElevation: NeumorphElevation = elevation,
+    innerShadowDark: Color = Neumorph.shadowDark(isDark),
+    innerShadowLight: Color = Neumorph.shadowLight(isDark)
 ): Modifier {
     val clampedDepth = depth.coerceIn(0f, 1f)
     return drawWithCache {
@@ -82,12 +89,12 @@ fun Modifier.neumorph(
         val lightPaint = cachedShadowPaint(Neumorph.shadowLight(isDark).toArgb(), highlightBlurPx)
         // 凹陷用自己的一套画笔（模糊半径不同，而 BlurMaskFilter 是建在画笔上的）
         val innerDarkPaint = if (clampedDepth < 1f) {
-            cachedShadowPaint(Neumorph.shadowDark(isDark).toArgb(), innerBlurPx)
+            cachedShadowPaint(innerShadowDark.toArgb(), innerBlurPx)
         } else {
             darkPaint
         }
         val innerLightPaint = if (clampedDepth < 1f) {
-            cachedShadowPaint(Neumorph.shadowLight(isDark).toArgb(), innerBlurPx)
+            cachedShadowPaint(innerShadowLight.toArgb(), innerBlurPx)
         } else {
             lightPaint
         }
@@ -168,7 +175,10 @@ fun Modifier.neumorphPress(
     pressed: Boolean,
     surface: Color = Neumorph.surface(isDark),
     elevation: NeumorphElevation = NeumorphElevation.Medium,
-    restDepth: Float = 1f
+    restDepth: Float = 1f,
+    innerElevation: NeumorphElevation = elevation,
+    innerShadowDark: Color = Neumorph.shadowDark(isDark),
+    innerShadowLight: Color = Neumorph.shadowLight(isDark)
 ): Modifier {
     val depth by animateFloatAsState(
         targetValue = if (pressed) 0f else restDepth,
@@ -180,7 +190,10 @@ fun Modifier.neumorphPress(
         isDark = isDark,
         depth = depth,
         surface = surface,
-        elevation = elevation
+        elevation = elevation,
+        innerElevation = innerElevation,
+        innerShadowDark = innerShadowDark,
+        innerShadowLight = innerShadowLight
     )
 }
 

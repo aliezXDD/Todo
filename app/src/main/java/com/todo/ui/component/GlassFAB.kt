@@ -46,11 +46,20 @@ fun GlassFAB(
     val shape = RoundedCornerShape(NeumorphShapes.Medium)
 
     val surfaceColor = if (accent) MaterialTheme.colorScheme.primary else Neumorph.surface(isDark)
-    val contentColor = if (accent) {
+    // 图标自己的颜色：两种按钮各自取对比色（主色上用 onPrimary，玻璃面上用 onSurface）
+    val iconColor = if (accent) {
         MaterialTheme.colorScheme.onPrimary
     } else {
         MaterialTheme.colorScheme.onSurface
     }
+    // 按下高亮的颜色**不跟图标走**，两种按钮统一用 onSurface。
+    // M3 的 FloatingActionButton 内部是 Surface(onClick)，它拿 contentColor 当涟漪颜色：
+    // 要是让涟漪跟着图标，主色那颗按下去是"中间发暗的一团"，跟旁边两颗"整块变亮"完全不是一回事。
+    val rippleColor = MaterialTheme.colorScheme.onSurface
+    // 「按进去」那两张内阴影：同色表面沿用页面那对灰影子；主色表面换成同色系（见 tonalShadowDark），
+    // 否则深灰压在橙色上会糊成一块黑，跟旁边两颗轻轻沉下去的样子对不上
+    val innerShadowDark = if (accent) Neumorph.tonalShadowDark(surfaceColor) else Neumorph.shadowDark(isDark)
+    val innerShadowLight = if (accent) Neumorph.tonalShadowLight(surfaceColor) else Neumorph.shadowLight(isDark)
 
     val fabScale by animateFloatAsState(
         targetValue = if (isPressed) 0.96f else 1f,
@@ -71,11 +80,15 @@ fun GlassFAB(
                 isDark = isDark,
                 pressed = isPressed,
                 surface = surfaceColor,
-                elevation = NeumorphElevation.Medium
+                elevation = NeumorphElevation.Medium,
+                innerShadowDark = innerShadowDark,
+                innerShadowLight = innerShadowLight
             ),
         shape = shape,
         containerColor = Color.Transparent,
-        contentColor = contentColor,
+        // 这里给的是「涟漪颜色」：按下高亮由它决定（见 rippleColor 的说明），
+        // 图标自己的颜色下面单独给
+        contentColor = rippleColor,
         interactionSource = interactionSource,
         elevation = FloatingActionButtonDefaults.elevation(
             defaultElevation = 0.dp,
@@ -87,7 +100,7 @@ fun GlassFAB(
         Icon(
             imageVector = icon,
             contentDescription = contentDescription,
-            tint = contentColor
+            tint = iconColor
         )
     }
 }

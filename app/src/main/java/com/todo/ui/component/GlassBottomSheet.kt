@@ -76,8 +76,11 @@ fun GlassBottomSheet(
             modifier = Modifier
                 .fillMaxWidth()
                 .navigationBarsPadding()
-                .padding(horizontal = 20.dp, vertical = 14.dp)
-                .padding(bottom = 10.dp)
+                // 面板内容的内衬。底部比顶部**窄很多**（10dp vs 14dp）：面板是从屏幕底部"顶上来"的，
+                // 底边与键盘/导航栏之间本来就有一道视觉间隔，再垫厚就会读成一截空档 ——
+                // 面板里最下面那颗按钮的暗影（约 19dp）由卡片自己的 16dp 内衬承接，这里只留
+                // 面板边缘到屏幕/键盘的那一点点空气。
+                .padding(start = 20.dp, end = 20.dp, top = 14.dp, bottom = 10.dp)
         ) {
             content()
         }

@@ -9,11 +9,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -30,7 +29,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.todo.ui.component.GlassButton
 import com.todo.ui.component.GlassFAB
 import com.todo.ui.screen.todo.component.AddTodoSheet
 import com.todo.ui.screen.todo.component.AvatarActionDialog
@@ -40,7 +38,6 @@ import com.todo.ui.screen.todo.component.MiniStatsCard
 import com.todo.ui.screen.todo.component.NoteSheet
 import com.todo.ui.screen.todo.component.TodaySection
 import com.todo.ui.screen.todo.component.decodePickedImage
-import com.todo.ui.theme.NeumorphShapes
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -56,8 +53,6 @@ fun TodoScreen(
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
         viewModel.refreshDay()
     }
-    // 「往日记录」按钮：与卡片同一套圆角语言
-    val historyButtonShape = RoundedCornerShape(NeumorphShapes.Small)
 
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -103,15 +98,8 @@ fun TodoScreen(
                 onClick = onNavigateToChart
             )
 
-            GlassButton(
-                text = "往日记录",
-                onClick = onNavigateToHistory,
-                glassSurface = true,
-                shape = historyButtonShape,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp)
-            )
+            // 原来这里还有一条占满整行的「往日记录」横条，现在已收进「今日」卡片右上角那排图标按钮里
+            //（历史 / 备注 / +）。于是「今日」卡片直接顶到进度卡下方，只留这一个 14dp 的空隙。
 
             // 「今日」卡片（标题 + 日期 + 待办列表）自己撑满这个 Box，
             // 所以 Box 的范围就等于卡片的范围，+ 按钮贴着它的右上角放即可
@@ -130,14 +118,23 @@ fun TodoScreen(
                     modifier = Modifier.fillMaxSize()
                 )
 
-                // 两个入口并排贴在「今日」卡片的右上角：笔记在左、添加在右。
-                // 「+」的右边界仍与待办条目右边界对齐（条目内缩 16dp），位置与之前完全一致。
+                // 三个入口并排贴在「今日」卡片的右上角：历史在左、备注居中、「+」在右。
+                // 「+」的右边界仍与待办条目右边界对齐（条目内缩 16dp），位置与之前完全一致 ——
+                // 往左边加按钮不会让它挪动。
                 Row(
                     modifier = Modifier
                         .align(Alignment.TopEnd)
                         .padding(top = 10.dp, end = 16.dp),
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
+                    // 历史页的入口。与铅笔一样是"次级行动"：玻璃面（accent = false），
+                    // 只有「+」是主色填充的主操作
+                    GlassFAB(
+                        onClick = onNavigateToHistory,
+                        icon = Icons.Filled.DateRange,
+                        contentDescription = "历史",
+                        accent = false
+                    )
                     GlassFAB(
                         onClick = { viewModel.setNoteSheetVisible(true) },
                         icon = Icons.Filled.Edit,
@@ -161,6 +158,8 @@ fun TodoScreen(
         isMultiSelectMode = uiState.presetMultiSelectMode,
         selectedPresetIds = uiState.selectedPresetIds,
         searchQuery = uiState.presetSearchQuery,
+        // 截止日期的日历同样以当前逻辑日为最早可选的一天
+        today = uiState.today,
         onDismiss = { viewModel.setAddSheetVisible(false) },
         onSearchQueryChange = viewModel::onSearchPresetQueryChange,
         onAddManual = viewModel::addTodo,

@@ -51,7 +51,8 @@ fun HistoryDayCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = DateUtils.formatShortDate(record.date),
+                    // 与「今日」标题下那行、「截止 …」、面板里那颗日期按钮同一套点分格式
+                    text = DateUtils.formatDotDate(record.date),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )

@@ -1,7 +1,7 @@
 package com.todo.ui.screen.todo.component
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -65,9 +65,17 @@ fun AddTodoSheet(
     isMultiSelectMode: Boolean,
     selectedPresetIds: Set<Long>,
     searchQuery: String,
+    /** 当前逻辑日：交给日历当"最早可选的一天"（与「编辑待办」面板同一个来源）。 */
+    today: String,
     onDismiss: () -> Unit,
     onSearchQueryChange: (String) -> Unit,
-    onAddManual: (String) -> Unit,
+    /**
+     * 手动输入那一条：内容 + 截止日期（null = 不设，落在今天）。
+     *
+     * 日期只在**手动输入**这一档可选：从预设添加的待办一律不带日期（面板里的单击预设、
+     * 多选「添加选中项」、以及预设页的双击添加，行为都保持原样）。
+     */
+    onAddManual: (String, String?) -> Unit,
     onPresetClick: (Preset) -> Unit,
     onPresetLongPress: (Preset) -> Unit,
     onTogglePresetSelect: (Preset) -> Unit,
@@ -78,15 +86,19 @@ fun AddTodoSheet(
 
     var selectedTabIndex by remember { mutableStateOf(0) }
     var manualInput by remember { mutableStateOf("") }
+    // 截止日期的草稿：null = 不设（新待办落在今天）。与输入框一样只活在面板里，添加成功后一起清空。
+    var dueDate by remember { mutableStateOf<String?>(null) }
+    var pickerVisible by remember { mutableStateOf(false) }
     val isDark = MaterialTheme.colorScheme.onSurface.luminance() > 0.7f
     val secondaryTextColor = MaterialTheme.colorScheme.secondary
 
     // 提交手动输入：键盘上的"完成"（回车）与再次点击那颗按钮（有内容时它是「添加待办」）走同一条路径——
-    // 添加后输入框清空、面板与键盘都留着，方便连着录好几条
+    // 添加后输入框与截止日期都清空、面板与键盘都留着，方便连着录好几条
     val submitManualInput: () -> Unit = {
         if (manualInput.isNotBlank()) {
-            onAddManual(manualInput)
+            onAddManual(manualInput, dueDate)
             manualInput = ""
+            dueDate = null
         }
     }
 
@@ -167,7 +179,20 @@ fun AddTodoSheet(
                 AnimatedContent(
                     targetState = selectedTabIndex,
                     transitionSpec = {
-                        if (targetState > initialState) {
+                        // 高度动画**不裁剪**（`SizeTransform(clip = false)`）：这一档最下面那颗按钮的
+                        // 暗影画在自身边界之外（偏移 7 + 模糊 11），默认的 clipToBounds 会把它切出一条直线，
+                        // 而"在底部留内衬给暗影落"又会把面板撑高一截 —— 键盘上方多出一条空档。
+                        // 不裁之后暗影直接落在卡片自己的内衬里，面板高度也回到该有的样子。
+                        val resize = SizeTransform(
+                            clip = false,
+                            sizeAnimationSpec = { _, _ ->
+                                tween(
+                                    durationMillis = MotionTokens.SheetResize,
+                                    easing = MotionTokens.StandardEasing
+                                )
+                            }
+                        )
+                        val slide = if (targetState > initialState) {
                             (
                                 fadeIn(tween(MotionTokens.SheetTabSwitch, easing = MotionTokens.StandardEasing)) +
                                     slideInVertically(
@@ -196,36 +221,44 @@ fun AddTodoSheet(
                                     )
                                 )
                         }
+                        slide using resize
                     },
                     label = "addSheetTabSlide"
                 ) { tabIndex ->
                     Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .animateContentSize(
-                                animationSpec = tween(
-                                    durationMillis = MotionTokens.SheetResize,
-                                    easing = MotionTokens.StandardEasing
-                                )
-                            )
+                        modifier = Modifier.fillMaxWidth()
                     ) {
                         when (tabIndex) {
                             0 -> {
                                 // 手动输入这一档没有额外的「完成/添加」按钮：面板一打开就带起键盘，
                                 // 输入不为空时按键盘上的"完成"（回车）、或点上面那颗变成「添加待办」的按钮即可添加，
                                 // 添加后面板与键盘都留着，方便连着录好几条；要收起就下滑面板或点空白处
-                                NeumorphTextField(
-                                    value = manualInput,
-                                    onValueChange = { manualInput = it },
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = AddSheetGutter)
-                                        .focusRequester(manualInputFocus),
-                                    placeholder = "输入待办内容...",
-                                    singleLine = true,
-                                    imeAction = ImeAction.Done,
-                                    onImeAction = submitManualInput
-                                )
+                                Column(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    NeumorphTextField(
+                                        value = manualInput,
+                                        onValueChange = { manualInput = it },
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = AddSheetGutter)
+                                            .focusRequester(manualInputFocus),
+                                        placeholder = "输入待办内容...",
+                                        singleLine = true,
+                                        imeAction = ImeAction.Done,
+                                        onImeAction = submitManualInput
+                                    )
+                                    // 截止日期：与「编辑待办」面板同一个组件、同一套日历，
+                                    // 设了它就是"预留"——今天不计入 M，到那天才计入。
+                                    // 只在这一档出现：预设那条路不带日期（见 onAddManual 的说明）
+                                    DueDateField(
+                                        label = "截止日期",
+                                        dueDate = dueDate,
+                                        onClick = { pickerVisible = true },
+                                        modifier = Modifier.padding(horizontal = AddSheetGutter)
+                                    )
+                                }
                             }
 
                             1 -> {
@@ -331,4 +364,20 @@ fun AddTodoSheet(
             }
         }
     }
+
+    // 截止日期的日历：与「编辑待办」用的是同一个弹窗，可选范围同样只有今天及以后
+    DeadlinePickerDialog(
+        visible = pickerVisible,
+        today = today,
+        selectedDate = dueDate,
+        onDismiss = { pickerVisible = false },
+        onConfirm = { picked ->
+            dueDate = picked
+            pickerVisible = false
+        },
+        onClear = {
+            dueDate = null
+            pickerVisible = false
+        }
+    )
 }

@@ -25,14 +25,6 @@ import com.todo.ui.theme.NeumorphElevation
 import com.todo.ui.theme.NeumorphShapes
 
 /**
- * 卡片涟漪的半径上限。
- *
- * Material 默认的涟漪会一路铺满整张卡片，在大表面上看起来就是"整张卡变浅了一档"（深色下尤其像
- * 颜色出错）。给一个固定半径后，它只是触点附近的一圈水波，卡片其余部分颜色始终不变。
- */
-private val CardRippleRadius = 48.dp
-
-/**
  * 新拟态卡片：与背景同色、无描边，靠一对亮/暗阴影"从背景里凸起"。
  * 底色由 [neumorphPress]/[neumorph] 填充（因此这里不铺任何底色），否则凹陷时内阴影会被底色盖住。
  *
@@ -46,7 +38,11 @@ private val CardRippleRadius = 48.dp
  *
  * [onClick] 不为空时有两种反馈，和按钮、FAB 保持一致：
  * 1. 按下把卡片**按进去**（凸→凹）—— 新拟态里表达按压的方式；
- * 2. 触点处一圈水波纹（半径见 [CardRippleRadius]，不会铺满整张卡）。
+ * 2. 整张卡**连同圆角一起**点亮（涟漪铺满卡片、被 [shape] 裁到圆角之内）。
+ *
+ * 涟漪刻意**不设固定半径**：卡片是宽而扁的圆角矩形，一个固定半径的圆压上去，会被卡片的上下边
+ * 切平 —— 看起来是一条光带、而不是"这张卡被按住了"，形状与卡片对不上。铺满之后它天然与卡片同形，
+ * 也和列表条目（[GlassListItem] 用的默认涟漪）是同一套语言。
  */
 @Composable
 fun GlassCard(
@@ -76,14 +72,16 @@ fun GlassCard(
         Box(modifier = cardModifier) {
             if (onClick != null) {
                 // 点击层：铺满卡片、裁成卡片形状，但排在内容之前（因此波纹在内容之下，
-                // 且不会抢走内容里按钮的点击）
+                // 且不会抢走内容里按钮的点击）。
+                // 涟漪用默认的「铺满 + 由 shape 裁形」，与列表条目同一套：
+                // 高亮的轮廓因此永远等于卡片自己的圆角矩形
                 Box(
                     modifier = Modifier
                         .matchParentSize()
                         .clip(shape)
                         .clickable(
                             interactionSource = interactionSource,
-                            indication = ripple(radius = CardRippleRadius),
+                            indication = ripple(),
                             role = Role.Button,
                             onClick = onClick
                         )

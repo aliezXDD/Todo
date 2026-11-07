@@ -59,6 +59,10 @@ fun GlassButton(
     val accent = MaterialTheme.colorScheme.primary
     val surfaceColor = if (glassSurface) Neumorph.surface(isDark) else accent
     val contentColor = if (glassSurface) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onPrimary
+    // 「按进去」那两张内阴影：与背景同色的表面沿用页面那对灰影子；主色表面换成同色系
+    // （见 tonalShadowDark），否则深灰压在主题色上会糊成一块黑，和旁边那些玻璃面按钮不是一回事
+    val innerShadowDark = if (glassSurface) Neumorph.shadowDark(isDark) else Neumorph.tonalShadowDark(accent)
+    val innerShadowLight = if (glassSurface) Neumorph.shadowLight(isDark) else Neumorph.tonalShadowLight(accent)
 
     Button(
         onClick = onClick,
@@ -68,7 +72,9 @@ fun GlassButton(
             pressed = pressed && enabled && !recessed,
             surface = if (enabled) surfaceColor else surfaceColor.copy(alpha = 0.45f),
             elevation = elevation,
-            restDepth = if (recessed) 0f else 1f
+            restDepth = if (recessed) 0f else 1f,
+            innerShadowDark = innerShadowDark,
+            innerShadowLight = innerShadowLight
         ),
         enabled = enabled,
         shape = shape,

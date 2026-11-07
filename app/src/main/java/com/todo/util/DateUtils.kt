@@ -39,15 +39,26 @@ object DateUtils {
     private fun logicalDate(now: LocalDateTime): LocalDate =
         if (now.hour < DAY_START_HOUR) now.toLocalDate().minusDays(1) else now.toLocalDate()
 
+    /**
+     * 「今日」卡片标题下面那行日期：`2026.11.7 周六`。
+     *
+     * 日期部分走 [formatDotDate]（点分隔、月/日不补零），后面跟周几 ——
+     * 周几不随格式一起改：它是这一行里唯一"看一眼就知道星期几"的信息。
+     */
     fun formatDisplayDate(dateStr: String): String {
-        val date = LocalDate.parse(dateStr, dateFormatter)
-        val weekDay = getChineseDayOfWeek(dateStr)
-        return "${date.year}年${date.monthValue}月${date.dayOfMonth}日 $weekDay"
+        return "${formatDotDate(dateStr)} ${getChineseDayOfWeek(dateStr)}"
     }
 
-    fun formatShortDate(dateStr: String): String {
+    /**
+     * 点分格式的日期：`2026.11.7`，月/日**不补零**（`11.7` 而不是 `11.07`）。
+     *
+     * 按日常写日期的习惯，补零反而像机器格式。界面上的日期**只此一种写法**：
+     * 「今日」标题下那行（后面再跟周几）、待办条目上的「截止 …」、添加 / 编辑面板里那颗日期按钮、
+     * 历史页每天那张卡片的标题。
+     */
+    fun formatDotDate(dateStr: String): String {
         val date = LocalDate.parse(dateStr, dateFormatter)
-        return "${date.year}年${date.monthValue}月${date.dayOfMonth}日"
+        return "${date.year}.${date.monthValue}.${date.dayOfMonth}"
     }
 
     fun getChineseDayOfWeek(dateStr: String): String {

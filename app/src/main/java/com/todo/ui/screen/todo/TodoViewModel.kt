@@ -291,10 +291,18 @@ class TodoViewModel @Inject constructor(
         _uiState.update { it.copy(presetMultiSelectMode = false, selectedPresetIds = emptySet()) }
     }
 
-    fun addTodo(content: String) {
+    /**
+     * 新增一条待办。
+     *
+     * [dueDate] 非空表示这条待办**预留**到那一天（与编辑面板设的截止日期同一条规则，
+     * 见 [com.todo.domain.model.isDeferred]）；为空则落在今天。
+     *
+     * 默认值让三条预设路径（面板里单击、预设页双击、多选「添加选中项」）都保持原样、不带日期。
+     */
+    fun addTodo(content: String, dueDate: String? = null) {
         if (content.isBlank()) return
         viewModelScope.launch {
-            addTodoUseCase(content.trim())
+            addTodoUseCase(content.trim(), dueDate)
         }
     }
 

@@ -187,7 +187,7 @@ fun TodoItemRow(
                     val dueDate = todo.dueDate
                     if (showDeadline && dueDate != null) {
                         Text(
-                            text = "截止 ${DateUtils.formatShortDate(dueDate)}",
+                            text = "截止 ${DateUtils.formatDotDate(dueDate)}",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.secondary.copy(alpha = alpha.value),
                             maxLines = 1,

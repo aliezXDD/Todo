@@ -28,7 +28,7 @@ import com.todo.ui.component.neumorphOverlay
 import com.todo.ui.screen.todo.component.HistoryDayCard
 
 /**
- * 往日记录。
+ * 历史（往日记录页；入口是首页「今日」卡片右上角的「历史」图标按钮，页内标题也叫「历史」）。
  *
  * 这里**不再**套一层大卡片：新拟态的表面色与背景完全相同，"外层卡片 + 内层卡片"两层不透明同色
  * 叠在一起时，视觉上会糊成一整块（看起来像被一块纯色遮罩盖住）。现在让每一天自己作为
@@ -50,7 +50,7 @@ fun HistoryScreen(
             .fillMaxSize()
     ) {
         GlassTopBar(
-            title = "往日记录",
+            title = "历史",
             navigationIcon = Icons.AutoMirrored.Filled.ArrowBack,
             // 与回收站同理：吸顶栏抬到列表之上，它的阴影才不会被列表的渐隐带硬切
             modifier = Modifier.neumorphOverlay(),
@@ -78,7 +78,7 @@ fun HistoryScreen(
                 LoadingState(modifier = Modifier.fillMaxSize())
             } else if (uiState.historyRecords.isEmpty()) {
                 EmptyState(
-                    text = "暂无往日记录",
+                    text = "暂无历史记录",
                     modifier = Modifier.fillMaxSize()
                 )
             } else {

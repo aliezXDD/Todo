@@ -2,6 +2,7 @@ package com.todo.ui.theme
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
@@ -51,6 +52,18 @@ object Neumorph {
     fun shadowDark(isDark: Boolean): Color = if (isDark) DarkShadowDark else LightShadowDark
 
     fun shadowLight(isDark: Boolean): Color = if (isDark) DarkShadowLight else LightShadowLight
+
+    /**
+     * **有颜色的表面**（主色填充的按钮、FAB）"按进去"时用的暗影：表面自己的更暗一档。
+     *
+     * [shadowDark] / [shadowLight] 是照着"与背景同色"的表面标定的：深灰压在深灰上几乎看不见，
+     * 压在橙色上却会糊成一块黑 —— 主色按钮按下去就像脏了一块、还带着一片渐变，跟同色表面那几颗
+     * "轻轻沉下去"完全不是一回事。换成同色系之后，明暗关系与灰面一致，只是颜色各自不同。
+     */
+    fun tonalShadowDark(surface: Color): Color = lerp(surface, Color.Black, 0.34f)
+
+    /** [tonalShadowDark] 的另一半：表面自己的更亮一档。 */
+    fun tonalShadowLight(surface: Color): Color = lerp(surface, Color.White, 0.28f)
 }
 
 /**

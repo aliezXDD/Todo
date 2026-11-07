@@ -22,7 +22,7 @@ data class Todo(
 /**
  * 截止日期是否**尚未到期**：设了截止日期，且它在今天之后。
  *
- * 这是"预留"判定的时间那一半，单独拆出来是因为界面也要用它：条目上那句「截止 xxxx年xx月xx日」
+ * 这是"预留"判定的时间那一半，单独拆出来是因为界面也要用它：条目上那句「截止 2026.11.7」
  * 只在期限还没到时才显示（见 `TodoItemRow`），而"算不算数"还要再看完成状态。
  */
 fun isDeadlinePending(dueDate: String?, today: String): Boolean =
