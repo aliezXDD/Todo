@@ -57,7 +57,7 @@ Kotlin 2.2 · Jetpack Compose · Room · 纯本地存储 · 零权限
 
 <img src="docs/screenshots/home-light-dark.jpg" width="420" alt="今日待办">
 
-**添加待办**：左侧手动输入、右侧预设选择；输入框一有内容，右侧按钮就直接变成「添加待办」
+**添加待办**：左侧手动输入（可以顺手设截止日期、加完自动清空）、右侧预设选择；输入框一有内容，右侧按钮就直接变成「添加待办」
 
 <img src="docs/screenshots/addsheet-dark.jpg" width="420" alt="添加待办">
 
